@@ -48,11 +48,11 @@ open class OkexUserWebSocket: OkexWebSocket {
     open var completions = [String: OkexOrderCompletion]()
     
     /// 下单后订单变化
-    static let orderStatusChangedNotification = Notification.Name("OkexOrderStatusChangedNotification")
+    public static let orderStatusChangedNotification = Notification.Name("OkexOrderStatusChangedNotification")
     /// 账号已准备好去读取
-    static let balancePositionInitReadyNotification = Notification.Name("OkexBalancePositionInitReadyNotification")
+    public static let balancePositionInitReadyNotification = Notification.Name("OkexBalancePositionInitReadyNotification")
     /// 账户有变化
-    static let balancePositionChangedNotification = Notification.Name("OkexBalancePositionChangedNotification")
+    public static let balancePositionChangedNotification = Notification.Name("OkexBalancePositionChangedNotification")
     
     open func login() {
         let timestamp = "\(Date().timeIntervalSince1970)"
@@ -74,11 +74,9 @@ open class OkexUserWebSocket: OkexWebSocket {
         sendMessage(message: params)
     }
     
-    open func loginSucceed() {
-//        subcribeBalance()
+    func loginSucceed() {
+        subcribeBalance()
         subcribeOrders()
-//        subscribe(channel: "orders", instType: "SWAP")
-//        subscribe(channel: "orders", instType: "FUTURES")
     }
     
     open func subcribeBalance() {
@@ -87,6 +85,8 @@ open class OkexUserWebSocket: OkexWebSocket {
     
     open func subcribeOrders() {
         subscribe(channel: "orders", instType: "SPOT")
+        subscribe(channel: "orders", instType: "SWAP")
+        subscribe(channel: "orders", instType: "FUTURES")
     }
     
     open func balanceWith(ccy: String) -> Double? {

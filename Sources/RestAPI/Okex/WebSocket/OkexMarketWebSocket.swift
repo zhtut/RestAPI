@@ -9,21 +9,21 @@ import Foundation
 import SSCommon
 import SSLog
 
-class OkexMarketWebSocket: OkexWebSocket {
+open class OkexMarketWebSocket: OkexWebSocket {
     
-    static let shared = OkexMarketWebSocket()
+    public static let shared = OkexMarketWebSocket()
     
-    override var urlStr: String {
+    open override var urlStr: String {
         "wss://wsaws.okex.com:8443/ws/v5/public"
 //        "wss://wsaws.okex.com:8443/ws/v5/public"
     }
     
-    var depthData = OkexDepthData()
+    open var depthData = OkexDepthData()
     
     /// k线图变化的通知
-    static let candleDidChangeNotification = Notification.Name("SCCandleDidChangeNotification")
+    public static let candleDidChangeNotification = Notification.Name("SCCandleDidChangeNotification")
     
-    override func webSocketDidReceive(message: [String : Any]) {
+    open override func webSocketDidReceive(message: [String : Any]) {
         super.webSocketDidReceive(message: message)
         let event = message["event"] as? String;
         let arg = message["arg"] as? [String: Any];
@@ -57,10 +57,14 @@ class OkexMarketWebSocket: OkexWebSocket {
         }
     }
     
-    func processCandleMessage(message: [String: Any]) {
+    open func processCandleMessage(message: [String: Any]) {
         if let data = message["data"] as? [[String]] {
             let first = data.first!
-            let candle = OkexCandle.candleWith(data: first)
+            var candle = OkexCandle.candleWith(data: first)
+            if let arg = message["arg"] as? [String: Any],
+               let instId = arg.stringFor("instId") {
+                candle.instId = instId
+            }
             NotificationCenter.default.post(name: OkexMarketWebSocket.candleDidChangeNotification, object: candle)
         }
     }

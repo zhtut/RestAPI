@@ -39,4 +39,21 @@ public struct OkexInstrument: Codable {
     // suspend：暂停中
     // expired：已过期
     // prepublic：预上线
+    
+    public static func instrumentWith(instId: String, completion: @escaping (OkexInstrument?, String?) -> Void) {
+        let path = "/api/v5/public/instruments"
+        let params = ["instId": instId, "instType": "SWAP"]
+        OkexRestAPI.sendRequestWith(path: path,
+                                    params: params,
+                                    method: .GET,
+                                    dataClass: OKInstrument.self) { response in
+            if response.responseSucceed,
+               let array = response.data as? [OKInstrument],
+               let ins = array.first {
+                completion(ins, nil)
+                return
+            }
+            completion(nil, response.errorMsg)
+        }
+    }
 }

@@ -51,4 +51,19 @@ public struct OkexOrder: Codable {
     public var code    : String? ///<     错误码，默认为0
     public var msg    : String? ///<     错误消息，默认为""
 
+    public func refresh(_ completion: @escaping (OkexOrder?, String?) -> Void) {
+        let path = "GET /api/v5/trade/order"
+        var params = ["instId": instId!, "ordId": ordId!]
+        OkexRestAPI.sendRequestWith(path: path, params: params, method: .GET) { response in
+            if response.responseSucceed {
+                if let data = response.data as? [[String: Any]],
+                   let dic = data.first {
+                    let order = dic.transformToModel(OkexOrder.self)
+                    completion?(order, nil)
+                    return
+                }
+            }
+            completion?(nil, response.errorMsg!)
+        }
+    }
 }

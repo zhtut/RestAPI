@@ -9,6 +9,7 @@ import Foundation
 
 /// k线图，蜡烛图
 public struct OkexCandle: Codable {
+    public var instId    : String? ///<     symbol
     public var ts    : String? ///<     开始时间，Unix时间戳的毫秒数格式，如 1597026383085
     public var o    : String? ///<     开盘价格
     public var h    : String? ///<     最高价格
