@@ -1,0 +1,70 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "COpenSSL",
+        "repositoryURL": "https://gitee.com/ztgtut/Perfect-COpenSSL",
+        "state": {
+          "branch": null,
+          "revision": "ce3113e159b8c6d8565e5d8db2672b572c81aea9",
+          "version": "4.0.2"
+        }
+      },
+      {
+        "package": "SSCommon",
+        "repositoryURL": "https://gitee.com/ztgtut/SSCommon.git",
+        "state": {
+          "branch": null,
+          "revision": "1da48d157e9bf11de91a72d25e143d3d49cb91ae",
+          "version": "1.0.2"
+        }
+      },
+      {
+        "package": "SSNetwork",
+        "repositoryURL": "https://gitee.com/ztgtut/SSNetwork.git",
+        "state": {
+          "branch": null,
+          "revision": "1632064d8246ce6020e0aa6e7aaf1c586a60c175",
+          "version": "1.0.1"
+        }
+      },
+      {
+        "package": "SSWebsocket",
+        "repositoryURL": "https://gitee.com/ztgtut/SSWebsocket.git",
+        "state": {
+          "branch": null,
+          "revision": "a173f465135cf8b3e51cac4cb70e949e7878d80d",
+          "version": "1.0.5"
+        }
+      },
+      {
+        "package": "swift-nio",
+        "repositoryURL": "https://gitee.com/ztgtut/swift-nio.git",
+        "state": {
+          "branch": null,
+          "revision": "6aa9347d9bc5bbfe6a84983aec955c17ffea96ef",
+          "version": "2.33.0"
+        }
+      },
+      {
+        "package": "swift-nio-ssl",
+        "repositoryURL": "https://gitee.com/ztgtut/swift-nio-ssl.git",
+        "state": {
+          "branch": null,
+          "revision": "5e68c1ded15619bb281b273fa8c2d8fd7f7b2b7d",
+          "version": "2.16.1"
+        }
+      },
+      {
+        "package": "websocket-kit",
+        "repositoryURL": "https://gitee.com/ztgtut/websocket-kit.git",
+        "state": {
+          "branch": null,
+          "revision": "b1c4df8f6c848c2e977726903bbe6578eed723ad",
+          "version": "2.2.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
