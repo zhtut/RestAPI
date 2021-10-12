@@ -81,7 +81,7 @@ open class OkexOrder: NSObject, Codable {
                     return
                 }
             }
-            completion(nil, response.errorMsg!)
+            completion(false, response.errorMsg!)
         }
 
     }
