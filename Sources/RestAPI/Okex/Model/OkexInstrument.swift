@@ -46,9 +46,9 @@ public struct OkexInstrument: Codable {
         OkexRestAPI.sendRequestWith(path: path,
                                     params: params,
                                     method: .GET,
-                                    dataClass: OKInstrument.self) { response in
+                                    dataClass: OkexInstrument.self) { response in
             if response.responseSucceed,
-               let array = response.data as? [OKInstrument],
+               let array = response.data as? [OkexInstrument],
                let ins = array.first {
                 completion(ins, nil)
                 return
