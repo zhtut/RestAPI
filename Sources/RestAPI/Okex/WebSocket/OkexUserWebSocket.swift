@@ -16,6 +16,7 @@ open class OkexUserWebSocket: OkexWebSocket {
         "wss://wsaws.okex.com:8443/ws/v5/private"
     }
     
+    /// 余额和持仓对象
     open var balancePosition: OkexBalancePosition?
     
     /// USDT余额
@@ -23,7 +24,16 @@ open class OkexUserWebSocket: OkexWebSocket {
         return balanceWith(ccy: "usdt")
     }
     
-    /// 持仓
+    /// 是否有持仓
+    open var hasPosition: Bool {
+        if let po = positions,
+           po.count > 0 {
+            return true
+        }
+        return false
+    }
+    
+    /// 持仓对象数组
     open var positions: [OkexPosition]? {
         if balancePosition == nil {
             return nil
@@ -43,7 +53,7 @@ open class OkexUserWebSocket: OkexWebSocket {
         return "无持仓"
     }
     
-    open var orders: [OkexOrder]?
+    open var isReady = false
     public typealias OkexOrderCompletion = (Bool, String?) -> Void
     open var completions = [String: OkexOrderCompletion]()
     
@@ -133,6 +143,7 @@ open class OkexUserWebSocket: OkexWebSocket {
                     if balancePosition?.eventType == "snapshot" {
                         NotificationCenter.default.post(name: OkexUserWebSocket.balancePositionInitReadyNotification, object: balancePosition)
                         log("当前OKexUSDT余额：\(self.usdt ?? 0)")
+                        isReady = true
                     } else {
                         NotificationCenter.default.post(name: OkexUserWebSocket.balancePositionChangedNotification, object: balancePosition)
                     }
