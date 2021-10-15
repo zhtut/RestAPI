@@ -15,7 +15,6 @@ open class OkexMarketWebSocket: OkexWebSocket {
     
     open override var urlStr: String {
         "wss://wsaws.okex.com:8443/ws/v5/public"
-//        "wss://wsaws.okex.com:8443/ws/v5/public"
     }
     
     open var depthData = OkexDepthData()
