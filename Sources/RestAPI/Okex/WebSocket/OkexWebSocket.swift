@@ -11,6 +11,7 @@ import SSCommon
 import Dispatch
 #endif
 import SSWebsocket
+import SSLog
 
 open class OkexWebSocket: SCWebSocket {
     

@@ -75,7 +75,8 @@ public struct OkexPosition: Codable {
             }
         }
         params["posSide"] = posSide
-        params["sz"] = pos
+        let sz = fabs(pos?.doubleValue ?? 0.0)
+        params["sz"] = "\(sz)"
         return params;
     }
     
