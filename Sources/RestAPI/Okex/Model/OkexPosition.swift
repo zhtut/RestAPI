@@ -75,8 +75,12 @@ public struct OkexPosition: Codable {
             }
         }
         params["posSide"] = posSide
-        let sz = fabs(pos?.doubleValue ?? 0.0)
-        params["sz"] = "\(sz)"
+        if var pos = pos {
+            if pos.hasPrefix("-") {
+                pos = pos.replacingOccurrences(of: "-", with: "")
+            }
+            params["sz"] = pos
+        }
         return params;
     }
     
