@@ -53,16 +53,40 @@ open class OkexUserWebSocket: OkexWebSocket {
         return "无持仓"
     }
     
+    /// 订单
+    open var orders: [OkexOrder]?
+    
     open var isReady = false
     public typealias OkexOrderCompletion = (Bool, String?) -> Void
     open var completions = [String: OkexOrderCompletion]()
     
     /// 下单后订单变化
-    public static let orderStatusChangedNotification = Notification.Name("OkexOrderStatusChangedNotification")
+    public static let orderInitNotification = Notification.Name("OkexOrderInitNotification")
+    /// 下单后订单变化
+    public static let orderChangedNotification = Notification.Name("OkexOrderChangedNotification")
     /// 账号已准备好去读取
     public static let balancePositionInitReadyNotification = Notification.Name("OkexBalancePositionInitReadyNotification")
     /// 账户有变化
     public static let balancePositionChangedNotification = Notification.Name("OkexBalancePositionChangedNotification")
+    
+    public override init() {
+        super.init()
+        refreshOrders()
+    }
+    
+    func refreshOrders() {
+        let path = "GET /api/v5/trade/orders-pending"
+        OkexRestAPI.sendRequestWith(path: path, dataClass: OkexOrder.self) { response in
+            if response.responseSucceed {
+                if let data = response.data as? [OkexOrder] {
+                    self.orders = data
+                } else {
+                    self.orders = [OkexOrder]()
+                }
+                NotificationCenter.default.post(name: OkexUserWebSocket.orderInitNotification, object: self.orders)
+            }
+        }
+    }
     
     open func login() {
         let timestamp = "\(Date().timeIntervalSince1970)"
@@ -148,17 +172,25 @@ open class OkexUserWebSocket: OkexWebSocket {
                         NotificationCenter.default.post(name: OkexUserWebSocket.balancePositionChangedNotification, object: balancePosition)
                     }
                 } else if channel == "orders" {
+                    if self.orders == nil {
+                        return
+                    }
                     // 订单变化会从，等待成交，部分成交，完全成交
-                    var ods = [OkexOrder]()
                     if let dicArray = data as? [[String: Any]] {
                         for dic in dicArray {
                             if let order = dic.transformToModel(OkexOrder.self) {
-                                ods.append(order)
+                                for (index,or) in self.orders!.enumerated() {
+                                    if order.ordId == or.ordId {
+                                        self.orders!.remove(at: index)
+                                    }
+                                }
+                                if order.state == "live" || order.state == "partially_filled" {
+                                    self.orders!.append(order)
+                                }
+                                NotificationCenter.default.post(name: OkexUserWebSocket.orderChangedNotification, object: order)
                             }
                         }
                     }
-                    let order = ods.first
-                    NotificationCenter.default.post(name: OkexUserWebSocket.orderStatusChangedNotification, object: order)
                 }
             }
         }
