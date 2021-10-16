@@ -13,7 +13,7 @@ open class OkexUserWebSocket: OkexWebSocket {
     public static let shared = OkexUserWebSocket()
     
     open override var urlStr: String {
-        "wss://wsaws.okex.com:8443/ws/v5/private"
+        return APIKeyConfig.default.Okex_WebsocketPrivateURL
     }
     
     /// 余额和持仓对象

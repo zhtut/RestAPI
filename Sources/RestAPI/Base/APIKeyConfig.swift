@@ -14,4 +14,6 @@ open class APIKeyConfig {
     open var OKex_SECRET_KEY = ""
     open var OKex_Passphrase = ""
     open var Okex_BaseURL = "https://aws.okex.com"
+    open var Okex_WebsocketPublicURL = "wss://wsaws.okex.com:8443/ws/v5/public"
+    open var Okex_WebsocketPrivateURL = "wss://wsaws.okex.com:8443/ws/v5/private"
 }

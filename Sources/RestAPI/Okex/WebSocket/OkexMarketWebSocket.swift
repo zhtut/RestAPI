@@ -14,7 +14,7 @@ open class OkexMarketWebSocket: OkexWebSocket {
     public static let shared = OkexMarketWebSocket()
     
     open override var urlStr: String {
-        "wss://wsaws.okex.com:8443/ws/v5/public"
+        return APIKeyConfig.default.Okex_WebsocketPublicURL
     }
     
     open var depthData = OkexDepthData()
