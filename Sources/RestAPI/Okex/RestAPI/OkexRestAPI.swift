@@ -41,6 +41,9 @@ open class OkexRestAPI: NSObject {
         headerFields["OK-ACCESS-PASSPHRASE"] = APIKeyConfig.default.OKex_Passphrase
         headerFields["Content-Type"] = "application/json; charset=UTF-8"
         headerFields["Accept"] = "application/json"
+#if DEBUG
+        headerFields["x-simulated-trading"] = "1"
+#endif
         
         var bodyString: String?
         if newMethod == .POST {
