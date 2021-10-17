@@ -22,7 +22,7 @@ open class OkexMarketWebSocket: OkexWebSocket {
     /// k线图变化的通知
     public static let candleDidChangeNotification = Notification.Name("SCCandleDidChangeNotification")
     
-    open var candles = [String: [OkexCandle]]()
+    open var candles: [OkexCandle]?
     
     open override func webSocketDidReceive(message: [String : Any]) {
         super.webSocketDidReceive(message: message)
@@ -58,24 +58,54 @@ open class OkexMarketWebSocket: OkexWebSocket {
         }
     }
     
+    public enum CandleBar: String {
+        case candle1Y
+        case candle6M, candle3M, candle1M
+        case candle1W
+        case candle1D, candle2D, candle3D, candle5D
+        case candle12H, candle6H, candle4H, candle2H, candle1H
+        case candle30m, candle15m, candle5m, candle3m, candle1m
+    }
+    
+    open func subscribeCandle(bar: CandleBar, instId: String) {
+        let arg = OkexSubscribeArg()
+        arg.channel = "\(bar)"
+        arg.instId = instId
+        subscribe(arg: arg)
+        
+        let path = "GET /api/v5/market/candles"
+        let params = ["instId": instId, "bar": "\(bar)", "limit": "12"]
+        OkexRestAPI.sendRequestWith(path: path, params: params) { response in
+            self.candles = [OkexCandle]()
+            if response.responseSucceed {
+                if let data = response.data as? [[String]] {
+                    for obj in data {
+                        let candle = OkexCandle.candleWith(data: obj)
+                        self.candles!.append(candle)
+                    }
+                }
+            }
+        }
+    }
+    
     open func processCandleMessage(message: [String: Any]) {
+        guard var candles = candles else {
+            return
+        }
+        
         if let data = message["data"] as? [[String]] {
             let first = data.first!
             var candle = OkexCandle.candleWith(data: first)
             if let arg = message["arg"] as? [String: Any],
                let instId = arg.stringFor("instId") {
                 candle.instId = instId
-                if var candles = self.candles[instId] {
-                    if let last = candles.last {
-                        if last.ts == candle.ts {
-                            candles.removeLast()
-                        }
+                if let last = candles.last {
+                    if last.ts == candle.ts {
+                        candles.removeLast()
                     }
-                    candles.append(candle)
-                    self.candles[instId] = candles
-                } else {
-                    self.candles[instId] = [candle]
                 }
+                candles.append(candle)
+                self.candles = candles
             }
             NotificationCenter.default.post(name: OkexMarketWebSocket.candleDidChangeNotification, object: candle)
         }
