@@ -148,8 +148,7 @@ open class OkexUserWebSocket: OkexWebSocket {
                     for dic in dicArray {
                         if let position = dic.transformToModel(OkexPosition.self) {
                             for (index,po) in positions!.enumerated() {
-                                if position.instId == po.instId,
-                                   position.posSide == po.posSide {
+                                if position.posId == po.posId {
                                     positions!.remove(at: index)
                                 }
                             }
@@ -160,6 +159,8 @@ open class OkexUserWebSocket: OkexWebSocket {
                                 NotificationCenter.default.post(name: OkexUserWebSocket.positionsInitNotification, object: positions)
                             } else {
                                 NotificationCenter.default.post(name: OkexUserWebSocket.positionsChangedNotification, object: position)
+                                log("持仓变动：\(position.positionDesc)")
+                                log("最新持仓数量：\(positions!.count)")
                             }
                         }
                     }
