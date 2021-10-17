@@ -16,6 +16,9 @@ open class OkexUserWebSocket: OkexWebSocket {
         return APIKeyConfig.default.Okex_WebsocketPrivateURL
     }
     
+    /// 持仓对象数组
+    open var positions: [OkexPosition]?
+    
     /// 是否有持仓
     open var hasPosition: Bool {
         if let po = positions,
@@ -24,9 +27,6 @@ open class OkexUserWebSocket: OkexWebSocket {
         }
         return false
     }
-    
-    /// 持仓对象数组
-    open var positions: [OkexPosition]?
     
     open var positionDesc: String {
         if positions == nil || positions?.count == 0 {
@@ -42,7 +42,6 @@ open class OkexUserWebSocket: OkexWebSocket {
     /// 订单
     open var orders: [OkexOrder]?
     
-    open var isReady = false
     public typealias OkexOrderCompletion = (Bool, String?) -> Void
     open var completions = [String: OkexOrderCompletion]()
     
@@ -58,6 +57,7 @@ open class OkexUserWebSocket: OkexWebSocket {
     public override init() {
         super.init()
         refreshOrders()
+        refreshPositions()
     }
     
     func refreshOrders() {
@@ -70,6 +70,23 @@ open class OkexUserWebSocket: OkexWebSocket {
                     self.orders = [OkexOrder]()
                 }
                 NotificationCenter.default.post(name: OkexUserWebSocket.orderInitNotification, object: self.orders)
+            }
+        }
+    }
+    
+    func refreshPositions() {
+        let path = "GET /api/v5/account/positions"
+        OkexRestAPI.sendRequestWith(path: path, dataClass: OkexPosition.self) { response in
+            if response.responseSucceed {
+                self.positions = [OkexPosition]()
+                if let data = response.data as? [OkexPosition] {
+                    for po in data {
+                        if po.pos != "0" {
+                            self.positions!.append(po)
+                        }
+                    }
+                }
+                NotificationCenter.default.post(name: OkexUserWebSocket.positionsInitNotification, object: self.positions)
             }
         }
     }
@@ -139,10 +156,8 @@ open class OkexUserWebSocket: OkexWebSocket {
            let channel = arg["channel"] as? String,
            let data = message["data"] as? [Any] {
             if channel == "positions" {
-                var firstInit = false
                 if positions == nil {
-                    positions = [OkexPosition]()
-                    firstInit = true
+                    return
                 }
                 if let dicArray = data as? [[String: Any]] {
                     for dic in dicArray {
@@ -155,13 +170,9 @@ open class OkexUserWebSocket: OkexWebSocket {
                             if position.pos != "0" {
                                 positions!.append(position)
                             }
-                            if firstInit {
-                                NotificationCenter.default.post(name: OkexUserWebSocket.positionsInitNotification, object: positions)
-                            } else {
-                                NotificationCenter.default.post(name: OkexUserWebSocket.positionsChangedNotification, object: position)
-                                log("持仓变动：\(position.positionDesc)")
-                                log("最新持仓数量：\(positions!.count)")
-                            }
+                            NotificationCenter.default.post(name: OkexUserWebSocket.positionsChangedNotification, object: position)
+                            log("持仓变动：\(position.positionDesc)")
+                            log("最新持仓数量：\(positions!.count)")
                         }
                     }
                 }
