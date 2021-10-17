@@ -16,14 +16,6 @@ open class OkexUserWebSocket: OkexWebSocket {
         return APIKeyConfig.default.Okex_WebsocketPrivateURL
     }
     
-    /// 余额和持仓对象
-    open var balancePosition: OkexBalancePosition?
-    
-    /// USDT余额
-    open var usdt: Double? {
-        return balanceWith(ccy: "usdt")
-    }
-    
     /// 是否有持仓
     open var hasPosition: Bool {
         if let po = positions,
@@ -34,13 +26,7 @@ open class OkexUserWebSocket: OkexWebSocket {
     }
     
     /// 持仓对象数组
-    open var positions: [OkexPosition]? {
-        if balancePosition == nil {
-            return nil
-        }
-        let data = balancePosition!.posData
-        return data
-    }
+    open var positions: [OkexPosition]?
     
     open var positionDesc: String {
         if positions == nil || positions?.count == 0 {
@@ -65,9 +51,9 @@ open class OkexUserWebSocket: OkexWebSocket {
     /// 下单后订单变化
     public static let orderChangedNotification = Notification.Name("OkexOrderChangedNotification")
     /// 账号已准备好去读取
-    public static let balancePositionInitReadyNotification = Notification.Name("OkexBalancePositionInitReadyNotification")
+    public static let positionsInitNotification = Notification.Name("OkexPositionsInitNotification")
     /// 账户有变化
-    public static let balancePositionChangedNotification = Notification.Name("OkexBalancePositionChangedNotification")
+    public static let positionsChangedNotification = Notification.Name("OkexPositionsChangedNotification")
     
     public override init() {
         super.init()
@@ -109,90 +95,126 @@ open class OkexUserWebSocket: OkexWebSocket {
     }
     
     func loginSucceed() {
-        subcribeBalance()
+        subcribePositions()
         subcribeOrders()
     }
     
-    open func subcribeBalance() {
-        subscribe(channel: "balance_and_position")
+    open func subcribePositions() {
+        subscribe(channel: "positions", instType: "ANY")
     }
     
     open func subcribeOrders() {
-        subscribe(channel: "orders", instType: "SPOT")
-        subscribe(channel: "orders", instType: "SWAP")
-        subscribe(channel: "orders", instType: "FUTURES")
+        subscribe(channel: "orders", instType: "ANY")
     }
     
-    open func balanceWith(ccy: String) -> Double? {
-        if balancePosition == nil {
-            return nil
-        }
-        for data in balancePosition!.balData! {
-            if data.ccy?.lowercased() == ccy.lowercased() {
-                return Double(data.cashBal ?? "0")
-            }
-        }
-        return nil
-    }
-    
-    open override func webSocketDidReceive(message: [String : Any]) {
-        super.webSocketDidReceive(message: message)
-        let event = message["event"] as? String;
-        let code = message["code"] as? String;
-        let op = message["op"] as? String;
-        if event == "login" && code == "0" {
-            log("登录成功")
-            loginSucceed()
-        } else if op == "order" {
-            // 这里是订单下单成功与否的通知，一般我们订单不会失败，所以这里不作操作，直接等orders订单变化的通知
-            if let id = message.stringFor("id") {
-                let com = completions[id]
-                if code == "0" {
-                    com?(true, id)
-                } else {
-                    com?(false, id)
+    func processEvent(_ message: [String: Any]) {
+        if let event = message["event"] as? String {
+            if event == "subscribe" {
+                if let arg = message["arg"] as? [String: Any],
+                   let channel = arg["channel"] as? String {
+                    log("\(channel)订阅成功")
                 }
-                completions.removeValue(forKey: id)
+            } else if event == "unsubscribe" {
+                if let arg = message["arg"] as? [String: Any],
+                   let channel = arg["channel"] as? String {
+                    log("\(channel)取消订阅成功")
+                }
+            } else if event == "login" {
+                if let code = message["code"] as? String,
+                   code == "0" {
+                    log("websocket登录成功")
+                    loginSucceed()
+                } else {
+                    let msg = message.stringFor("msg")
+                    log("websocket登录失败:\(msg ?? "")")
+                }
+            } else if event == "error" {
+                log("websocket发生错误：\(message)")
             }
-        } else {
-            let arg = message["arg"] as? [String: Any]
-            let data = message["data"] as? [Any]
-            if arg != nil,
-               let channel = arg!["channel"] as? String {
-                if channel == "balance_and_position" {
-                    balancePosition = nil
-                    if let dic = data?.first as? [String: Any] {
-                        balancePosition = dic.transformToModel(OkexBalancePosition.self)
-                    }
-                    if balancePosition?.eventType == "snapshot" {
-                        NotificationCenter.default.post(name: OkexUserWebSocket.balancePositionInitReadyNotification, object: balancePosition)
-                        log("当前OKexUSDT余额：\(self.usdt ?? 0)")
-                        isReady = true
-                    } else {
-                        NotificationCenter.default.post(name: OkexUserWebSocket.balancePositionChangedNotification, object: balancePosition)
-                    }
-                } else if channel == "orders" {
-                    if self.orders == nil {
-                        return
-                    }
-                    // 订单变化会从，等待成交，部分成交，完全成交
-                    if let dicArray = data as? [[String: Any]] {
-                        for dic in dicArray {
-                            if let order = dic.transformToModel(OkexOrder.self) {
-                                for (index,or) in self.orders!.enumerated() {
-                                    if order.ordId == or.ordId {
-                                        self.orders!.remove(at: index)
-                                    }
+        }
+    }
+    
+    func processChannelData(_ message: [String: Any]) {
+        if let arg = message["arg"] as? [String: Any],
+           let channel = arg["channel"] as? String,
+           let data = message["data"] as? [Any] {
+            if channel == "positions" {
+                var firstInit = false
+                if positions == nil {
+                    positions = [OkexPosition]()
+                    firstInit = true
+                }
+                if let dicArray = data as? [[String: Any]] {
+                    for dic in dicArray {
+                        if let position = dic.transformToModel(OkexPosition.self) {
+                            for (index,po) in positions!.enumerated() {
+                                if position.instId == po.instId,
+                                   position.posSide == po.posSide {
+                                    positions!.remove(at: index)
                                 }
-                                if order.state == "live" || order.state == "partially_filled" {
-                                    self.orders!.append(order)
-                                }
-                                NotificationCenter.default.post(name: OkexUserWebSocket.orderChangedNotification, object: order)
+                            }
+                            if position.pos != "0" {
+                                positions!.append(position)
+                            }
+                            if firstInit {
+                                NotificationCenter.default.post(name: OkexUserWebSocket.positionsInitNotification, object: positions)
+                            } else {
+                                NotificationCenter.default.post(name: OkexUserWebSocket.positionsChangedNotification, object: position)
                             }
                         }
                     }
                 }
+            } else if channel == "orders" {
+                if self.orders == nil {
+                    return
+                }
+                // 订单变化会从，等待成交，部分成交，完全成交
+                if let dicArray = data as? [[String: Any]] {
+                    for dic in dicArray {
+                        if let order = dic.transformToModel(OkexOrder.self) {
+                            for (index,or) in self.orders!.enumerated() {
+                                if order.ordId == or.ordId {
+                                    self.orders!.remove(at: index)
+                                }
+                            }
+                            if order.state == "live" || order.state == "partially_filled" {
+                                self.orders!.append(order)
+                            }
+                            NotificationCenter.default.post(name: OkexUserWebSocket.orderChangedNotification, object: order)
+                        }
+                    }
+                }
             }
+        }
+    }
+    
+    func processOpData(_ message: [String: Any]) {
+        if let op = message["op"] as? String {
+            if op == "order" {
+                // 这里是订单下单成功与否的通知，一般我们订单不会失败，所以这里不作操作，直接等orders订单变化的通知
+                if let id = message.stringFor("id") {
+                    let com = completions[id]
+                    if let code = message["code"] as? String,
+                       code == "0" {
+                        com?(true, id)
+                    } else {
+                        com?(false, id)
+                    }
+                    completions.removeValue(forKey: id)
+                }
+            }
+        }
+    }
+    
+    open override func webSocketDidReceive(message: [String: Any]) {
+        super.webSocketDidReceive(message: message)
+        if (message["event"] as? String) != nil {
+            processEvent(message)
+        } else if (message["op"] as? String) != nil {
+            processOpData(message)
+        } else if let arg = message["arg"] as? [String: Any],
+                  (arg["channel"] as? String) != nil {
+            processChannelData(message)
         }
     }
     
@@ -224,9 +246,10 @@ open class OkexUserWebSocket: OkexWebSocket {
     }
     
     @discardableResult
-    open func closePosition(position: OkexPosition) -> String {
+    open func closePosition(position: OkexPosition,
+                            completion: OkexOrderCompletion? = nil) -> String {
         let params = position.closePositionParams()
-        return orderWith(params: params)
+        return orderWith(params: params, completion: completion)
     }
 
     open override func webSocketDidOpen() {

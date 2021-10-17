@@ -22,6 +22,8 @@ open class OkexMarketWebSocket: OkexWebSocket {
     /// k线图变化的通知
     public static let candleDidChangeNotification = Notification.Name("SCCandleDidChangeNotification")
     
+    var candles = [String: [OkexCandle]]()
+    
     open override func webSocketDidReceive(message: [String : Any]) {
         super.webSocketDidReceive(message: message)
         let event = message["event"] as? String;
@@ -63,6 +65,17 @@ open class OkexMarketWebSocket: OkexWebSocket {
             if let arg = message["arg"] as? [String: Any],
                let instId = arg.stringFor("instId") {
                 candle.instId = instId
+                if var candles = self.candles[instId] {
+                    if let last = candles.last {
+                        if last.ts == candle.ts {
+                            candles.removeLast()
+                        }
+                    }
+                    candles.append(candle)
+                    self.candles[instId] = candles
+                } else {
+                    self.candles[instId] = [candle]
+                }
             }
             NotificationCenter.default.post(name: OkexMarketWebSocket.candleDidChangeNotification, object: candle)
         }
