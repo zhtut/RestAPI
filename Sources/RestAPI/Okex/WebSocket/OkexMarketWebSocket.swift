@@ -74,7 +74,7 @@ open class OkexMarketWebSocket: OkexWebSocket {
         subscribe(arg: arg)
         
         let path = "GET /api/v5/market/candles"
-        let params = ["instId": instId, "bar": "\(bar)", "limit": "12"]
+        let params = ["instId": instId, "bar": "\(bar)".replacingOccurrences(of: "candel", with: ""), "limit": "12"]
         OkexRestAPI.sendRequestWith(path: path, params: params) { response in
             self.candles = [OkexCandle]()
             if response.responseSucceed {
