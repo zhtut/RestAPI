@@ -22,7 +22,7 @@ open class OkexMarketWebSocket: OkexWebSocket {
     /// k线图变化的通知
     public static let candleDidChangeNotification = Notification.Name("SCCandleDidChangeNotification")
     
-    var candles = [String: [OkexCandle]]()
+    open var candles = [String: [OkexCandle]]()
     
     open override func webSocketDidReceive(message: [String : Any]) {
         super.webSocketDidReceive(message: message)
