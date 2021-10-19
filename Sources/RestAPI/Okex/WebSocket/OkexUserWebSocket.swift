@@ -192,7 +192,7 @@ open class OkexUserWebSocket: OkexWebSocket {
                             if order.state == "live" || order.state == "partially_filled" {
                                 self.orders!.append(order)
                             }
-                            log("订单变动：\(order.state)")
+                            log("订单变动：\(order.state ?? "")")
                             log("最新订单数量：\(orders!.count)")
                             NotificationCenter.default.post(name: OkexUserWebSocket.orderChangedNotification, object: order)
                         }
