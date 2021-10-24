@@ -7,6 +7,7 @@
 
 import Foundation
 import SSCommon
+import SSNetwork
 
 class BARestAPI: NSObject {
     class func sendRequestWith(path: String,
@@ -68,7 +69,7 @@ class BARestAPI: NSObject {
         headerFields["Accept"] = "application/json"
         
         let print = path.contains("order")
-        let _ = SSNetworkHelper.sendRequest(url: urlStr, params: sendParams, header: headerFields, method: newMethod!, timeOut: 10, printLog: print) { res in
+        let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, params: sendParams, header: headerFields, method: newMethod!, timeOut: 10, printLog: print) { res in
             let response = BAResponse.init(response: res)
             if let dictionary = response.originJson as? [String: Any] {
                 response.code = Int(dictionary["code"] as? String ?? "")

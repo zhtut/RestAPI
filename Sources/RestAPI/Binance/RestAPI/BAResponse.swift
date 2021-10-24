@@ -7,6 +7,7 @@
 
 import Foundation
 import SSCommon
+import SSNetwork
 
 class BAResponse: SSResponse {
 

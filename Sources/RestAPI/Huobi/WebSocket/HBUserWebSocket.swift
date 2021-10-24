@@ -7,6 +7,7 @@
 
 import Foundation
 import SSCommon
+import SSLog
 
 /// 现货账户
 class HBUserWebSocket: HBWebSocket {
@@ -81,7 +82,7 @@ class HBUserWebSocket: HBWebSocket {
            let host = temp.components(separatedBy: "/").first {
             let path = temp.replacingOccurrences(of: host, with: "")
             var params = [String: Any]()
-            params["accessKey"] = kHBAccessKey
+            params["accessKey"] = APIKeyConfig.default.HB_Access_Key
             params["signatureMethod"] = "HmacSHA256"
             params["signatureVersion"] = "2.1"
             params["timestamp"] = Date().utcString

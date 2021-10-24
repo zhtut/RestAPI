@@ -8,6 +8,8 @@
 import Foundation
 import Gzip
 import SSCommon
+import SSWebsocket
+import SSLog
 
 class HBWebSocket: SCWebSocket {
     

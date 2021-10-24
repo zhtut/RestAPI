@@ -8,7 +8,6 @@
 import Foundation
 import SSCommon
 
-
 /// 现货行情
 class HBMarketWebSocket: HBWebSocket {
 
