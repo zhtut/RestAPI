@@ -27,8 +27,7 @@ open class STRestAPI : NSObject {
         let dic = params as? [String: Any]
         let urlInfo = STURLInfo.urlInfoWith(method: meth, host: baseHost, path: path, params: dic)
         let header = ["Content-Type": "application/json"]
-        let print = path.contains("order")
-        let _ = SSNetworkHelper.sendRequest(urlStr: urlInfo.url, params: urlInfo.params, header: header, method: meth, timeOut: 10, printLog: print) { res in
+        let _ = SSNetworkHelper.sendRequest(urlStr: urlInfo.url, params: urlInfo.params, header: header, method: meth, timeOut: 10, printLog: false) { res in
             let response = STResponse.init(response: res)
             if let dictionary = response.originJson as? [String: Any] {
                 response.ts = dictionary.intFor("ts")

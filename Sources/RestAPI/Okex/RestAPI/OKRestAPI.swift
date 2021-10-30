@@ -60,7 +60,7 @@ open class OKRestAPI: NSObject {
         let sign = OKGetSign(timestamp: timestamp, method: "\(newMethod)", path: signPath, bodyStr: bodyString)
         headerFields["OK-ACCESS-SIGN"] = sign
         
-        let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, params: newParams, header: headerFields, method: newMethod, timeOut: 10, printLog: true) { res in
+        let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, params: newParams, header: headerFields, method: newMethod, timeOut: 10, printLog: false) { res in
             let response = OKResponse.init(response: res)
             if let dictionary = response.originJson as? [String: Any] {
                 response.code = dictionary.intFor("code")
