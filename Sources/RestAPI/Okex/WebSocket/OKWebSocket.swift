@@ -83,7 +83,7 @@ open class OKWebSocket: SCWebSocket {
     
     open override func webSocketDidReceive(message: [String : Any]) {
         super.webSocketDidReceive(message: message)
-        let str = message.jsonStr
+//        let str = message.jsonStr
 //        log("WebsocketDidReceive:\(str ?? "")")
         if let event = message["event"] as? String,
            let arg = message["arg"] as? [String: Any],
