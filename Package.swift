@@ -16,9 +16,9 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://gitee.com/ztgtut/SSNetwork.git", from: "1.0.0"),
-        .package(url: "https://gitee.com/ztgtut/SSCommon.git", from: "1.0.0"),
-        .package(url: "https://gitee.com/ztgtut/SSWebsocket.git", from: "1.0.0"),
+        .package(url: "https://gitee.com/ztgtut/SSNetwork.git", branch: "master"),
+        .package(url: "https://gitee.com/ztgtut/SSCommon.git", branch: "master"),
+        .package(url: "https://gitee.com/ztgtut/SSWebsocket.git", branch: "master"),
         .package(name: "Gzip", url: "https://github.com/1024jp/GzipSwift", from: "5.1.1"),
     ],
     targets: [
