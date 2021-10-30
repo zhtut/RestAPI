@@ -38,7 +38,7 @@ class BAWebSocket: SCWebSocket {
     
     override func webSocketDidReceive(string: String) {
         super.webSocketDidReceive(string: string)
-        log("BA.didReceiveMessageWith:\(string)")
+//        log("BA.didReceiveMessageWith:\(string)")
         if string == "pong" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
                 if self.isConnected {

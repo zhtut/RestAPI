@@ -38,7 +38,7 @@ open class HBWebSocket: SCWebSocket {
         if let data = string.data(using: .utf8),
             let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) {
             let dic = json as! [String: Any]
-            log("HB.didReceiveMessageWithString:\(dic)")
+//            log("HB.didReceiveMessageWithString:\(dic)")
             webSocketDidReceive(message: dic)
         }
     }
@@ -49,13 +49,13 @@ open class HBWebSocket: SCWebSocket {
             if let nsdata = try? data.gunzipped(),
                let json = try? JSONSerialization.jsonObject(with: nsdata, options: .allowFragments) {
                 let dic = json as! [String: Any]
-                log("HB.didReceiveMessageWithNSData:\(dic)")
+//                log("HB.didReceiveMessageWithNSData:\(dic)")
                 webSocketDidReceive(message: dic)
             }
         } else {
             if let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) {
                 let dic = json as! [String: Any]
-                log("HB.didReceiveMessageWithData:\(dic)")
+//                log("HB.didReceiveMessageWithData:\(dic)")
                 webSocketDidReceive(message: dic)
             }
         }
