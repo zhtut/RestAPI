@@ -1,5 +1,5 @@
 //
-//  OkexResponse.swift
+//  OKResponse.swift
 //  SmartCurrency
 //
 //  Created by shutut on 2021/7/28.
@@ -8,7 +8,7 @@
 import Foundation
 import SSNetwork
 
-open class OkexResponse: SSResponse {
+open class OKResponse: SSResponse {
     
     open var code: Int?
     open var data: Any?

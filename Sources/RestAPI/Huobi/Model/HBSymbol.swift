@@ -7,16 +7,16 @@
 
 import Foundation
 
-class HBSymbol: Codable {
-    var base_currency: String? ///<    true    string    交易对中的基础币种
-    var quote_currency: String? ///<    true    string    交易对中的报价币种
-    var symbol: String? ///<    true    string    交易对
-    var state: String? ///<    true    string    交易对状态；可能值: [online，offline,suspend] online _ 已上线；offline _ 交易对已下线，不可交易；suspend __ 交易暂停；pre_online _ 即将上线
-    var api_trading: String? ///<    true    string    API交易使能标记（有效值：enabled, disabled）
-    var price_precision: Int? ///<    true    integer 交易对报价的精度（小数点后位数），限价买入与限价卖出价格使用
-    var value_precision: Int? ///<    true    integer    交易对交易金额的精度（小数点后位数），市价买入金额使用
-    var amount_precision: Int? ///<    true    integer    交易对基础币种计数精度（小数点后位数），限价买入、限价卖出、市价卖出数量使用
-    var sell_market_min_order_amt: Double? ///<    true    float    交易对市价卖单最小下单量，以基础币种为单位（NEW）
+open class HBSymbol: Codable {
+    open var base_currency: String? ///<    true    string    交易对中的基础币种
+    open var quote_currency: String? ///<    true    string    交易对中的报价币种
+    open var symbol: String? ///<    true    string    交易对
+    open var state: String? ///<    true    string    交易对状态；可能值: [online，offline,suspend] online _ 已上线；offline _ 交易对已下线，不可交易；suspend __ 交易暂停；pre_online _ 即将上线
+    open var api_trading: String? ///<    true    string    API交易使能标记（有效值：enabled, disabled）
+    open var price_precision: Int? ///<    true    integer 交易对报价的精度（小数点后位数），限价买入与限价卖出价格使用
+    open var value_precision: Int? ///<    true    integer    交易对交易金额的精度（小数点后位数），市价买入金额使用
+    open var amount_precision: Int? ///<    true    integer    交易对基础币种计数精度（小数点后位数），限价买入、限价卖出、市价卖出数量使用
+    open var sell_market_min_order_amt: Double? ///<    true    float    交易对市价卖单最小下单量，以基础币种为单位（NEW）
     //    var symbol_partition: String? ///<    true    string    交易区，可能值: [main，innovation]
     //    var min_order_amt: String? ///<    true    float    交易对限价单最小下单量 ，以基础币种为单位（即将废弃）
     //    var limit_order_min_order_amt: String? ///<    true    float    交易对限价单最小下单量 ，以基础币种为单位（NEW）

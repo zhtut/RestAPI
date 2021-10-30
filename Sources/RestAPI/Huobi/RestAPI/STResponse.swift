@@ -9,17 +9,17 @@ import Foundation
 import SSCommon
 import SSNetwork
 
-class STResponse: SSResponse {
+open class STResponse: SSResponse {
     
-    var status: String?
-    var data: Any?
-    var ts: Int?
+    open var status: String?
+    open var data: Any?
+    open var ts: Int?
 
-    var responseSucceed: Bool {
+    open var responseSucceed: Bool {
         return status == "ok"
     }
 
-    var serverErrorMsg: String? {
+    open var serverErrorMsg: String? {
         let originDictionary = originJson as? [String: Any]
         if originDictionary == nil {
             return nil
@@ -38,7 +38,7 @@ class STResponse: SSResponse {
         return nil
     }
     
-    var errorMsg: String? {
+    open var errorMsg: String? {
         if fetchSucceed {
             return serverErrorMsg
         } else {

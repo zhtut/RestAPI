@@ -1,5 +1,5 @@
 //
-//  OkexUserWebSocket.swift
+//  OKUserWebSocket.swift
 //  SmartCurrency
 //
 //  Created by shutut on 2021/8/15.
@@ -9,15 +9,15 @@ import Foundation
 import SSCommon
 import SSLog
 
-open class OkexUserWebSocket: OkexWebSocket {
-    public static let shared = OkexUserWebSocket()
+open class OKUserWebSocket: OKWebSocket {
+    public static let shared = OKUserWebSocket()
     
     open override var urlStr: String {
-        return APIKeyConfig.default.Okex_WebsocketPrivateURL
+        return APIKeyConfig.default.OK_WebsocketPrivateURL
     }
     
     /// 持仓对象数组
-    open var positions: [OkexPosition]?
+    open var positions: [OKPosition]?
     
     /// 是否有持仓
     open var hasPosition: Bool {
@@ -40,19 +40,19 @@ open class OkexUserWebSocket: OkexWebSocket {
     }
     
     /// 订单
-    open var orders: [OkexOrder]?
+    open var orders: [OKOrder]?
     
-    public typealias OkexOrderCompletion = (Bool, String?) -> Void
-    open var completions = [String: OkexOrderCompletion]()
+    public typealias OKOrderCompletion = (Bool, String?) -> Void
+    open var completions = [String: OKOrderCompletion]()
     
     /// 下单后订单变化
-    public static let orderInitNotification = Notification.Name("OkexOrderInitNotification")
+    public static let orderInitNotification = Notification.Name("OKOrderInitNotification")
     /// 下单后订单变化
-    public static let orderChangedNotification = Notification.Name("OkexOrderChangedNotification")
+    public static let orderChangedNotification = Notification.Name("OKOrderChangedNotification")
     /// 账号已准备好去读取
-    public static let positionsInitNotification = Notification.Name("OkexPositionsInitNotification")
+    public static let positionsInitNotification = Notification.Name("OKPositionsInitNotification")
     /// 账户有变化
-    public static let positionsChangedNotification = Notification.Name("OkexPositionsChangedNotification")
+    public static let positionsChangedNotification = Notification.Name("OKPositionsChangedNotification")
     
     public override init() {
         super.init()
@@ -62,31 +62,31 @@ open class OkexUserWebSocket: OkexWebSocket {
     
     func refreshOrders() {
         let path = "GET /api/v5/trade/orders-pending"
-        OkexRestAPI.sendRequestWith(path: path, dataClass: OkexOrder.self) { response in
+        OKRestAPI.sendRequestWith(path: path, dataClass: OKOrder.self) { response in
             if response.responseSucceed {
-                if let data = response.data as? [OkexOrder] {
+                if let data = response.data as? [OKOrder] {
                     self.orders = data
                 } else {
-                    self.orders = [OkexOrder]()
+                    self.orders = [OKOrder]()
                 }
-                NotificationCenter.default.post(name: OkexUserWebSocket.orderInitNotification, object: self.orders)
+                NotificationCenter.default.post(name: OKUserWebSocket.orderInitNotification, object: self.orders)
             }
         }
     }
     
     func refreshPositions() {
         let path = "GET /api/v5/account/positions"
-        OkexRestAPI.sendRequestWith(path: path, dataClass: OkexPosition.self) { response in
+        OKRestAPI.sendRequestWith(path: path, dataClass: OKPosition.self) { response in
             if response.responseSucceed {
-                self.positions = [OkexPosition]()
-                if let data = response.data as? [OkexPosition] {
+                self.positions = [OKPosition]()
+                if let data = response.data as? [OKPosition] {
                     for po in data {
                         if po.pos != "0" {
                             self.positions!.append(po)
                         }
                     }
                 }
-                NotificationCenter.default.post(name: OkexUserWebSocket.positionsInitNotification, object: self.positions)
+                NotificationCenter.default.post(name: OKUserWebSocket.positionsInitNotification, object: self.positions)
             }
         }
     }
@@ -95,14 +95,14 @@ open class OkexUserWebSocket: OkexWebSocket {
         let timestamp = "\(Date().timeIntervalSince1970)"
         let method = "GET"
         let signPath = "/users/self/verify"
-        let sign = OkexRestAPI.OKexGetSign(timestamp: timestamp, method: method, path: signPath, bodyStr: nil)
+        let sign = OKRestAPI.OKGetSign(timestamp: timestamp, method: method, path: signPath, bodyStr: nil)
         let params = [
             "op": "login",
             "args":
                 [
                     [
-                        "apiKey": APIKeyConfig.default.OKex_API_KEY,
-                        "passphrase": APIKeyConfig.default.OKex_Passphrase,
+                        "apiKey": APIKeyConfig.default.OK_API_KEY,
+                        "passphrase": APIKeyConfig.default.OK_Passphrase,
                         "timestamp": timestamp,
                         "sign": sign
                     ]
@@ -161,7 +161,7 @@ open class OkexUserWebSocket: OkexWebSocket {
                 }
                 if let dicArray = data as? [[String: Any]] {
                     for dic in dicArray {
-                        if let position = dic.transformToModel(OkexPosition.self) {
+                        if let position = dic.transformToModel(OKPosition.self) {
                             for (index,po) in positions!.enumerated() {
                                 if position.posId == po.posId {
                                     positions!.remove(at: index)
@@ -170,7 +170,7 @@ open class OkexUserWebSocket: OkexWebSocket {
                             if position.pos != "0" {
                                 positions!.append(position)
                             }
-                            NotificationCenter.default.post(name: OkexUserWebSocket.positionsChangedNotification, object: position)
+                            NotificationCenter.default.post(name: OKUserWebSocket.positionsChangedNotification, object: position)
                             log("持仓变动：\(position.positionDesc)")
                             log("最新持仓数量：\(positions!.count)")
                         }
@@ -183,7 +183,7 @@ open class OkexUserWebSocket: OkexWebSocket {
                 // 订单变化会从，等待成交，部分成交，完全成交
                 if let dicArray = data as? [[String: Any]] {
                     for dic in dicArray {
-                        if let order = dic.transformToModel(OkexOrder.self) {
+                        if let order = dic.transformToModel(OKOrder.self) {
                             for (index,or) in self.orders!.enumerated() {
                                 if order.ordId == or.ordId {
                                     self.orders!.remove(at: index)
@@ -194,7 +194,7 @@ open class OkexUserWebSocket: OkexWebSocket {
                             }
                             log("订单变动：\(order.state ?? "")")
                             log("最新订单数量：\(orders!.count)")
-                            NotificationCenter.default.post(name: OkexUserWebSocket.orderChangedNotification, object: order)
+                            NotificationCenter.default.post(name: OKUserWebSocket.orderChangedNotification, object: order)
                         }
                     }
                 }
@@ -233,14 +233,14 @@ open class OkexUserWebSocket: OkexWebSocket {
     }
     
     @discardableResult
-    open func orderWith(order: OkexOrder) -> String {
+    open func orderWith(order: OKOrder) -> String {
         let orderParams = order.transformToJson()
         return orderWith(params: orderParams ?? [:])
     }
     
     @discardableResult
     open func orderWith(params: [String: Any],
-                   completion: OkexOrderCompletion? = nil) -> String {
+                   completion: OKOrderCompletion? = nil) -> String {
         var time = "\(Int(Date().timeIntervalSince1970 * 1000))"
         if let clOrdId = params["clOrdId"] as? String {
             time = clOrdId;
@@ -260,8 +260,8 @@ open class OkexUserWebSocket: OkexWebSocket {
     }
     
     @discardableResult
-    open func closePosition(position: OkexPosition,
-                            completion: OkexOrderCompletion? = nil) -> String {
+    open func closePosition(position: OKPosition,
+                            completion: OKOrderCompletion? = nil) -> String {
         let params = position.closePositionParams()
         return orderWith(params: params, completion: completion)
     }

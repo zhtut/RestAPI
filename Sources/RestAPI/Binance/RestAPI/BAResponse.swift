@@ -9,24 +9,24 @@ import Foundation
 import SSCommon
 import SSNetwork
 
-class BAResponse: SSResponse {
+open class BAResponse: SSResponse {
 
-    var code: Int?
-    var data: Any?
-    var msg: String?
+    open var code: Int?
+    open var data: Any?
+    open var msg: String?
     
-    var responseSucceed: Bool {
+    open var responseSucceed: Bool {
         return code == nil
     }
     
-    var serverErrorMsg: String? {
+    open var serverErrorMsg: String? {
         if self.code != nil && self.msg != nil {
             return self.msg
         }
         return nil
     }
     
-    var errorMsg: String? {
+    open var errorMsg: String? {
         if fetchSucceed {
             return serverErrorMsg
         } else {

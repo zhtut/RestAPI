@@ -8,7 +8,7 @@
 import Foundation
 
 /// 深度价格
-open class OkexDepthPrice: NSObject {
+open class OKDepthPrice: NSObject {
     /// 价格
     open var px: Double = 0
     /// 交易量
@@ -22,11 +22,11 @@ open class OkexDepthPrice: NSObject {
         return "\(px) \(sz)"
     }
     
-    open class func priceWith(_ array: [String]) -> OkexDepthPrice? {
+    open class func priceWith(_ array: [String]) -> OKDepthPrice? {
         if array.count < 4 {
             return nil
         }
-        let  model = OkexDepthPrice()
+        let  model = OKDepthPrice()
         model.px = array[0].doubleValue ?? 0
         model.sz = array[1].doubleValue ?? 0
         model.fSz = array[2].doubleValue ?? 0

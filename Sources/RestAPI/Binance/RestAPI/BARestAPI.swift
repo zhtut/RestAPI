@@ -9,8 +9,8 @@ import Foundation
 import SSCommon
 import SSNetwork
 
-class BARestAPI: NSObject {
-    class func sendRequestWith(path: String,
+open class BARestAPI: NSObject {
+    open class func sendRequestWith(path: String,
                                params: Any? = nil,
                                method: SSHttpMethod? = nil,
                                dataKey: String = "data",
@@ -82,7 +82,7 @@ class BARestAPI: NSObject {
         }
     }
     
-    class func sendRequestWith<T: Decodable>(path: String,
+    open class func sendRequestWith<T: Decodable>(path: String,
                                              params: Any? = nil,
                                              method: SSHttpMethod? = nil,
                                              dataKey: String = "data",

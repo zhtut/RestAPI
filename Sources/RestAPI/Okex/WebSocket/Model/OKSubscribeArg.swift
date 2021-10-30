@@ -1,5 +1,5 @@
 //
-//  OkexSubscribeArg.swift
+//  OKSubscribeArg.swift
 //  SmartCurrency
 //
 //  Created by shutut on 2021/8/21.
@@ -8,7 +8,7 @@
 import Foundation
 import SSCommon
 
-open class OkexSubscribeArg: NSObject, Codable {
+open class OKSubscribeArg: NSObject, Codable {
     open var channel: String?
     open var instId: String?
     open var instType: String?

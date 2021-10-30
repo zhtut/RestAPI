@@ -1,5 +1,5 @@
 //
-//  OkexCandle.swift
+//  OKCandle.swift
 //  SmartCurrency
 //
 //  Created by shutut on 2021/8/15.
@@ -8,7 +8,7 @@
 import Foundation
 
 /// k线图，蜡烛图
-public struct OkexCandle: Codable {
+public struct OKCandle: Codable {
     public var instId    : String? ///<     symbol
     public var ts    : String? ///<     开始时间，Unix时间戳的毫秒数格式，如 1597026383085
     public var o    : String? ///<     开盘价格
@@ -62,8 +62,8 @@ public struct OkexCandle: Codable {
         return cNum > oNum
     }
     
-    public static func candleWith(data: [String]) -> OkexCandle {
-        var candle = OkexCandle()
+    public static func candleWith(data: [String]) -> OKCandle {
+        var candle = OKCandle()
         if data.count >= 5 {
             candle.ts = data[0]
             candle.o = data[1]
@@ -87,7 +87,7 @@ public struct OkexCandle: Codable {
     }
 }
 
-public extension Array where Element == OkexCandle {
+public extension Array where Element == OKCandle {
     
     func maValueWith(count: Int) -> Double {
         if (self.count > count) {

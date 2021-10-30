@@ -10,7 +10,7 @@ import SSCommon
 
 class BAUserWebSocket: BAWebSocket {
     
-    static let shared = OkexMarketWebSocket()
+    static let shared = OKMarketWebSocket()
     
     override var urlStr: String {
         "wss://stream.binance.com:9443"

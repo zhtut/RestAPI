@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct OkexInstrument: Codable {
+public struct OKInstrument: Codable {
     public var instType    : String? ///<     产品类型
     public var instId    : String? ///<     产品ID，如 BTC-USD-SWAP
     public var category    : String? ///<     手续费档位，每个交易产品属于哪个档位手续费
@@ -40,15 +40,15 @@ public struct OkexInstrument: Codable {
     // expired：已过期
     // prepublic：预上线
     
-    public static func instrumentWith(instId: String, completion: @escaping (OkexInstrument?, String?) -> Void) {
+    public static func instrumentWith(instId: String, completion: @escaping (OKInstrument?, String?) -> Void) {
         let path = "/api/v5/public/instruments"
         let params = ["instId": instId, "instType": "SWAP"]
-        OkexRestAPI.sendRequestWith(path: path,
+        OKRestAPI.sendRequestWith(path: path,
                                     params: params,
                                     method: .GET,
-                                    dataClass: OkexInstrument.self) { response in
+                                    dataClass: OKInstrument.self) { response in
             if response.responseSucceed,
-               let array = response.data as? [OkexInstrument],
+               let array = response.data as? [OKInstrument],
                let ins = array.first {
                 completion(ins, nil)
                 return

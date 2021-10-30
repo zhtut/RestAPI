@@ -1,5 +1,5 @@
 //
-//  OkexMarketWebSocket.swift
+//  OKMarketWebSocket.swift
 //  SmartCurrency
 //
 //  Created by shutut on 2021/8/14.
@@ -9,20 +9,20 @@ import Foundation
 import SSCommon
 import SSLog
 
-open class OkexMarketWebSocket: OkexWebSocket {
+open class OKMarketWebSocket: OKWebSocket {
     
-    public static let shared = OkexMarketWebSocket()
+    public static let shared = OKMarketWebSocket()
     
     open override var urlStr: String {
-        return APIKeyConfig.default.Okex_WebsocketPublicURL
+        return APIKeyConfig.default.OK_WebsocketPublicURL
     }
     
-    open var depthData = OkexDepthData()
+    open var depthData = OKDepthData()
     
     /// k线图变化的通知
     public static let candleDidChangeNotification = Notification.Name("SCCandleDidChangeNotification")
     
-    open var candles: [OkexCandle]?
+    open var candles: [OKCandle]?
     
     open override func webSocketDidReceive(message: [String : Any]) {
         super.webSocketDidReceive(message: message)
@@ -52,7 +52,7 @@ open class OkexMarketWebSocket: OkexWebSocket {
                 print(depthData.description)
             } else if channel == "trades" {
 //                if let data = message["data"] as? [[String : Any]] {
-//                    let models = data.transformToModelArray(OkexHistoryTrade.self)
+//                    let models = data.transformToModelArray(OKHistoryTrade.self)
 //                }
             }
         }
@@ -68,19 +68,19 @@ open class OkexMarketWebSocket: OkexWebSocket {
     }
     
     open func subscribeCandle(bar: CandleBar, instId: String) {
-        let arg = OkexSubscribeArg()
+        let arg = OKSubscribeArg()
         arg.channel = "\(bar)"
         arg.instId = instId
         subscribe(arg: arg)
         
         let path = "GET /api/v5/market/candles"
         let params = ["instId": instId, "bar": "\(bar)".replacingOccurrences(of: "candle", with: ""), "limit": "12"]
-        OkexRestAPI.sendRequestWith(path: path, params: params) { response in
-            self.candles = [OkexCandle]()
+        OKRestAPI.sendRequestWith(path: path, params: params) { response in
+            self.candles = [OKCandle]()
             if response.responseSucceed {
                 if let data = response.data as? [[String]] {
                     for obj in data {
-                        let candle = OkexCandle.candleWith(data: obj)
+                        let candle = OKCandle.candleWith(data: obj)
                         self.candles!.append(candle)
                     }
                 }
@@ -95,7 +95,7 @@ open class OkexMarketWebSocket: OkexWebSocket {
         
         if let data = message["data"] as? [[String]] {
             let first = data.first!
-            var candle = OkexCandle.candleWith(data: first)
+            var candle = OKCandle.candleWith(data: first)
             if let arg = message["arg"] as? [String: Any],
                let instId = arg.stringFor("instId") {
                 candle.instId = instId
@@ -107,7 +107,7 @@ open class OkexMarketWebSocket: OkexWebSocket {
                 candles.append(candle)
                 self.candles = candles
             }
-            NotificationCenter.default.post(name: OkexMarketWebSocket.candleDidChangeNotification, object: candle)
+            NotificationCenter.default.post(name: OKMarketWebSocket.candleDidChangeNotification, object: candle)
         }
     }
 }

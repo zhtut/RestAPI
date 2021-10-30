@@ -7,7 +7,7 @@
 
 import Foundation
 
-open class OkexHistoryTrade: NSObject, Codable {
+open class OKHistoryTrade: NSObject, Codable {
     open var instId: String? /// ": "BTC-USDT",
     open var tradeId: String? /// ": "130639474",
     open var px: String? /// ": "42219.9",

@@ -1,5 +1,5 @@
 //
-//  OkexResiAPI.swift
+//  OKResiAPI.swift
 //  SmartCurrency
 //
 //  Created by shutut on 2021/7/28.
@@ -10,13 +10,13 @@ import SSCommon
 import SSNetwork
 import SSEncrypt
 
-open class OkexRestAPI: NSObject {
+open class OKRestAPI: NSObject {
     
     open class func sendRequestWith(path: String,
                                     params: Any? = nil,
                                     method: SSHttpMethod = .GET,
                                     dataKey: String = "data",
-                                    completion: @escaping (OkexResponse) -> Void) {
+                                    completion: @escaping (OKResponse) -> Void) {
         var newMethod = method
         var newPath = path
         var newParams = params
@@ -36,9 +36,9 @@ open class OkexRestAPI: NSObject {
         let timestamp = Date().isoTimeString
         
         var headerFields = [String: String]()
-        headerFields["OK-ACCESS-KEY"] = APIKeyConfig.default.OKex_API_KEY
+        headerFields["OK-ACCESS-KEY"] = APIKeyConfig.default.OK_API_KEY
         headerFields["OK-ACCESS-TIMESTAMP"] = timestamp
-        headerFields["OK-ACCESS-PASSPHRASE"] = APIKeyConfig.default.OKex_Passphrase
+        headerFields["OK-ACCESS-PASSPHRASE"] = APIKeyConfig.default.OK_Passphrase
         headerFields["Content-Type"] = "application/json; charset=UTF-8"
         headerFields["Accept"] = "application/json"
 #if DEBUG
@@ -59,12 +59,12 @@ open class OkexRestAPI: NSObject {
             newParams = nil
         }
         
-        let urlStr = "\(APIKeyConfig.default.Okex_BaseURL)\(signPath)"
-        let sign = OKexGetSign(timestamp: timestamp, method: "\(newMethod)", path: signPath, bodyStr: bodyString)
+        let urlStr = "\(APIKeyConfig.default.OK_BaseURL)\(signPath)"
+        let sign = OKGetSign(timestamp: timestamp, method: "\(newMethod)", path: signPath, bodyStr: bodyString)
         headerFields["OK-ACCESS-SIGN"] = sign
         
         let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, params: newParams, header: headerFields, method: newMethod, timeOut: 10, printLog: true) { res in
-            let response = OkexResponse.init(response: res)
+            let response = OKResponse.init(response: res)
             if let dictionary = response.originJson as? [String: Any] {
                 response.code = dictionary.intFor("code")
                 response.msg = dictionary["msg"] as? String
@@ -83,7 +83,7 @@ open class OkexRestAPI: NSObject {
                                                   method: SSHttpMethod = .GET,
                                                   dataKey: String = "data",
                                                   dataClass: T.Type,
-                                                  completion: @escaping (OkexResponse) -> Void) {
+                                                  completion: @escaping (OKResponse) -> Void) {
         sendRequestWith(path: path, params: params, method: method, dataKey: dataKey) { response in
             if response.responseSucceed {
                 let da = response.data
@@ -104,12 +104,12 @@ open class OkexRestAPI: NSObject {
         }
     }
     
-    open class func OKexGetSign(timestamp: String, method: String, path: String, bodyStr: String?) -> String {
+    open class func OKGetSign(timestamp: String, method: String, path: String, bodyStr: String?) -> String {
         var str = "\(timestamp)\(method)\(path)"
         if bodyStr != nil && bodyStr!.count > 0 {
             str = "\(str)\(bodyStr!)"
         }
-        let base64String = str.hmacToBase64StringWith(key: APIKeyConfig.default.OKex_SECRET_KEY);
+        let base64String = str.hmacToBase64StringWith(key: APIKeyConfig.default.OK_SECRET_KEY);
         return base64String;
     }
 }

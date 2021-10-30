@@ -7,15 +7,15 @@
 
 import Foundation
 
-class BAInstrument: NSObject {
-    var symbol: String? ///": "ETHBTC",
-    var status: String? ///": "TRADING",
-    var baseAsset: String? ///": "ETH",
-    var baseAssetPrecision: Int? ///": 8,
-    var quoteAsset: String? ///": "BTC",
-    var quotePrecision: Int? ///": 8,
-    var quoteAssetPrecision: Int? ///": 8,
-    var orderTypes: [String]? ///": [
+open class BAInstrument: NSObject {
+    open var symbol: String? ///": "ETHBTC",
+    open var status: String? ///": "TRADING",
+    open var baseAsset: String? ///": "ETH",
+    open var baseAssetPrecision: Int? ///": 8,
+    open var quoteAsset: String? ///": "BTC",
+    open var quotePrecision: Int? ///": 8,
+    open var quoteAssetPrecision: Int? ///": 8,
+    open var orderTypes: [String]? ///": [
 //    LIMIT",
 //    LIMIT_MAKER",
 //    MARKET",
@@ -24,21 +24,21 @@ class BAInstrument: NSObject {
 //    TAKE_PROFIT",
 //    TAKE_PROFIT_LIMIT"
 //    ],
-    var icebergAllowed: Bool? ///": true,
-    var ocoAllowed: Bool? ///": true,
-    var isSpotTradingAllowed: Bool? ///": true,
-    var isMarginTradingAllowed: Bool? ///": true,
-    var filters: [[String: Any]]?  ///": [
+    open var icebergAllowed: Bool? ///": true,
+    open var ocoAllowed: Bool? ///": true,
+    open var isSpotTradingAllowed: Bool? ///": true,
+    open var isMarginTradingAllowed: Bool? ///": true,
+    open var filters: [[String: Any]]?  ///": [
     //这些在"过滤器"部分中定义
     //所有限制都是可选的
 //    ],
-    var permissions: [String]? /// ": [
+    open var permissions: [String]? /// ": [
 //    "SPOT",
 //    "MARGIN"
 //    ]
 //    }
     
-    static func modelWith(dic: [String: Any]) -> BAInstrument {
+    open class func modelWith(dic: [String: Any]) -> BAInstrument {
         let model = BAInstrument()
         model.symbol = dic.stringFor("symbol")
         model.status = dic.stringFor("status")
@@ -57,7 +57,7 @@ class BAInstrument: NSObject {
         return model
     }
     
-    var lotSz: String? {
+    open var lotSz: String? {
         if filters == nil {
             return nil
         }
@@ -70,7 +70,7 @@ class BAInstrument: NSObject {
         return nil
     }
     
-    var tickSz: String? {
+    open var tickSz: String? {
         if filters == nil {
             return nil
         }

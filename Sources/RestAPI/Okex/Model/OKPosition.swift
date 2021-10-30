@@ -1,5 +1,5 @@
 //
-//  OkexPosition.swift
+//  OKPosition.swift
 //  SmartCurrency
 //
 //  Created by shutut on 2021/8/1.
@@ -8,7 +8,7 @@
 import Foundation
 import SSCommon
 
-public struct OkexPosition: Codable {
+public struct OKPosition: Codable {
     
     public var instType: String? ///< String?    产品类型
     public var mgnMode: String? ///< String?    保证金模式 cross：全仓 isolated：逐仓
@@ -55,7 +55,7 @@ public struct OkexPosition: Codable {
         let path = "/api/v5/trade/order";
         let params = closePositionParams()
         print("下单进行清仓操作，params:\(params)")
-        OkexRestAPI.sendRequestWith(path: path, params: params, method: .POST) { response in
+        OKRestAPI.sendRequestWith(path: path, params: params, method: .POST) { response in
             if response.responseSucceed {
                 completion(true, nil)
             } else {
@@ -84,7 +84,7 @@ public struct OkexPosition: Codable {
         return params;
     }
     
-    public static func closePositions(positions: [OkexPosition], completion: @escaping (Bool, String?) -> Void) {
+    public static func closePositions(positions: [OKPosition], completion: @escaping (Bool, String?) -> Void) {
         
         let path = "/api/v5/trade/batch-orders";
         var array = [[String: Any]]()
@@ -92,7 +92,7 @@ public struct OkexPosition: Codable {
             let dic = position.closePositionParams()
             array.append(dic)
         }
-        OkexRestAPI.sendRequestWith(path: path, params: array, method: .POST) { response in
+        OKRestAPI.sendRequestWith(path: path, params: array, method: .POST) { response in
             if response.responseSucceed {
                 completion(true, nil)
             } else {

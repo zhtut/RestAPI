@@ -7,11 +7,11 @@
 
 import Foundation
 
-public extension Array where Element == OkexDepthPrice {
+public extension Array where Element == OKDepthPrice {
     mutating func setupWith(array: [[String]]) {
         removeAll()
         for arr in array {
-            if let price = OkexDepthPrice.priceWith(arr) {
+            if let price = OKDepthPrice.priceWith(arr) {
                 append(price)
             }
         }
@@ -19,13 +19,13 @@ public extension Array where Element == OkexDepthPrice {
     
     mutating func updateWith(array: [[String]]) {
         for arr in array {
-            if let newPrice = OkexDepthPrice.priceWith(arr) {
+            if let newPrice = OKDepthPrice.priceWith(arr) {
                 updateWith(newPrice: newPrice)
             }
         }
     }
     
-    mutating func updateWith(newPrice: OkexDepthPrice) {
+    mutating func updateWith(newPrice: OKDepthPrice) {
         for (index, price) in self.enumerated() {
             /// 价格一样，先移除
             if price.px == newPrice.px {
@@ -40,9 +40,9 @@ public extension Array where Element == OkexDepthPrice {
     }
 }
 
-open class OkexDepthData: NSObject {
-    open var bids = [OkexDepthPrice]()
-    open var asks = [OkexDepthPrice]()
+open class OKDepthData: NSObject {
+    open var bids = [OKDepthPrice]()
+    open var asks = [OKDepthPrice]()
     
     open var hasData: Bool {
         if bids.count > 0 && asks.count > 0 {
@@ -61,7 +61,7 @@ open class OkexDepthData: NSObject {
         return nil
     }
     
-    public static let didChangeNotification = Notification.Name("OkexDidChangeNotification")
+    public static let didChangeNotification = Notification.Name("OKDidChangeNotification")
     
     open func setupWith(data: [[String: Any]]) {
         bids.removeAll()
@@ -93,7 +93,7 @@ open class OkexDepthData: NSObject {
                 }
             }
             
-            NotificationCenter.default.post(name: OkexDepthData.didChangeNotification, object: self)
+            NotificationCenter.default.post(name: OKDepthData.didChangeNotification, object: self)
         }
     }
     

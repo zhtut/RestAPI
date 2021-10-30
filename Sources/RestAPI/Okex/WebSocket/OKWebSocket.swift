@@ -1,5 +1,5 @@
 //
-//  OkexWebSocket.swift
+//  OKWebSocket.swift
 //  SmartCurrency
 //
 //  Created by shutut on 2021/8/14.
@@ -13,9 +13,9 @@ import Dispatch
 import SSWebsocket
 import SSLog
 
-open class OkexWebSocket: SCWebSocket {
+open class OKWebSocket: SCWebSocket {
     
-    open var subArg: OkexSubscribeArg?
+    open var subArg: OKSubscribeArg?
     
     open func subscribe(channel: String,
                    instId: String? = nil,
@@ -32,7 +32,7 @@ open class OkexWebSocket: SCWebSocket {
         sendMessage(message: dic)
     }
     
-    open func subscribe(arg: OkexSubscribeArg) {
+    open func subscribe(arg: OKSubscribeArg) {
         subArg = arg
         let arg = arg.transformToJson()
         var dic = [ "op": "subscribe" ] as [String: Any]
@@ -110,7 +110,7 @@ open class OkexWebSocket: SCWebSocket {
         /*
          "{\"event\":\"error\",\"msg\":\"Illegal request: {\\\"arg\\\":{\\\"channel\\\":\\\"candle1D\\\",\\\"instId\\\":\\\"BTC-USDT\\\"},\\\"event\\\":\\\"subscribe\\\"}\",\"code\":\"60012\"}"
          */
-//        log("Okex.didReceiveMessageWith:\(string)")
+//        log("OK.didReceiveMessageWith:\(string)")
         if string == "pong" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
                 if self.isConnected {

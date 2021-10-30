@@ -9,9 +9,9 @@ import Foundation
 import SSCommon
 import SSNetwork
 
-class STRestAPI : NSObject {
+open class STRestAPI : NSObject {
     
-    class func sendRequestWith(path: String,
+    open class func sendRequestWith(path: String,
                                params: Any? = nil,
                                method: SSHttpMethod? = nil,
                                dataKey: String = "data",
@@ -41,7 +41,7 @@ class STRestAPI : NSObject {
         }
     }
     
-    class func sendRequestWith<T: Decodable>(path: String,
+    open class func sendRequestWith<T: Decodable>(path: String,
                                              params: Any? = nil,
                                              method: SSHttpMethod? = nil,
                                              dataKey: String = "data",

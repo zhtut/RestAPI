@@ -9,12 +9,12 @@ import Foundation
 import SSCommon
 import SSNetwork
 
-class STURLInfo : NSObject {
+open class STURLInfo : NSObject {
     
-    var url = ""
-    var params = [String: Any]()
+    open var url = ""
+    open var params = [String: Any]()
     
-    class func urlInfoWith(method: SSHttpMethod, host: String, path: String, params: [String: Any]?) -> STURLInfo {
+    open class func urlInfoWith(method: SSHttpMethod, host: String, path: String, params: [String: Any]?) -> STURLInfo {
         var signatureParams = requiredParams()
         if params != nil,
            let time = params!.stringFor("Timestamp"),
@@ -46,7 +46,7 @@ class STURLInfo : NSObject {
         return urlInfo
     }
     
-    class func getURLWith(urlString: String, params: [String: Any]) -> String {
+    open class func getURLWith(urlString: String, params: [String: Any]) -> String {
         var temp = urlString
         let paramString = getParamString(params)!
         if temp.contains("?") {
@@ -57,7 +57,7 @@ class STURLInfo : NSObject {
         return temp
     }
     
-    class func signatureWith(method: SSHttpMethod, host: String, path: String, params: [String: Any]?) -> String {
+    open class func signatureWith(method: SSHttpMethod, host: String, path: String, params: [String: Any]?) -> String {
         
         var newHost = host
         if newHost.hasPrefix("http") {
@@ -81,7 +81,7 @@ class STURLInfo : NSObject {
         return signature
     }
     
-    class func getParamString(_ params: [String: Any]) -> String? {
+    open class func getParamString(_ params: [String: Any]) -> String? {
         var originStr = ""
         let keys = params.keys.sorted()
         for i in 0...keys.count-1 {
@@ -98,7 +98,7 @@ class STURLInfo : NSObject {
         return originStr
     }
     
-    class func requiredParams() -> [String: Any] {
+    open class func requiredParams() -> [String: Any] {
         var params = [String: Any]()
         params["AccessKeyId"] = APIKeyConfig.default.HB_Access_Key
         params["SignatureMethod"] = "HmacSHA256"

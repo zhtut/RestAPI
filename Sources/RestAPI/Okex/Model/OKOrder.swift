@@ -1,5 +1,5 @@
 //
-//  OkexOrder.swift
+//  OKOrder.swift
 //  SmartCurrency
 //
 //  Created by shutut on 2021/8/15.
@@ -8,7 +8,7 @@
 import Foundation
 import SSCommon
 
-open class OkexOrder: NSObject, Codable {
+open class OKOrder: NSObject, Codable {
     
     open var instId    : String? ///<     产品ID
     open var ccy    : String? ///<     保证金币种，仅适用于单币种保证金账户下的全仓币币杠杆订单
@@ -52,14 +52,14 @@ open class OkexOrder: NSObject, Codable {
     open var code    : String? ///<     错误码，默认为0
     open var msg    : String? ///<     错误消息，默认为""
 
-    open func refresh(_ completion: @escaping (OkexOrder?, String?) -> Void) {
+    open func refresh(_ completion: @escaping (OKOrder?, String?) -> Void) {
         let path = "GET /api/v5/trade/order"
         let params = ["instId": instId!, "ordId": ordId!]
-        OkexRestAPI.sendRequestWith(path: path, params: params, method: .GET) { response in
+        OKRestAPI.sendRequestWith(path: path, params: params, method: .GET) { response in
             if response.responseSucceed {
                 if let data = response.data as? [[String: Any]],
                    let dic = data.first {
-                    let order = dic.transformToModel(OkexOrder.self)
+                    let order = dic.transformToModel(OKOrder.self)
                     completion(order, nil)
                     return
                 }
@@ -71,7 +71,7 @@ open class OkexOrder: NSObject, Codable {
     open func cancelWith(completion: @escaping SSSucceedHandler) {
         let path = "POST /api/v5/trade/cancel-order"
         let params = ["instId": instId!, "ordId": ordId!]
-        OkexRestAPI.sendRequestWith(path: path, params: params, method: .GET) { response in
+        OKRestAPI.sendRequestWith(path: path, params: params, method: .GET) { response in
             if response.responseSucceed {
                 if let data = response.data as? [[String: Any]],
                    let dic = data.first {
