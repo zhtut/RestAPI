@@ -7,7 +7,8 @@
 
 import Foundation
 
-open class HBSymbol: Codable {
+open class HBSymbol: NSObject, Codable {
+    
     open var base_currency: String? ///<    true    string    交易对中的基础币种
     open var quote_currency: String? ///<    true    string    交易对中的报价币种
     open var symbol: String? ///<    true    string    交易对

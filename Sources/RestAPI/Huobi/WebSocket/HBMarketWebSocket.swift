@@ -9,29 +9,29 @@ import Foundation
 import SSCommon
 
 /// 现货行情
-class HBMarketWebSocket: HBWebSocket {
+open class HBMarketWebSocket: HBWebSocket {
 
-    static let shared = HBMarketWebSocket()
+    public static let shared = HBMarketWebSocket()
     
-    override var urlStr: String {
+    open override var urlStr: String {
         "wss://api-aws.huobi.pro/ws"
     }
     
-    var completions = [String: SSSucceedHandler]()
+    open var completions = [String: SSSucceedHandler]()
     
     /// k线图变化的通知
-    static let candleDidChangeNotification = Notification.Name("HBCandleDidChangeNotification")
+    public static let candleDidChangeNotification = Notification.Name("HBCandleDidChangeNotification")
 
-    override func webSocketDidOpen() {
+    open override func webSocketDidOpen() {
         super.webSocketDidOpen()
     }
     
-    enum Action: String {
+    public enum Action: String {
         case sub
         case unsub
     }
     
-    func subscribe(action: Action = .sub, str: String, completion: SSSucceedHandler? = nil) {
+    open func subscribe(action: Action = .sub, str: String, completion: SSSucceedHandler? = nil) {
         let message = [
             "\(action)": str.lowercased()
         ]
@@ -42,17 +42,17 @@ class HBMarketWebSocket: HBWebSocket {
         sendMessage(message: message)
     }
     
-    func subscribeCandle(symbol: String, period: String, completion: SSSucceedHandler? = nil) {
+    open func subscribeCandle(symbol: String, period: String, completion: SSSucceedHandler? = nil) {
         let str = "market.\(symbol).kline.\(period)"
         subscribe(action: .sub, str: str, completion: completion)
     }
     
-    func unsubscribeCandle(symbol: String, period: String) {
+    open func unsubscribeCandle(symbol: String, period: String) {
         let str = "market.\(symbol).kline.\(period)"
         subscribe(action: .unsub, str: str)
     }
     
-    override func webSocketDidReceive(message: [String : Any]) {
+    open override func webSocketDidReceive(message: [String : Any]) {
         super.webSocketDidReceive(message: message)
         /*
          {
@@ -92,7 +92,7 @@ class HBMarketWebSocket: HBWebSocket {
         }
     }
     
-    func processCandleMessage(message: [String: Any]) {
+    open func processCandleMessage(message: [String: Any]) {
         if let tick = message["tick"] as? [String: Any] {
             let candle = tick.transformToModel(HBCandle.self)
             NotificationCenter.default.post(name: HBMarketWebSocket.candleDidChangeNotification, object: candle)

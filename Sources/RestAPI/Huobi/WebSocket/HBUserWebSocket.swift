@@ -10,35 +10,35 @@ import SSCommon
 import SSLog
 
 /// 现货账户
-class HBUserWebSocket: HBWebSocket {
+open class HBUserWebSocket: HBWebSocket {
     
-    static let shared = HBUserWebSocket()
+    public static let shared = HBUserWebSocket()
     
-    override var urlStr: String {
+    open override var urlStr: String {
         "wss://api.huobi.pro/ws/v2"
     }
     
-    override var gzipData: Bool {
+    open override var gzipData: Bool {
         return false
     }
     
-    var spotAccountId: Int?
+    open var spotAccountId: Int?
     
-    var accounts = [HBAccount]()
-    var usdt: Double? {
+    open var accounts = [HBAccount]()
+    open var usdt: Double? {
         return balanceWith(ccy: "usdt")
     }
     
-    var completions = [String: SSSucceedHandler]()
+    open var completions = [String: SSSucceedHandler]()
     
     /// 下单后订单变化
-    static let orderStatusChangedNotification = Notification.Name("HBorderStatusChangedNotification")
+    public static let orderStatusChangedNotification = Notification.Name("HBorderStatusChangedNotification")
     /// 账户有变化
-    static let accountDidReadyNotification = Notification.Name("HBAccountDidReadyNotification")
+    public static let accountDidReadyNotification = Notification.Name("HBAccountDidReadyNotification")
     /// 账户有变化
-    static let accountDidChangeNotification = Notification.Name("HBAccountDidChangeNotification")
+    public static let accountDidChangeNotification = Notification.Name("HBAccountDidChangeNotification")
     
-    func balanceWith(ccy: String) -> Double? {
+    open func balanceWith(ccy: String) -> Double? {
         for acc in accounts {
             if acc.currency?.uppercased() == ccy.uppercased() {
                 return Double(acc.balance!)
@@ -47,7 +47,7 @@ class HBUserWebSocket: HBWebSocket {
         return nil
     }
     
-    func subscribeAccounts() {
+    open func subscribeAccounts() {
         let message = [
             "action": "sub",
             "ch": "accounts.update"
@@ -55,7 +55,7 @@ class HBUserWebSocket: HBWebSocket {
         sendMessage(message: message)
     }
     
-    func subscribeOrder(symbol: String = "*", completion: SSSucceedHandler? = nil) {
+    open func subscribeOrder(symbol: String = "*", completion: SSSucceedHandler? = nil) {
         let ch = "orders#\(symbol)"
         let message = [
             "action": "sub",
@@ -68,7 +68,7 @@ class HBUserWebSocket: HBWebSocket {
         sendMessage(message: message)
     }
     
-    func unsubscribeOrder(symbol: String = "*") {
+    open func unsubscribeOrder(symbol: String = "*") {
         let message = [
             "action": "unsub",
             "ch": "orders#\(symbol)"
@@ -76,7 +76,7 @@ class HBUserWebSocket: HBWebSocket {
         sendMessage(message: message)
     }
     
-    func auth() {
+    open func auth() {
         log("HB.准备进行websocket登录")
         if let temp = urlStr.components(separatedBy: "//").last,
            let host = temp.components(separatedBy: "/").first {
@@ -99,13 +99,13 @@ class HBUserWebSocket: HBWebSocket {
         }
     }
     
-    func authSucceed() {
+    open func authSucceed() {
         log("HB.登录成功，准备刷新账户ID")
         refreshAccountId()
         subscribeOrder()
     }
     
-    func refreshAccountId() {
+    open func refreshAccountId() {
         let path = "/v1/account/accounts";
         STRestAPI.sendRequestWith(path: path, params: nil, method: .GET) { response in
             if response.responseSucceed {
@@ -126,12 +126,12 @@ class HBUserWebSocket: HBWebSocket {
         }
     }
     
-    override func webSocketDidOpen() {
+    open override func webSocketDidOpen() {
         super.webSocketDidOpen()
         auth()
     }
 
-    override func webSocketDidReceive(message: [String : Any]) {
+    open override func webSocketDidReceive(message: [String : Any]) {
         super.webSocketDidReceive(message: message)
         if let ch = message["ch"] as? String {
             if (ch == "auth") {

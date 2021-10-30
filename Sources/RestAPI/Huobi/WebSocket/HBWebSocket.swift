@@ -11,13 +11,13 @@ import SSCommon
 import SSWebsocket
 import SSLog
 
-class HBWebSocket: SCWebSocket {
+open class HBWebSocket: SCWebSocket {
     
     var gzipData: Bool {
         true
     }
     
-    override func webSocketDidReceive(message: [String: Any]) {
+    open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
         if let ping = message["ping"] {
             let pong = ["pong": ping]
@@ -30,7 +30,7 @@ class HBWebSocket: SCWebSocket {
         }
     }
     
-    override func webSocketDidReceive(string: String) {
+    open override func webSocketDidReceive(string: String) {
         super.webSocketDidReceive(string: string)
         /*
          "{\"event\":\"error\",\"msg\":\"Illegal request: {\\\"arg\\\":{\\\"channel\\\":\\\"candle1D\\\",\\\"instId\\\":\\\"BTC-USDT\\\"},\\\"event\\\":\\\"subscribe\\\"}\",\"code\":\"60012\"}"
@@ -43,7 +43,7 @@ class HBWebSocket: SCWebSocket {
         }
     }
     
-    override func webSocketDidReceive(data: Data) {
+    open override func webSocketDidReceive(data: Data) {
         super.webSocketDidReceive(data: data)
         if gzipData {
             if let nsdata = try? data.gunzipped(),
