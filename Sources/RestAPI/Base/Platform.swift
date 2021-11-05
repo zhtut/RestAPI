@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SSLog
 
 /// 平台
 public enum Platform: String {
@@ -17,7 +18,7 @@ public enum Platform: String {
     /// - Parameter message: 原始日志
     func log(_ message: String) {
         let str = "\(self): \(message)"
-        print(str)
+        SSLogManager.shared.log(str)
     }
 }
 
