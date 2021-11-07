@@ -13,7 +13,7 @@ import SSLog
 import Dispatch
 #endif
 
-class BAWebSocket: SCWebSocket {
+class BAWebSocket: SSWebSocket {
     
     func subscribe(method: String = "SUBSCRIBE",
                    params: [String]) {

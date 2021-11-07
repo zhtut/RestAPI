@@ -20,12 +20,15 @@ open class OKMarketWebSocket: OKWebSocket {
     open var depthData = OKDepthData()
     
     /// k线图变化的通知
-    public static let candleDidChangeNotification = Notification.Name("SCCandleDidChangeNotification")
+    public static let candleDidChangeNotification = Notification.Name("OKCandleDidChangeNotification")
+    public static let receiveDepthDataNotification = Notification.Name("OKReceiveDepthDataNotification")
+    public static let tradesNotification = Notification.Name("OKTradesNotification")
     
     open var candles: [OKCandle]?
     
     open override func webSocketDidReceive(message: [String : Any]) {
         super.webSocketDidReceive(message: message)
+        log("did receive message:\(message)")
         let event = message["event"] as? String;
         let arg = message["arg"] as? [String: Any];
         let channel = arg?["channel"] as? String ?? ""
@@ -47,13 +50,14 @@ open class OKMarketWebSocket: OKWebSocket {
                         depthData.setupWith(data: data)
                     } else if action == "update" {
                         depthData.updateWith(data: data)
+                        NotificationCenter.default.post(name: OKMarketWebSocket.receiveDepthDataNotification, object: data)
                     }
                 }
-                print(depthData.description)
             } else if channel == "trades" {
-//                if let data = message["data"] as? [[String : Any]] {
-//                    let models = data.transformToModelArray(OKHistoryTrade.self)
-//                }
+                if let data = message["data"] as? [[String : Any]] {
+                    let models = data.transformToModelArray(OKHistoryTrade.self)
+                    NotificationCenter.default.post(name: OKMarketWebSocket.tradesNotification, object: models)
+                }
             }
         }
     }

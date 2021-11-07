@@ -11,7 +11,7 @@ import SSCommon
 import SSWebsocket
 import SSLog
 
-open class HBWebSocket: SCWebSocket {
+open class HBWebSocket: SSWebSocket {
     
     var gzipData: Bool {
         true

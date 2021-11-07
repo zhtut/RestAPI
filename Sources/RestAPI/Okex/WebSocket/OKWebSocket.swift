@@ -13,7 +13,7 @@ import Dispatch
 import SSWebsocket
 import SSLog
 
-open class OKWebSocket: SCWebSocket {
+open class OKWebSocket: SSWebSocket {
     
     open var subArg: OKSubscribeArg?
     
