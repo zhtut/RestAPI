@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "Gzip",
+        "repositoryURL": "https://github.com/1024jp/GzipSwift",
+        "state": {
+          "branch": null,
+          "revision": "ba0b6cb51cc6202f896e469b87d2889a46b10d1b",
+          "version": "5.1.1"
+        }
+      },
+      {
         "package": "COpenSSL",
         "repositoryURL": "https://gitee.com/ztgtut/Perfect-COpenSSL",
         "state": {
@@ -14,27 +23,27 @@
         "package": "SSCommon",
         "repositoryURL": "https://gitee.com/ztgtut/SSCommon.git",
         "state": {
-          "branch": null,
-          "revision": "1da48d157e9bf11de91a72d25e143d3d49cb91ae",
-          "version": "1.0.2"
+          "branch": "master",
+          "revision": "16bc1d3ccd6bc4f9cc15ed01271586e9f8b6fa62",
+          "version": null
         }
       },
       {
         "package": "SSNetwork",
         "repositoryURL": "https://gitee.com/ztgtut/SSNetwork.git",
         "state": {
-          "branch": null,
+          "branch": "master",
           "revision": "1632064d8246ce6020e0aa6e7aaf1c586a60c175",
-          "version": "1.0.1"
+          "version": null
         }
       },
       {
         "package": "SSWebsocket",
         "repositoryURL": "https://gitee.com/ztgtut/SSWebsocket.git",
         "state": {
-          "branch": null,
-          "revision": "a173f465135cf8b3e51cac4cb70e949e7878d80d",
-          "version": "1.0.5"
+          "branch": "master",
+          "revision": "52e4694e1ab9a720af7c0ce30c3d2790bde4e7ff",
+          "version": null
         }
       },
       {

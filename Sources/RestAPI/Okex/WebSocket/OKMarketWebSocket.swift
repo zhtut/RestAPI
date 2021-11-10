@@ -28,7 +28,7 @@ open class OKMarketWebSocket: OKWebSocket {
     
     open override func webSocketDidReceive(message: [String : Any]) {
         super.webSocketDidReceive(message: message)
-        log("did receive message:\(message)")
+//        log("did receive message:\(message.jsonStr)")
         let event = message["event"] as? String;
         let arg = message["arg"] as? [String: Any];
         let channel = arg?["channel"] as? String ?? ""
