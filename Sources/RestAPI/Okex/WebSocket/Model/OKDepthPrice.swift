@@ -14,12 +14,12 @@ open class OKDepthPrice: NSObject {
     /// 交易量
     open var sz: Double = 0
     /// 强平订单
-    open var fSz: Double = 0
+    open var fSz: Int = 0
     /// 订单数量
-    open var oSz: Double = 0
+    open var oSz: Int = 0
     
     open override var description: String {
-        return "\(px) \(sz)"
+        return "\(px) \(sz) \(oSz) "
     }
     
     open class func priceWith(_ array: [String]) -> OKDepthPrice? {
@@ -29,8 +29,8 @@ open class OKDepthPrice: NSObject {
         let  model = OKDepthPrice()
         model.px = array[0].doubleValue ?? 0
         model.sz = array[1].doubleValue ?? 0
-        model.fSz = array[2].doubleValue ?? 0
-        model.oSz = array[3].doubleValue ?? 0
+        model.fSz = array[2].intValue ?? 0
+        model.oSz = array[3].intValue ?? 0
         return model
     }
 }

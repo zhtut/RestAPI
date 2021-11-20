@@ -34,7 +34,7 @@ public extension Array where Element == OKDepthPrice {
             }
         }
         /// 新价格有数量，才加入到数组中，待后面再排下序
-        if newPrice.sz.stringValue != "0" {
+        if newPrice.sz > 0 {
             append(newPrice)
         }
     }
@@ -74,6 +74,8 @@ open class OKDepthData: NSObject {
             if let datas = dic["bids"] as? [[String]] {
                 bids.setupWith(array: datas)
             }
+            
+            sort()
         }
     }
     
@@ -81,19 +83,24 @@ open class OKDepthData: NSObject {
         if let dic = data.first {
             if let datas = dic["asks"] as? [[String]] {
                 asks.updateWith(array: datas)
-                asks.sort { p1, p2 in
-                    p1.px < p2.px
-                }
             }
             
             if let datas = dic["bids"] as? [[String]] {
                 bids.updateWith(array: datas)
-                bids.sort { p1, p2 in
-                    p1.px > p2.px
-                }
             }
             
+            sort()
+            
             NotificationCenter.default.post(name: OKDepthData.didChangeNotification, object: self)
+        }
+    }
+    
+    func sort() {
+        asks.sort { p1, p2 in
+            p1.px < p2.px
+        }
+        bids.sort { p1, p2 in
+            p1.px > p2.px
         }
     }
     
