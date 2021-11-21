@@ -192,8 +192,10 @@ open class OKUserWebSocket: OKWebSocket {
                             if order.state == "live" || order.state == "partially_filled" {
                                 self.orders!.append(order)
                             }
-                            log("订单变动：\(order.state ?? "")")
-                            log("最新订单数量：\(orders!.count)")
+                            log("订单变动：\(order.state ?? ""), 最新订单数量：\(orders!.count)")
+                            if order.code != "0" {
+                                log("订单出错了:\(order.px ?? ""),\(order.code ?? ""),\(order.msg ?? "")")
+                            }
                             NotificationCenter.default.post(name: OKUserWebSocket.orderChangedNotification, object: order)
                         }
                     }

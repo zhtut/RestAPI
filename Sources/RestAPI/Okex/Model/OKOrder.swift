@@ -85,4 +85,26 @@ open class OKOrder: NSObject, Codable {
         }
 
     }
+    
+    open class func cancel(orders: [OKOrder], completion: @escaping SSSucceedHandler) {
+        let path = "POST /api/v5/trade/cancel-batch-orders"
+        var params = [[String: Any]]()
+        for or in orders {
+            let tem = ["instId": or.instId!, "ordId": or.ordId!]
+            params.append(tem)
+        }
+        OKRestAPI.sendRequestWith(path: path, params: params, method: .GET) { response in
+            if response.responseSucceed {
+                if let data = response.data as? [[String: Any]],
+                   let dic = data.first {
+                    let sCode = dic.intFor("sCode")
+                    let sMsg = dic.stringFor("sMsg") ?? ""
+                    completion(sCode == 0, sMsg)
+                    return
+                }
+            }
+            completion(false, response.errorMsg!)
+        }
+        
+    }
 }
