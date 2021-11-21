@@ -56,8 +56,6 @@ open class OKUserWebSocket: OKWebSocket {
     
     public override init() {
         super.init()
-        refreshOrders()
-        refreshPositions()
     }
     
     func refreshOrders() {
@@ -69,6 +67,7 @@ open class OKUserWebSocket: OKWebSocket {
                 } else {
                     self.orders = [OKOrder]()
                 }
+                self.subcribeOrders()
                 NotificationCenter.default.post(name: OKUserWebSocket.orderInitNotification, object: self.orders)
             }
         }
@@ -86,6 +85,7 @@ open class OKUserWebSocket: OKWebSocket {
                         }
                     }
                 }
+                self.subcribePositions()
                 NotificationCenter.default.post(name: OKUserWebSocket.positionsInitNotification, object: self.positions)
             }
         }
@@ -112,8 +112,8 @@ open class OKUserWebSocket: OKWebSocket {
     }
     
     func loginSucceed() {
-        subcribePositions()
-        subcribeOrders()
+        refreshOrders()
+        refreshPositions()
     }
     
     open func subcribePositions() {
