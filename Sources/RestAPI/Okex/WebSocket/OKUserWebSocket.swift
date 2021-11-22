@@ -138,7 +138,7 @@ open class OKUserWebSocket: OKWebSocket {
            let channel = arg["channel"] as? String,
            let data = message["data"] as? [Any] {
             if channel == "positions" {
-                let firstInit: Bool = false
+                var firstInit: Bool = false
                 if positions == nil {
                     positions = [OKPosition]()
                     firstInit = true
