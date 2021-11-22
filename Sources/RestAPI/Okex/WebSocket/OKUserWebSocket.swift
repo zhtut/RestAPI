@@ -207,6 +207,18 @@ open class OKUserWebSocket: OKWebSocket {
                     }
                     completions.removeValue(forKey: id)
                 }
+            } else if op == "batch-orders" {
+                // 这里是订单下单成功与否的通知，一般我们订单不会失败，所以这里不作操作，直接等orders订单变化的通知
+                if let id = message.stringFor("id") {
+                    let com = completions[id]
+                    if let code = message["code"] as? String,
+                       code == "0" {
+                        com?(true, id)
+                    } else {
+                        com?(false, id)
+                    }
+                    completions.removeValue(forKey: id)
+                }
             }
         }
     }
@@ -242,6 +254,22 @@ open class OKUserWebSocket: OKWebSocket {
             "id": time,
             "op": "order",
             "args": [newParams]
+        ] as [String: Any]
+        sendMessage(message: message)
+        if completion != nil {
+            completions[time] = completion!
+        }
+        return time
+    }
+    
+    @discardableResult
+    open func batchOrdersWith(params: [[String: Any]],
+                        completion: OKOrderCompletion? = nil) -> String {
+        let time = "\(Int(Date().timeIntervalSince1970 * 1000))"
+        let message = [
+            "id": time,
+            "op": "batch-orders",
+            "args": params
         ] as [String: Any]
         sendMessage(message: message)
         if completion != nil {

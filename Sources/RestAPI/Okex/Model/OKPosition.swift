@@ -47,7 +47,10 @@ public struct OKPosition: Codable {
     public var uTime: String? ///< String?    最近一次持仓更新时间，Unix时间戳的毫秒数格式，如 1597026383085
 
     public var positionDesc: String {
-        let str = "持仓\(lever!)倍做\(posSide! == "long" ? "多" : "空")\n\(pos!)张"
+        if pos == "0" {
+            return "\(posSide)方向无持仓"
+        }
+        let str = "持仓\(lever!)倍做\(posSide! == "long" ? "多" : "空")\(pos!)张"
         return str
     }
     
