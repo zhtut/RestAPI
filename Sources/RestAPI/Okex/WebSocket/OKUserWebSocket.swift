@@ -73,24 +73,6 @@ open class OKUserWebSocket: OKWebSocket {
         }
     }
     
-    func refreshPositions() {
-        let path = "GET /api/v5/account/positions"
-        OKRestAPI.sendRequestWith(path: path, dataClass: OKPosition.self) { response in
-            if response.responseSucceed {
-                self.positions = [OKPosition]()
-                if let data = response.data as? [OKPosition] {
-                    for po in data {
-                        if po.pos != "0" {
-                            self.positions!.append(po)
-                        }
-                    }
-                }
-                self.subcribePositions()
-                NotificationCenter.default.post(name: OKUserWebSocket.positionsInitNotification, object: self.positions)
-            }
-        }
-    }
-    
     open func login() {
         let timestamp = "\(Date().timeIntervalSince1970)"
         let method = "GET"
@@ -113,7 +95,7 @@ open class OKUserWebSocket: OKWebSocket {
     
     func loginSucceed() {
         refreshOrders()
-        refreshPositions()
+        self.subcribePositions()
     }
     
     open func subcribePositions() {
@@ -156,9 +138,12 @@ open class OKUserWebSocket: OKWebSocket {
            let channel = arg["channel"] as? String,
            let data = message["data"] as? [Any] {
             if channel == "positions" {
+                let firstInit: Bool = false
                 if positions == nil {
-                    return
+                    positions = [OKPosition]()
+                    firstInit = true
                 }
+                print("position message = \(message.jsonStr ?? "")")
                 if let dicArray = data as? [[String: Any]] {
                     for dic in dicArray {
                         if let position = dic.transformToModel(OKPosition.self) {
@@ -170,9 +155,13 @@ open class OKUserWebSocket: OKWebSocket {
                             if position.pos != "0" {
                                 positions!.append(position)
                             }
-                            NotificationCenter.default.post(name: OKUserWebSocket.positionsChangedNotification, object: position)
-                            log("持仓变动：\(position.positionDesc)")
-                            log("最新持仓数量：\(positions!.count)")
+                            
+                            if firstInit {
+                                NotificationCenter.default.post(name: OKUserWebSocket.positionsInitNotification, object: positions)
+                            } else {
+                                NotificationCenter.default.post(name: OKUserWebSocket.positionsChangedNotification, object: position)
+                                log("持仓更新：\(position.positionDesc), 最新持仓数量：\(positions!.count)")
+                            }
                         }
                     }
                 }
@@ -271,5 +260,11 @@ open class OKUserWebSocket: OKWebSocket {
     open override func webSocketDidOpen() {
         super.webSocketDidOpen()
         login()
+    }
+    
+    open override func webSocketDidClosedWith(code: Int, reason: String?) {
+        super.webSocketDidClosedWith(code: code, reason: reason)
+        positions = nil
+        orders = nil
     }
 }
