@@ -48,7 +48,7 @@ public struct OKPosition: Codable {
 
     public var positionDesc: String {
         if pos == "0" {
-            return "\(posSide)方向无持仓"
+            return "\(posSide ?? "")方向无持仓"
         }
         let str = "持仓\(lever!)倍做\(posSide! == "long" ? "多" : "空")\(pos!)张"
         return str

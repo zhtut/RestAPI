@@ -143,7 +143,7 @@ open class OKUserWebSocket: OKWebSocket {
                     positions = [OKPosition]()
                     firstInit = true
                 }
-                print("position message = \(message.jsonStr ?? "")")
+//                print("position message = \(message.jsonStr ?? "")")
                 if let dicArray = data as? [[String: Any]] {
                     for dic in dicArray {
                         if let position = dic.transformToModel(OKPosition.self) {
@@ -181,10 +181,7 @@ open class OKUserWebSocket: OKWebSocket {
                             if order.state == "live" || order.state == "partially_filled" {
                                 self.orders!.append(order)
                             }
-                            log("订单变动：\(order.state ?? ""), 最新订单数量：\(orders!.count)")
-                            if order.code != "0" {
-                                log("订单出错了:\(order.px ?? ""),\(order.code ?? ""),\(order.msg ?? "")")
-                            }
+                            log("订单\(order.ordId ?? "")变化：\(order.state ?? ""), \(order.msg ?? ""), \(order.code ?? "") 剩余订单数量：\(orders!.count)")
                             NotificationCenter.default.post(name: OKUserWebSocket.orderChangedNotification, object: order)
                         }
                     }
@@ -205,6 +202,7 @@ open class OKUserWebSocket: OKWebSocket {
                     } else {
                         com?(false, id)
                     }
+                    log("下单结果：\(message.jsonStr ?? "")")
                     completions.removeValue(forKey: id)
                 }
             } else if op == "batch-orders" {
@@ -217,6 +215,7 @@ open class OKUserWebSocket: OKWebSocket {
                     } else {
                         com?(false, id)
                     }
+                    log("下单结果：\(message.jsonStr ?? "")")
                     completions.removeValue(forKey: id)
                 }
             }
