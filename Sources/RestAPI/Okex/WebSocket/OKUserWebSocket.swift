@@ -42,6 +42,27 @@ open class OKUserWebSocket: OKWebSocket {
     /// 订单
     open var orders: [OKOrder]?
     
+    /// 余额
+    open var balDatas: [OKBalData]?
+    
+    func bal(ccy: String) -> Double? {
+        if let balDatas = balDatas {
+            for data in balDatas {
+                if data.ccy == ccy {
+                    return data.cashBal?.doubleValue
+                }
+            }
+        }
+        return nil
+    }
+    
+    open var usdtBal: Double? {
+        if let usdt = bal(ccy: "USDT") {
+            return usdt
+        }
+        return nil
+    }
+    
     public typealias OKOrderCompletion = (Bool, String?) -> Void
     open var completions = [String: OKOrderCompletion]()
     
@@ -51,8 +72,10 @@ open class OKUserWebSocket: OKWebSocket {
     public static let orderChangedNotification = Notification.Name("OKOrderChangedNotification")
     /// 账号已准备好去读取
     public static let positionsInitNotification = Notification.Name("OKPositionsInitNotification")
-    /// 账户有变化
+    /// 持仓有变化
     public static let positionsChangedNotification = Notification.Name("OKPositionsChangedNotification")
+    /// 余额有变化
+    public static let balanceChangedNotification = Notification.Name("OKBalanceChangedNotification")
     
     public override init() {
         super.init()
@@ -95,7 +118,8 @@ open class OKUserWebSocket: OKWebSocket {
     
     func loginSucceed() {
         refreshOrders()
-        self.subcribePositions()
+        subcribePositions()
+        subcribeAccounts()
     }
     
     open func subcribePositions() {
@@ -104,6 +128,10 @@ open class OKUserWebSocket: OKWebSocket {
     
     open func subcribeOrders() {
         subscribe(channel: "orders", instType: "ANY")
+    }
+    
+    open func subcribeAccounts() {
+        subscribe(channel: "account")
     }
     
     func processEvent(_ message: [String: Any]) {
@@ -184,6 +212,13 @@ open class OKUserWebSocket: OKWebSocket {
                             NotificationCenter.default.post(name: OKUserWebSocket.orderChangedNotification, object: order)
                         }
                     }
+                }
+            } else if channel == "account" {
+                if let data = data as? [[String: Any]],
+                   let info = data.first,
+                   let detail = info["details"] as? [[String: Any]],
+                   let balDatas = detail.transformToModelArray(OKBalData.self) {
+                    self.balDatas = balDatas
                 }
             }
         }
