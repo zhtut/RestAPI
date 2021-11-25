@@ -160,7 +160,6 @@ open class OKUserWebSocket: OKWebSocket {
                                 NotificationCenter.default.post(name: OKUserWebSocket.positionsInitNotification, object: positions)
                             } else {
                                 NotificationCenter.default.post(name: OKUserWebSocket.positionsChangedNotification, object: position)
-                                log("持仓更新：\(position.positionDesc), 最新持仓数量：\(positions!.count)")
                             }
                         }
                     }
