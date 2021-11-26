@@ -51,6 +51,18 @@ open class OKOrder: NSObject, Codable {
     open var amendResult    : String? ///<     修改订单的结果 -1： 失败 0：成功 1：自动撤单（因为修改成功导致订单自动撤销） 通过API修改订单时，如果cxlOnFail设置为false且修改失败后，则amendResult返回 -1 public 通过API修改订单时，如果cxlOnFail设置为true且修改失败后，则amendResult返回1 public 通过Web/APP修改订单时，如果修改失败后，则amendResult返回-1
     open var code    : String? ///<     错误码，默认为0
     open var msg    : String? ///<     错误消息，默认为""
+    
+    /// 是否开单
+    open var isOpen: Bool? {
+        if let side = side,
+        let posSide = posSide {
+            if (side == "buy" && posSide == "long") || (side == "sell" && posSide == "short") {
+                return true
+            }
+            return false
+        }
+        return nil
+    }
 
     open func refresh(_ completion: @escaping (OKOrder?, String?) -> Void) {
         let path = "GET /api/v5/trade/order"

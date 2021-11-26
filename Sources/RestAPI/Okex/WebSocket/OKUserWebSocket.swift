@@ -49,7 +49,7 @@ open class OKUserWebSocket: OKWebSocket {
         if let balDatas = balDatas {
             for data in balDatas {
                 if data.ccy == ccy {
-                    return data.cashBal?.doubleValue
+                    return data.availEq?.doubleValue
                 }
             }
         }

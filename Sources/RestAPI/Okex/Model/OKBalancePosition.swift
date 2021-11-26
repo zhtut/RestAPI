@@ -20,4 +20,5 @@ public struct OKBalData: Codable {
     public var cashBal: String? ///< ":"374.749996037394299",
     public var ccy: String? ///< ":"USDT",
     public var uTime: String? ///< ":"1628959156597"
+    public var availEq: String?
 }
