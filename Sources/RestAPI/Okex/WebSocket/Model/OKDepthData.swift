@@ -53,10 +53,11 @@ open class OKDepthData: NSObject {
     
     open var center: Double? {
         if hasData {
-            let ask = asks.first
-            let bid = bids.first
-            let center = (ask!.px + bid!.px) * 0.5
-            return center
+            if let ask = asks.first,
+               let bid = bids.first {
+                let center = (ask.px + bid.px) * 0.5
+                return center
+            }
         }
         return nil
     }

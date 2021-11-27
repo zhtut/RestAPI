@@ -19,8 +19,9 @@ open class OKResponse: SSResponse {
     }
     
     open var serverErrorMsg: String? {
-        if self.code != nil && self.msg != nil {
-            return self.msg
+        if let _ = code,
+           let msg = msg {
+            return msg
         }
         return nil
     }

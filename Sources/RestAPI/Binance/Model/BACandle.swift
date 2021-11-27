@@ -19,28 +19,28 @@ open class BACandle: Codable {
     
     open var oNum: Double {
         if o != nil {
-            return Double(o!)!
+            return Double(o!) ?? 0.0
         }
         return 0
     }
     
     open var hNum: Double {
         if h != nil {
-            return Double(h!)!
+            return Double(h!) ?? 0.0
         }
         return 0
     }
     
     open var cNum: Double {
         if c != nil {
-            return Double(c!)!
+            return Double(c!) ?? 0.0
         }
         return 0
     }
     
     open var lNum: Double {
         if l != nil {
-            return Double(l!)!
+            return Double(l!) ?? 0.0
         }
         return 0
     }

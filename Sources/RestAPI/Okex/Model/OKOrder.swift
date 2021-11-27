@@ -7,6 +7,7 @@
 
 import Foundation
 import SSCommon
+import SSLog
 
 open class OKOrder: NSObject, Codable {
     
@@ -66,44 +67,56 @@ open class OKOrder: NSObject, Codable {
 
     open func refresh(_ completion: @escaping (OKOrder?, String?) -> Void) {
         let path = "GET /api/v5/trade/order"
-        let params = ["instId": instId!, "ordId": ordId!]
-        OKRestAPI.sendRequestWith(path: path, params: params, method: .GET) { response in
-            if response.responseSucceed {
-                if let data = response.data as? [[String: Any]],
-                   let dic = data.first {
-                    let order = dic.transformToModel(OKOrder.self)
-                    completion(order, nil)
-                    return
+        if let instId = instId,
+           let ordId = ordId {
+            let params = ["instId": instId, "ordId": ordId]
+            OKRestAPI.sendRequestWith(path: path, params: params, method: .GET) { response in
+                if response.responseSucceed {
+                    if let data = response.data as? [[String: Any]],
+                       let dic = data.first {
+                        let order = dic.transformToModel(OKOrder.self)
+                        completion(order, nil)
+                        return
+                    }
                 }
+                completion(nil, response.errorMsg ?? "")
             }
-            completion(nil, response.errorMsg!)
+        } else {
+            log("refreshOrder失败，无instId或者ordId")
         }
     }
     
     open func cancelWith(completion: @escaping SSSucceedHandler) {
         let path = "POST /api/v5/trade/cancel-order"
-        let params = ["instId": instId!, "ordId": ordId!]
-        OKRestAPI.sendRequestWith(path: path, params: params, method: .GET) { response in
-            if response.responseSucceed {
-                if let data = response.data as? [[String: Any]],
-                   let dic = data.first {
-                    let sCode = dic.intFor("sCode")
-                    let sMsg = dic.stringFor("sMsg") ?? ""
-                    completion(sCode == 0, sMsg)
-                    return
+        if let instId = instId,
+           let ordId = ordId {
+            let params = ["instId": instId, "ordId": ordId]
+            OKRestAPI.sendRequestWith(path: path, params: params, method: .GET) { response in
+                if response.responseSucceed {
+                    if let data = response.data as? [[String: Any]],
+                       let dic = data.first {
+                        let sCode = dic.intFor("sCode")
+                        let sMsg = dic.stringFor("sMsg") ?? ""
+                        completion(sCode == 0, sMsg)
+                        return
+                    }
                 }
+                completion(false, response.errorMsg ?? "")
             }
-            completion(false, response.errorMsg!)
+        } else {
+            log("cancelOrder失败，无instId或者ordId")
         }
-
     }
     
     open class func cancel(orders: [OKOrder], completion: @escaping SSSucceedHandler) {
         let path = "POST /api/v5/trade/cancel-batch-orders"
         var params = [[String: Any]]()
         for or in orders {
-            let tem = ["instId": or.instId!, "ordId": or.ordId!]
-            params.append(tem)
+            if let instId = or.instId,
+               let ordId = or.ordId {
+                let tem = ["instId": instId, "ordId": ordId]
+                params.append(tem)
+            }
         }
         OKRestAPI.sendRequestWith(path: path, params: params, method: .GET) { response in
             if response.responseSucceed {
@@ -115,7 +128,7 @@ open class OKOrder: NSObject, Codable {
                     return
                 }
             }
-            completion(false, response.errorMsg!)
+            completion(false, response.errorMsg ?? "")
         }
         
     }

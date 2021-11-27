@@ -51,8 +51,9 @@ open class OKRestAPI: NSObject {
             }
         }
         var signPath = newPath
-        if newMethod == .GET && newParams != nil {
-            signPath = SSNetworkHelper.getURLString(url: newPath, params: newParams)
+        if newMethod == .GET,
+           let new = newParams {
+            signPath = SSNetworkHelper.getURLString(url: newPath, params: new)
             newParams = nil
         }
         
@@ -103,8 +104,9 @@ open class OKRestAPI: NSObject {
     
     open class func OKGetSign(timestamp: String, method: String, path: String, bodyStr: String?) -> String {
         var str = "\(timestamp)\(method)\(path)"
-        if bodyStr != nil && bodyStr!.count > 0 {
-            str = "\(str)\(bodyStr!)"
+        if let bodyStr = bodyStr,
+           bodyStr.count > 0 {
+            str = "\(str)\(bodyStr)"
         }
         let base64String = str.hmacToBase64StringWith(key: APIKeyConfig.default.OK_SECRET_KEY);
         return base64String;

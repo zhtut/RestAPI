@@ -23,29 +23,29 @@ public struct OKCandle: Codable {
     // 如果是币币/币币杠杆，数值为计价货币的数量。
     
     public var oNum: Double {
-        if o != nil {
-            return Double(o!)!
+        if let o = o {
+            return Double(o) ?? 0.0
         }
         return 0
     }
     
     public var hNum: Double {
-        if h != nil {
-            return Double(h!)!
+        if let h = h {
+            return Double(h) ?? 0.0
         }
         return 0
     }
     
     public var cNum: Double {
-        if c != nil {
-            return Double(c!)!
+        if let c = c {
+            return Double(c) ?? 0.0
         }
         return 0
     }
     
     public var lNum: Double {
-        if l != nil {
-            return Double(l!)!
+        if let l = l {
+            return Double(l) ?? 0.0
         }
         return 0
     }

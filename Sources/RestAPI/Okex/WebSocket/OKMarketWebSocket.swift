@@ -32,7 +32,8 @@ open class OKMarketWebSocket: OKWebSocket {
         let event = message["event"] as? String;
         let arg = message["arg"] as? [String: Any];
         let channel = arg?["channel"] as? String ?? ""
-        if event == "subscribe" && arg != nil {
+        if event == "subscribe",
+        let _ = arg {
             if channel.hasPrefix("candle") {
                 log("K线频道订阅成功")
             } else if channel.hasPrefix("book") {
@@ -85,7 +86,10 @@ open class OKMarketWebSocket: OKWebSocket {
                 if let data = response.data as? [[String]] {
                     for obj in data {
                         let candle = OKCandle.candleWith(data: obj)
-                        self.candles!.append(candle)
+                        if var candles = self.candles {
+                            candles.append(candle)
+                            self.candles = candles
+                        }
                     }
                 }
             }
@@ -97,8 +101,8 @@ open class OKMarketWebSocket: OKWebSocket {
             return
         }
         
-        if let data = message["data"] as? [[String]] {
-            let first = data.first!
+        if let data = message["data"] as? [[String]],
+           let first = data.first {
             var candle = OKCandle.candleWith(data: first)
             if let arg = message["arg"] as? [String: Any],
                let instId = arg.stringFor("instId") {

@@ -58,26 +58,24 @@ open class BAInstrument: NSObject {
     }
     
     open var lotSz: String? {
-        if filters == nil {
-            return nil
-        }
-        for dic in filters! {
-            if let filterType = dic.stringFor("filterType"),
-               filterType == "LOT_SIZE" {
-                return dic.stringFor("stepSize")
+        if let filters = filters {
+            for dic in filters {
+                if let filterType = dic.stringFor("filterType"),
+                   filterType == "LOT_SIZE" {
+                    return dic.stringFor("stepSize")
+                }
             }
         }
         return nil
     }
     
     open var tickSz: String? {
-        if filters == nil {
-            return nil
-        }
-        for dic in filters! {
-            if let filterType = dic.stringFor("filterType"),
-               filterType == "PRICE_FILTER" {
-                return dic.stringFor("tickSize")
+        if let filters = filters {
+            for dic in filters {
+                if let filterType = dic.stringFor("filterType"),
+                   filterType == "PRICE_FILTER" {
+                    return dic.stringFor("tickSize")
+                }
             }
         }
         return nil

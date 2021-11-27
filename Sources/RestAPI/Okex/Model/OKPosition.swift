@@ -45,14 +45,6 @@ public struct OKPosition: Codable {
     public var vegaPA: String? ///< String?    币本位持仓仓位vega，仅适用于期权
     public var cTime: String? ///< String?    持仓创建时间，Unix时间戳的毫秒数格式，如 1597026383085
     public var uTime: String? ///< String?    最近一次持仓更新时间，Unix时间戳的毫秒数格式，如 1597026383085
-
-    public var positionDesc: String {
-        if pos == "0" {
-            return "\(posSide ?? "")方向无持仓"
-        }
-        let str = "持仓\(lever!)倍做\(posSide! == "long" ? "多" : "空")\(pos!)张"
-        return str
-    }
     
     public func closePositionWith(completion: @escaping (Bool, String?) -> Void) {
         let path = "/api/v5/trade/order";
@@ -69,15 +61,15 @@ public struct OKPosition: Codable {
     
     public func closePositionParams() -> [String: Any] {
         var params = ["tdMode": "cross", "ccy": "USDT", "ordType": "market"]
-        params["instId"] = instId
+        params["instId"] = instId ?? ""
         if let posSide = self.posSide {
             if posSide == "long" {
                 params["side"] = "sell"
             } else {
                 params["side"] = "buy"
             }
+            params["posSide"] = posSide
         }
-        params["posSide"] = posSide
         if var pos = pos {
             if pos.hasPrefix("-") {
                 pos = pos.replacingOccurrences(of: "-", with: "")
@@ -99,7 +91,7 @@ public struct OKPosition: Codable {
             if response.responseSucceed {
                 completion(true, nil)
             } else {
-                completion(false, response.errorMsg!)
+                completion(false, response.errorMsg ?? "")
             }
         }
     }

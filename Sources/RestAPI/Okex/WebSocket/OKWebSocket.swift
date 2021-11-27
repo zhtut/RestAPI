@@ -60,21 +60,21 @@ open class OKWebSocket: SSWebSocket {
         instType: String? = nil,
         ccy: String? = nil,
         uly: String? = nil) -> [String: Any] {
-        var arg = [String: Any]()
-        if instId != nil {
-            arg["instId"] = instId!
+            var arg = [String: Any]()
+            if let instId = instId {
+                arg["instId"] = instId
+            }
+            if let instType = instType {
+                arg["instType"] = instType
+            }
+            if let ccy = ccy {
+                arg["ccy"] = ccy
+            }
+            if let uly = uly {
+                arg["uly"] = uly
+            }
+            return arg
         }
-        if instType != nil {
-            arg["instType"] = instType!
-        }
-        if ccy != nil {
-            arg["ccy"] = ccy!
-        }
-        if uly != nil {
-            arg["uly"] = uly!
-        }
-        return arg
-    }
     
     open override func webSocketDidOpen() {
         super.webSocketDidOpen()
@@ -91,14 +91,14 @@ open class OKWebSocket: SSWebSocket {
            let subArg = self.subArg {
             if event == "subscribe" {
                 if channel == subArg.channel,
-                   subArg.completion != nil {
-                    subArg.completion!(true, nil)
+                   let completion = subArg.completion {
+                    completion(true, nil)
                     self.subArg = nil
                 }
             } else if event == "error",
                       let msg = message["msg"] as? String {
-                if subArg.completion != nil {
-                    subArg.completion!(false, "订阅失败\(msg)")
+                if let completion = subArg.completion {
+                    completion(false, "订阅失败\(msg)")
                     self.subArg = nil
                 }
             }
@@ -119,8 +119,8 @@ open class OKWebSocket: SSWebSocket {
             }
         } else {
             if let data = string.data(using: .utf8),
-               let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) {
-                let dic = json as! [String: Any]
+               let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments),
+               let dic = json as? [String: Any] {
                 webSocketDidReceive(message: dic)
             }
         }

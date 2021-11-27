@@ -28,17 +28,6 @@ open class OKUserWebSocket: OKWebSocket {
         return false
     }
     
-    open var positionDesc: String {
-        if positions == nil || positions?.count == 0 {
-            return "无持仓"
-        }
-        if let position = positions?.first {
-            let str = position.positionDesc
-            return str
-        }
-        return "无持仓"
-    }
-    
     /// 订单
     open var orders: [OKOrder]?
     
@@ -174,16 +163,17 @@ open class OKUserWebSocket: OKWebSocket {
 //                print("position message = \(message.jsonStr ?? "")")
                 if let dicArray = data as? [[String: Any]] {
                     for dic in dicArray {
-                        if let position = dic.transformToModel(OKPosition.self) {
-                            for (index,po) in positions!.enumerated() {
+                        if let position = dic.transformToModel(OKPosition.self),
+                        var positions = positions {
+                            for (index,po) in positions.enumerated() {
                                 if position.posId == po.posId {
-                                    positions!.remove(at: index)
+                                    positions.remove(at: index)
                                 }
                             }
                             if position.pos != "0" {
-                                positions!.append(position)
+                                positions.append(position)
                             }
-                            
+                            self.positions = positions
                             if firstInit {
                                 NotificationCenter.default.post(name: OKUserWebSocket.positionsInitNotification, object: positions)
                             } else {
@@ -199,16 +189,18 @@ open class OKUserWebSocket: OKWebSocket {
                 // 订单变化会从，等待成交，部分成交，完全成交
                 if let dicArray = data as? [[String: Any]] {
                     for dic in dicArray {
-                        if let order = dic.transformToModel(OKOrder.self) {
-                            for (index,or) in self.orders!.enumerated() {
+                        if let order = dic.transformToModel(OKOrder.self),
+                        var orders = orders {
+                            for (index,or) in orders.enumerated() {
                                 if order.ordId == or.ordId {
-                                    self.orders!.remove(at: index)
+                                    orders.remove(at: index)
                                 }
                             }
                             if order.state == "live" || order.state == "partially_filled" {
-                                self.orders!.append(order)
+                                orders.append(order)
                             }
-                            log("订单\(order.ordId ?? "")变化：\(order.state ?? ""), \(order.msg ?? ""), \(order.code ?? "") 剩余订单数量：\(orders!.count)")
+                            self.orders = orders
+                            log("订单\(order.ordId ?? "")变化：\(order.state ?? ""), \(order.msg ?? ""), \(order.code ?? "") 剩余订单数量：\(orders.count)")
                             NotificationCenter.default.post(name: OKUserWebSocket.orderChangedNotification, object: order)
                         }
                     }
@@ -258,12 +250,12 @@ open class OKUserWebSocket: OKWebSocket {
     
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
-        if (message["event"] as? String) != nil {
+        if let _ = message.stringFor("event") {
             processEvent(message)
-        } else if (message["op"] as? String) != nil {
+        } else if let _ = message.stringFor("op") {
             processOpData(message)
         } else if let arg = message["arg"] as? [String: Any],
-                  (arg["channel"] as? String) != nil {
+                  let _ = arg.stringFor("channel") {
             processChannelData(message)
         }
     }
@@ -289,8 +281,8 @@ open class OKUserWebSocket: OKWebSocket {
             "args": [newParams]
         ] as [String: Any]
         sendMessage(message: message)
-        if completion != nil {
-            completions[time] = completion!
+        if let completion = completion {
+            completions[time] = completion
         }
         return time
     }
@@ -305,8 +297,8 @@ open class OKUserWebSocket: OKWebSocket {
             "args": params
         ] as [String: Any]
         sendMessage(message: message)
-        if completion != nil {
-            completions[time] = completion!
+        if let completion = completion {
+            completions[time] = completion
         }
         return time
     }
