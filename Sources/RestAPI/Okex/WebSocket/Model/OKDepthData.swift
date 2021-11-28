@@ -34,7 +34,8 @@ public extension Array where Element == OKDepthPrice {
             }
         }
         /// 新价格有数量，才加入到数组中，待后面再排下序
-        if newPrice.sz > 0 {
+        if let sz = newPrice.sz.doubleValue,
+           sz > 0 {
             append(newPrice)
         }
     }
@@ -54,8 +55,10 @@ open class OKDepthData: NSObject {
     open var center: Double? {
         if hasData {
             if let ask = asks.first,
-               let bid = bids.first {
-                let center = (ask.px + bid.px) * 0.5
+               let askPx = ask.px.doubleValue,
+               let bid = bids.first,
+               let bidPx = bid.px.doubleValue {
+                let center = (askPx + bidPx) * 0.5
                 return center
             }
         }

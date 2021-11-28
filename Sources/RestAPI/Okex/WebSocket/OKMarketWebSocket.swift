@@ -47,6 +47,7 @@ open class OKMarketWebSocket: OKWebSocket {
             } else if channel.hasPrefix("books") {
                 if let action = message["action"] as? String,
                    let data = message["data"] as? [[String : Any]] {
+//                    log("books message = \(message.jsonStr ?? "")")
                     if action == "snapshot" {
                         depthData.setupWith(data: data)
                     } else if action == "update" {

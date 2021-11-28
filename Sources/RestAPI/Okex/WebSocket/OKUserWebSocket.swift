@@ -54,6 +54,8 @@ open class OKUserWebSocket: OKWebSocket {
     
     public typealias OKOrderCompletion = (Bool, String?) -> Void
     open var completions = [String: OKOrderCompletion]()
+    public typealias OKBatchOrderCompletion = ([OKOrder]) -> Void
+    open var batchCompletions = [String: OKBatchOrderCompletion]()
     
     /// 下单后订单变化
     public static let orderInitNotification = Notification.Name("OKOrderInitNotification")
@@ -190,12 +192,10 @@ open class OKUserWebSocket: OKWebSocket {
                 if let dicArray = data as? [[String: Any]] {
                     for dic in dicArray {
                         if let order = dic.transformToModel(OKOrder.self),
-                        var orders = orders {
-                            for (index,or) in orders.enumerated() {
-                                if order.ordId == or.ordId {
-                                    orders.remove(at: index)
-                                }
-                            }
+                           var orders = orders?.filter({
+                               $0.ordId != order.ordId
+                           }) {
+                            
                             if order.state == "live" || order.state == "partially_filled" {
                                 orders.append(order)
                             }
@@ -231,18 +231,22 @@ open class OKUserWebSocket: OKWebSocket {
                     log("下单结果：\(message.jsonStr ?? "")")
                     completions.removeValue(forKey: id)
                 }
-            } else if op == "batch-orders" {
-                // 这里是订单下单成功与否的通知，一般我们订单不会失败，所以这里不作操作，直接等orders订单变化的通知
+            } else if op == "batch-orders" || op == "batch-cancel-orders" {
                 if let id = message.stringFor("id") {
-                    let com = completions[id]
-                    if let code = message["code"] as? String,
-                       code == "0" {
-                        com?(true, id)
-                    } else {
-                        com?(false, id)
+                    let com = batchCompletions[id]
+                    var results = [OKOrder]()
+                    if let data = message["data"] as? [[String: Any]] {
+                        for dic in data {
+                            let order = OKOrder()
+                            order.code = dic.stringFor("sCode")
+                            order.msg = dic.stringFor("sMsg")
+                            order.ordId = dic.stringFor("ordId")
+                            results.append(order)
+                        }
                     }
+                    com?(results)
                     log("下单结果：\(message.jsonStr ?? "")")
-                    completions.removeValue(forKey: id)
+                    batchCompletions.removeValue(forKey: id)
                 }
             }
         }
@@ -289,7 +293,7 @@ open class OKUserWebSocket: OKWebSocket {
     
     @discardableResult
     open func batchOrdersWith(params: [[String: Any]],
-                        completion: OKOrderCompletion? = nil) -> String {
+                        completion: OKBatchOrderCompletion? = nil) -> String {
         let time = "\(Int(Date().timeIntervalSince1970 * 1000))"
         let message = [
             "id": time,
@@ -298,7 +302,44 @@ open class OKUserWebSocket: OKWebSocket {
         ] as [String: Any]
         sendMessage(message: message)
         if let completion = completion {
-            completions[time] = completion
+            batchCompletions[time] = completion
+        }
+        return time
+    }
+    
+    @discardableResult
+    open func cancelBatchOrders(orders: [OKOrder],
+                                completion: OKBatchOrderCompletion? = nil) -> String {
+        if orders.count == 0 {
+            completion?([])
+            return ""
+        }
+        var params = [[String: Any]]()
+        for order in orders {
+            let param = [ "instId": order.instId ?? "",
+                          "ordId": order.ordId ?? "" ]
+            params.append(param)
+        }
+        return cancelBatchOrders(params: params, completion: completion)
+    }
+    
+    
+    @discardableResult
+    open func cancelBatchOrders(params: [[String: Any]],
+                                completion: OKBatchOrderCompletion? = nil) -> String {
+        if params.count == 0 {
+            completion?([])
+            return ""
+        }
+        let time = "\(Int(Date().timeIntervalSince1970 * 1000))"
+        let message = [
+            "id": time,
+            "op": "batch-cancel-orders",
+            "args": params
+        ] as [String: Any]
+        sendMessage(message: message)
+        if let completion = completion {
+            batchCompletions[time] = completion
         }
         return time
     }

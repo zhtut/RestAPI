@@ -10,9 +10,9 @@ import Foundation
 /// 深度价格
 open class OKDepthPrice: NSObject {
     /// 价格
-    open var px: Double = 0
+    open var px: String = ""
     /// 交易量
-    open var sz: Double = 0
+    open var sz: String = ""
     /// 强平订单
     open var fSz: Int = 0
     /// 订单数量
@@ -27,8 +27,8 @@ open class OKDepthPrice: NSObject {
             return nil
         }
         let  model = OKDepthPrice()
-        model.px = array[0].doubleValue ?? 0
-        model.sz = array[1].doubleValue ?? 0
+        model.px = array[0] 
+        model.sz = array[1] 
         model.fSz = array[2].intValue ?? 0
         model.oSz = array[3].intValue ?? 0
         return model

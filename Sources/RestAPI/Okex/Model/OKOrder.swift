@@ -109,6 +109,10 @@ open class OKOrder: NSObject, Codable {
     }
     
     open class func cancel(orders: [OKOrder], completion: @escaping SSSucceedHandler) {
+        if orders.count == 0 {
+            completion(true, nil)
+            return
+        }
         let path = "POST /api/v5/trade/cancel-batch-orders"
         var params = [[String: Any]]()
         for or in orders {
