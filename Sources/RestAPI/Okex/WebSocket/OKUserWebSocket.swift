@@ -70,6 +70,7 @@ open class OKUserWebSocket: OKWebSocket {
     
     public override init() {
         super.init()
+        refreshOrders()
     }
     
     func refreshOrders() {
@@ -81,8 +82,10 @@ open class OKUserWebSocket: OKWebSocket {
                 } else {
                     self.orders = [OKOrder]()
                 }
-                self.subcribeOrders()
                 NotificationCenter.default.post(name: OKUserWebSocket.orderInitNotification, object: self.orders)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                    self.refreshOrders()
+                }
             }
         }
     }
@@ -108,7 +111,7 @@ open class OKUserWebSocket: OKWebSocket {
     }
     
     func loginSucceed() {
-        refreshOrders()
+        subcribeOrders()
         subcribePositions()
         subcribeAccounts()
     }
