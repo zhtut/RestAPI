@@ -95,6 +95,14 @@ open class OKDepthData: NSObject {
             
             sort()
             
+            let maxLength = 50
+            if asks.count > maxLength {
+                asks = asks.suffix(maxLength)
+            }
+            if bids.count > maxLength {
+                bids = bids.suffix(maxLength)
+            }
+            
             NotificationCenter.default.post(name: OKDepthData.didChangeNotification, object: self)
         }
     }
