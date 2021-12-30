@@ -13,30 +13,30 @@ import SSLog
 import Dispatch
 #endif
 
-class BAWebSocket: SSWebSocket {
+open class BAWebSocket: SSWebSocket {
     
-    func subscribe(method: String = "SUBSCRIBE",
+    open func subscribe(method: String = "SUBSCRIBE",
                    params: [String]) {
         let dic = [ "method": method, "params": params ] as [String: Any]
         sendMessage(message: dic)
     }
     
-    func unsubscribe(method: String = "UNSUBSCRIBE",
+    open func unsubscribe(method: String = "UNSUBSCRIBE",
                    params: [String]) {
         let dic = [ "method": method, "params": params ] as [String: Any]
         sendMessage(message: dic)
     }
     
-    override func webSocketDidOpen() {
+    open override func webSocketDidOpen() {
         super.webSocketDidOpen()
         sendPing()
     }
     
-    override func webSocketDidReceive(message: [String: Any]) {
+    open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
     }
     
-    override func webSocketDidReceive(string: String) {
+    open override func webSocketDidReceive(string: String) {
         super.webSocketDidReceive(string: string)
 //        log("BA.didReceiveMessageWith:\(string)")
         if string == "pong" {

@@ -8,11 +8,11 @@
 import Foundation
 import SSCommon
 
-class BAMarketWebSocket: BAWebSocket {
+open class BAMarketWebSocket: BAWebSocket {
 
-    static let shared = BAMarketWebSocket()
+    public static let shared = BAMarketWebSocket()
     
-    override var urlStr: String {
+    open override var urlStr: String {
         "wss://stream.binance.com:9443"
     }
     
@@ -21,14 +21,14 @@ class BAMarketWebSocket: BAWebSocket {
     /// k线图变化的通知
     static let candleDidChangeNotification = Notification.Name("BACandleDidChangeNotification")
     
-    override func webSocketDidOpen() {
+    open override func webSocketDidOpen() {
         super.webSocketDidOpen()
 //        subscribeCandle(symbol: "ethusdt", period: "1m")
         
         /// 订阅交易笔数
-        let symbol = "ethusdt"
-        let trade = "\(symbol)@trade"
-        subscribe(params: [ trade ])
+//        let symbol = "ethusdt"
+//        let trade = "\(symbol)@trade"
+//        subscribe(params: [ trade ])
         
         /// 订阅深度数据
 //        let depth = "\(symbol)@depth"
@@ -49,7 +49,7 @@ class BAMarketWebSocket: BAWebSocket {
         unsubscribe(params: [ str ])
     }
 
-    override func webSocketDidReceive(message: [String: Any]) {
+    open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
         /*{
             "e": "kline",     // 事件类型

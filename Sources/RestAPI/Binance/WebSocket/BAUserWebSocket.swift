@@ -8,11 +8,11 @@
 import Foundation
 import SSCommon
 
-class BAUserWebSocket: BAWebSocket {
+open class BAUserWebSocket: BAWebSocket {
     
     static let shared = OKMarketWebSocket()
     
-    override var urlStr: String {
+    open override var urlStr: String {
         "wss://stream.binance.com:9443"
     }
     
