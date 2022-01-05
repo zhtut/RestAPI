@@ -19,7 +19,6 @@ let package = Package(
         .package(url: "https://gitee.com/ztgtut/SSNetwork.git", branch: "master"),
         .package(url: "https://gitee.com/ztgtut/SSCommon.git", branch: "master"),
         .package(url: "https://gitee.com/ztgtut/SSWebsocket.git", branch: "master"),
-        .package(name: "Gzip", url: "https://gitee.com/ztgtut/GzipSwift", from: "5.1.1"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -29,7 +28,6 @@ let package = Package(
             dependencies: [
                 "SSNetwork",
                 "SSWebsocket",
-                "Gzip",
                 .product(name: "SSCommon", package: "SSCommon"),
                 .product(name: "SSEncrypt", package: "SSCommon"),
                 .product(name: "SSLog", package: "SSCommon"),
