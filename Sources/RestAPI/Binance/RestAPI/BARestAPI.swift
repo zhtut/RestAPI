@@ -54,7 +54,7 @@ open class BARestAPI: NSObject {
                 newParams["timestamp"] = timestamp
             }
             paramStr = newParams.urlQueryStr!
-            let sign = paramStr.hmacToSha256StringWith(key: APIKeyConfig.default.Ba_Secret_Key)
+            let sign = paramStr.hmacSha256With(key: APIKeyConfig.default.Ba_Secret_Key)
             paramStr = "\(paramStr)&signature=\(sign)"
         }
         

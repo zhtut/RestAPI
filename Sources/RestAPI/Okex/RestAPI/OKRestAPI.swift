@@ -108,7 +108,7 @@ open class OKRestAPI: NSObject {
            bodyStr.count > 0 {
             str = "\(str)\(bodyStr)"
         }
-        let base64String = str.hmacToBase64StringWith(key: APIKeyConfig.default.OK_SECRET_KEY);
+        let base64String = str.hmacSha256ToBase64With(key: APIKeyConfig.default.OK_SECRET_KEY);
         return base64String;
     }
 }
