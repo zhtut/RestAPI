@@ -2,75 +2,66 @@
   "object": {
     "pins": [
       {
-        "package": "Gzip",
-        "repositoryURL": "https://github.com/1024jp/GzipSwift",
-        "state": {
-          "branch": null,
-          "revision": "ba0b6cb51cc6202f896e469b87d2889a46b10d1b",
-          "version": "5.1.1"
-        }
-      },
-      {
-        "package": "COpenSSL",
-        "repositoryURL": "https://gitee.com/ztgtut/Perfect-COpenSSL",
-        "state": {
-          "branch": null,
-          "revision": "ce3113e159b8c6d8565e5d8db2672b572c81aea9",
-          "version": "4.0.2"
-        }
-      },
-      {
         "package": "SSCommon",
-        "repositoryURL": "https://gitee.com/ztgtut/SSCommon.git",
+        "repositoryURL": "https://github.com/zhtut/SSCommon.git",
         "state": {
           "branch": "master",
-          "revision": "16bc1d3ccd6bc4f9cc15ed01271586e9f8b6fa62",
+          "revision": "50e4fe25191ac4d456a261ffa392857b9298235c",
           "version": null
         }
       },
       {
         "package": "SSNetwork",
-        "repositoryURL": "https://gitee.com/ztgtut/SSNetwork.git",
+        "repositoryURL": "https://github.com/zhtut/SSNetwork.git",
         "state": {
           "branch": "master",
-          "revision": "1632064d8246ce6020e0aa6e7aaf1c586a60c175",
+          "revision": "0340d5920e7a1d4a4a04cc043175efdc219d4891",
           "version": null
         }
       },
       {
         "package": "SSWebsocket",
-        "repositoryURL": "https://gitee.com/ztgtut/SSWebsocket.git",
+        "repositoryURL": "https://github.com/zhtut/SSWebsocket.git",
         "state": {
           "branch": "master",
-          "revision": "52e4694e1ab9a720af7c0ce30c3d2790bde4e7ff",
+          "revision": "c78d9c456d5054613d7925d16af54faa98f729e9",
           "version": null
         }
       },
       {
-        "package": "swift-nio",
-        "repositoryURL": "https://gitee.com/ztgtut/swift-nio.git",
+        "package": "swift-crypto",
+        "repositoryURL": "https://github.com/apple/swift-crypto.git",
         "state": {
           "branch": null,
-          "revision": "6aa9347d9bc5bbfe6a84983aec955c17ffea96ef",
-          "version": "2.33.0"
+          "revision": "9c53b7a758bb849a7df1bd2314395f5f0c14306f",
+          "version": "2.0.3"
+        }
+      },
+      {
+        "package": "swift-nio",
+        "repositoryURL": "https://github.com/apple/swift-nio.git",
+        "state": {
+          "branch": null,
+          "revision": "213eb6887e526e0dfac526a2eae559a1893ebbac",
+          "version": "2.36.0"
         }
       },
       {
         "package": "swift-nio-ssl",
-        "repositoryURL": "https://gitee.com/ztgtut/swift-nio-ssl.git",
+        "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "5e68c1ded15619bb281b273fa8c2d8fd7f7b2b7d",
-          "version": "2.16.1"
+          "revision": "2b329e37e9dd34fb382655181a680261d58cbbf1",
+          "version": "2.17.1"
         }
       },
       {
         "package": "websocket-kit",
-        "repositoryURL": "https://gitee.com/ztgtut/websocket-kit.git",
+        "repositoryURL": "https://github.com/vapor/websocket-kit.git",
         "state": {
           "branch": null,
-          "revision": "b1c4df8f6c848c2e977726903bbe6578eed723ad",
-          "version": "2.2.0"
+          "revision": "ff8fbce837ef01a93d49c6fb49a72be0f150dac7",
+          "version": "2.3.0"
         }
       }
     ]
