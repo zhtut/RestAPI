@@ -46,6 +46,11 @@ public struct OKPosition: Codable {
     public var cTime: String? ///< String?    持仓创建时间，Unix时间戳的毫秒数格式，如 1597026383085
     public var uTime: String? ///< String?    最近一次持仓更新时间，Unix时间戳的毫秒数格式，如 1597026383085
     
+    
+    public var isBuy: Bool {
+        return posSide == "long"
+    }
+    
     public func closePositionWith(completion: @escaping (Bool, String?) -> Void) {
         let path = "/api/v5/trade/order";
         let params = closePositionParams()
