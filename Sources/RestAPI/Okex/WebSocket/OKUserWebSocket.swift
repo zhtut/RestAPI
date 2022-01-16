@@ -29,7 +29,7 @@ open class OKUserWebSocket: OKWebSocket {
     }
     
     /// 订单
-    open var orders: [OKOrder]?
+    open var orders = [OKOrder]()
     
     /// 余额
     open var balDatas: [OKBalData]?
@@ -188,17 +188,13 @@ open class OKUserWebSocket: OKWebSocket {
                     }
                 }
             } else if channel == "orders" {
-                if self.orders == nil {
-                    return
-                }
                 // 订单变化会从，等待成交，部分成交，完全成交
                 if let dicArray = data as? [[String: Any]] {
                     for dic in dicArray {
-                        if let order = dic.transformToModel(OKOrder.self),
-                           var orders = orders?.filter({
-                               $0.ordId != order.ordId
-                           }) {
-                            
+                        if let order = dic.transformToModel(OKOrder.self) {
+                            var orders = orders.filter({
+                                $0.ordId != order.ordId
+                            })
                             if order.state == "live" || order.state == "partially_filled" {
                                 orders.append(order)
                             }
@@ -362,6 +358,6 @@ open class OKUserWebSocket: OKWebSocket {
     open override func webSocketDidClosedWith(code: Int, reason: String?) {
         super.webSocketDidClosedWith(code: code, reason: reason)
         positions = nil
-        orders = nil
+        orders.removeAll()
     }
 }
