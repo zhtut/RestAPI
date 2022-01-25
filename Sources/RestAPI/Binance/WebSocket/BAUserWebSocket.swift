@@ -13,7 +13,7 @@ open class BAUserWebSocket: BAWebSocket {
     static let shared = OKMarketWebSocket()
     
     open override var urlStr: String {
-        "wss://stream.binance.com:9443"
+        APIKeyConfig.default.BA_Websocket_URL_Str
     }
     
     /// k线图变化的通知

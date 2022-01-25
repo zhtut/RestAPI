@@ -23,7 +23,8 @@ open class APIKeyConfig {
     
     open var Ba_Api_Key = ""
     open var Ba_Secret_Key = ""
-    open var Ba_Base_URL_Str = "https://api.binance.com"
+    open var Ba_Base_URL_Str = "https://fapi.binance.com"
+    open var BA_Websocket_URL_Str = "wss://fstream.binance.com/ws/bnbusdt@aggTrade"
     
     // MARK: - GateIO
     

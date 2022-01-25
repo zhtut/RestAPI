@@ -16,7 +16,10 @@ open class BAResponse: SSResponse {
     open var msg: String?
     
     open var responseSucceed: Bool {
-        return code == nil
+        if fetchSucceed {
+            return code == nil || code == 200
+        }
+        return false
     }
     
     open var serverErrMsg: String? {

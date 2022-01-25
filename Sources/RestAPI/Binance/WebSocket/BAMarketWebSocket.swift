@@ -13,7 +13,7 @@ open class BAMarketWebSocket: BAWebSocket {
     public static let shared = BAMarketWebSocket()
     
     open override var urlStr: String {
-        "wss://stream.binance.com:9443"
+        APIKeyConfig.default.BA_Websocket_URL_Str
     }
     
     var completions = [String: SSSucceedHandler]()

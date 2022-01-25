@@ -24,7 +24,10 @@ open class BARestAPI: NSObject {
         } else if newPath.hasPrefix("POST") {
             newMethod = .POST
             newPath = newPath.replacingOccurrences(of: "\(SSHttpMethod.POST) ", with: "")
-        } 
+        } else if newPath.hasPrefix("DELETE") {
+            newMethod = .DELETE
+            newPath = newPath.replacingOccurrences(of: "\(SSHttpMethod.DELETE) ", with: "")
+        }
         
         var needSign = false
         if newPath.hasSuffix(" (HMAC SHA256)") {
@@ -68,15 +71,25 @@ open class BARestAPI: NSObject {
         headerFields["X-MBX-APIKEY"] = APIKeyConfig.default.Ba_Api_Key
         headerFields["Accept"] = "application/json"
         
-        let print = path.contains("order")
+        let print = true
         let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, params: sendParams, header: headerFields, method: newMethod!, timeOut: 10, printLog: print) { res in
             let response = BAResponse.init(response: res)
-            if let dictionary = response.originJson as? [String: Any] {
-                response.code = Int(dictionary["code"] as? String ?? "")
-                response.msg = dictionary["msg"] as? String
-                
-                let da = dictionary[dataKey]
-                response.data = da
+            if response.fetchSucceed {
+                if let dictionary = response.originJson as? [String: Any] {
+                    if dataKey.count > 0 {
+                        let da = dictionary[dataKey]
+                        response.data = da
+                    } else {
+                        response.data = response.originJson
+                    }
+                } else {
+                    response.data = response.originJson
+                }
+            } else {
+                if let dictionary = response.originJson as? [String: Any] {
+                    response.code = Int(dictionary["code"] as? String ?? "")
+                    response.msg = dictionary["msg"] as? String
+                }
             }
             completion(response)
         }
@@ -85,7 +98,7 @@ open class BARestAPI: NSObject {
     open class func sendRequestWith<T: Decodable>(path: String,
                                              params: Any? = nil,
                                              method: SSHttpMethod? = nil,
-                                             dataKey: String = "data",
+                                             dataKey: String = "",
                                              dataClass: T.Type,
                                              completion: @escaping (BAResponse) -> Void) {
         sendRequestWith(path: path, params: params, method: method, dataKey: dataKey) { response in

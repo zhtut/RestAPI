@@ -9,9 +9,9 @@ import Foundation
 
 open class BADepthBook {
     
-    var symbol: String?
+    open var symbol: String?
     
-    public convenience init(symbol: String) {
+    public convenience init(_ symbol: String? = nil) {
         self.init()
         self.symbol = symbol
     }
