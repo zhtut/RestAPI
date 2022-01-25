@@ -18,7 +18,7 @@ open class OKResponse: SSResponse {
         return code == 0
     }
     
-    open var serverErrorMsg: String? {
+    open var serverErrMsg: String? {
         if let _ = code,
            let msg = msg {
             return msg
@@ -26,11 +26,11 @@ open class OKResponse: SSResponse {
         return nil
     }
     
-    open var errorMsg: String? {
+    open var errMsg: String? {
         if fetchSucceed {
-            return serverErrorMsg
+            return serverErrMsg
         } else {
-            return systemErrorMsg
+            return systemErrMsg
         }
     }
 }

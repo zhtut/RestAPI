@@ -28,6 +28,7 @@ open class APIKeyConfig {
     // MARK: - GateIO
     
     open var GI_Api_Key = ""
-    open var GI_Secret_Key = ""
-    open var GI_Base_URL_Str = "https://api.gateio.ws/api/v4"
+    open var GI_Secret_Key = ""    
+    open var GI_BASE_HOST = "https://api.gateio.ws"
+    open var GI_BASE_PATH = "/api/v4"
 }

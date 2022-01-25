@@ -16,7 +16,8 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/zhtut/SSNetwork.git", branch: "master"),
+//        .package(url: "https://github.com/zhtut/SSNetwork.git", branch: "master"),
+        .package(name: "SSNetwork", path: "../SSNetwork"),
 //        .package(url: "https://github.com/zhtut/SSCommon.git", branch: "master"),
         .package(name: "SSCommon", path: "../SSCommon"),
         .package(url: "https://github.com/zhtut/SSWebsocket.git", branch: "master"),
@@ -33,5 +34,6 @@ let package = Package(
                 .product(name: "SSEncrypt", package: "SSCommon"),
                 .product(name: "SSLog", package: "SSCommon"),
             ]),
+        .testTarget(name: "RestAPITests", dependencies: ["RestAPI"]),
     ]
 )

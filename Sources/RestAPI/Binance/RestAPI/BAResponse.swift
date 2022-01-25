@@ -19,18 +19,18 @@ open class BAResponse: SSResponse {
         return code == nil
     }
     
-    open var serverErrorMsg: String? {
+    open var serverErrMsg: String? {
         if self.code != nil && self.msg != nil {
             return self.msg
         }
         return nil
     }
     
-    open var errorMsg: String? {
+    open var errMsg: String? {
         if fetchSucceed {
-            return serverErrorMsg
+            return serverErrMsg
         } else {
-            return systemErrorMsg
+            return systemErrMsg
         }
     }
 }

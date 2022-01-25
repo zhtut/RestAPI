@@ -53,7 +53,7 @@ public struct OKInstrument: Codable {
                 completion(ins, nil)
                 return
             }
-            completion(nil, response.errorMsg)
+            completion(nil, response.errMsg)
         }
     }
 }

@@ -11,6 +11,7 @@ import SSNetwork
 open class GIResponse: SSResponse {
     
     open var label: String?
+    open var data: Any?
     open var message: String?
     
     open var responseSucceed: Bool {
@@ -30,11 +31,11 @@ open class GIResponse: SSResponse {
         return nil
     }
     
-    open var errorMsg: String? {
+    open var errMsg: String? {
         if fetchSucceed {
-            return serverErrorMsg
+            return serverErrMsg
         } else {
-            return systemErrorMsg
+            return systemErrMsg
         }
     }
 }

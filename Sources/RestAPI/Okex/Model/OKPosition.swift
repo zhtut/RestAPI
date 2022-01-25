@@ -59,7 +59,7 @@ public struct OKPosition: Codable {
             if response.responseSucceed {
                 completion(true, nil)
             } else {
-                completion(false, response.errorMsg)
+                completion(false, response.errMsg)
             }
         }
     }
@@ -96,7 +96,7 @@ public struct OKPosition: Codable {
             if response.responseSucceed {
                 completion(true, nil)
             } else {
-                completion(false, response.errorMsg ?? "")
+                completion(false, response.errMsg ?? "")
             }
         }
     }

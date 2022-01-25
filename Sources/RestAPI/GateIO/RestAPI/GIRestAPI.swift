@@ -29,35 +29,41 @@ open class GIRestAPI: NSObject {
             newPath = newPath.replacingOccurrences(of: "\(SSHttpMethod.POST) ", with: "")
         }
         
-        if !newPath.hasPrefix("/") {
-            newPath = "/\(newPath)"
+        var urlStr: String
+        let baseHost = APIKeyConfig.default.GI_BASE_HOST
+        let basePath = APIKeyConfig.default.GI_BASE_PATH
+        if newPath.hasPrefix("/") {
+            urlStr = "\(baseHost + basePath)\(newPath)"
+        } else {
+            urlStr = "\(baseHost + basePath)/\(newPath)"
         }
         
-        let timestamp = Int(Date().timeIntervalSince1970)
+        let timestamp = "\(Int(Date().timeIntervalSince1970))"
         
         var headerFields = [String: String]()
         headerFields["KEY"] = APIKeyConfig.default.GI_Api_Key
         headerFields["Timestamp"] = timestamp
-        headerFields["Content-Type"] = "application/json; charset=UTF-8"
+        headerFields["Content-Type"] = "application/json"
         headerFields["Accept"] = "application/json"
         
         var bodyString: String?
-        if newMethod == .POST {
-            if let pa = newParams,
-               let data = try? JSONSerialization.data(withJSONObject: pa) {
-                bodyString = String(data: data, encoding: .utf8) ?? ""
-                newParams = bodyString
-            }
+        if newMethod == .POST,
+           let pa = params,
+           let data = try? JSONSerialization.data(withJSONObject: pa, options: .prettyPrinted) {
+            bodyString = String(data: data, encoding: .utf8) ?? ""
+            newParams = bodyString
         }
-        var signPath = newPath
+        
+        var queryStr: String?
         if newMethod == .GET,
-           let new = newParams {
-            signPath = SSNetworkHelper.getURLString(url: newPath, params: new)
+           let pa = params as? [String: Any],
+           let query = pa.urlQueryStr {
+            queryStr = query
+            urlStr.append("?\(query)")
             newParams = nil
         }
         
-        let urlStr = "\(APIKeyConfig.default.GI_Base_URL_Str)\(signPath)"
-        let sign = GIGetSign(timestamp: timestamp, method: "\(newMethod)", path: signPath, bodyStr: bodyString)
+        let sign = GIGetSign(timestamp: timestamp, method: "\(newMethod)", path: basePath + newPath, queryStr: queryStr, bodyStr: bodyString)
         headerFields["SIGN"] = sign
         
         let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, params: newParams, header: headerFields, method: newMethod, timeOut: 10, printLog: false) { res in
@@ -107,10 +113,10 @@ open class GIRestAPI: NSObject {
         str.append("\(path)\n")
         str.append("\(queryStr ?? "")\n")
         
-        let body = (bodyStr ?? "").sha512()
+        let body = (bodyStr ?? "").sha512Signature()
         str.append("\(body)\n")
         str.append(timestamp)
-        let sign = str.hmacToSha512StringWith(key: APIKeyConfig.default.GI_Secret_Key);
+        let sign = str.hmacSha512With(key: APIKeyConfig.default.GI_Secret_Key);
         return sign;
     }
 }

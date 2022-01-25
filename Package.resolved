@@ -2,24 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "SSCommon",
-        "repositoryURL": "https://github.com/zhtut/SSCommon.git",
-        "state": {
-          "branch": "master",
-          "revision": "50e4fe25191ac4d456a261ffa392857b9298235c",
-          "version": null
-        }
-      },
-      {
-        "package": "SSNetwork",
-        "repositoryURL": "https://github.com/zhtut/SSNetwork.git",
-        "state": {
-          "branch": "master",
-          "revision": "0340d5920e7a1d4a4a04cc043175efdc219d4891",
-          "version": null
-        }
-      },
-      {
         "package": "SSWebsocket",
         "repositoryURL": "https://github.com/zhtut/SSWebsocket.git",
         "state": {

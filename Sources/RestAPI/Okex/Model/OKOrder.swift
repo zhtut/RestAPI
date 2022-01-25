@@ -79,7 +79,7 @@ open class OKOrder: NSObject, Codable {
                         return
                     }
                 }
-                completion(nil, response.errorMsg ?? "")
+                completion(nil, response.errMsg ?? "")
             }
         } else {
             log("refreshOrder失败，无instId或者ordId")
@@ -101,7 +101,7 @@ open class OKOrder: NSObject, Codable {
                         return
                     }
                 }
-                completion(false, response.errorMsg ?? "")
+                completion(false, response.errMsg ?? "")
             }
         } else {
             log("cancelOrder失败，无instId或者ordId")
@@ -132,7 +132,7 @@ open class OKOrder: NSObject, Codable {
                     return
                 }
             }
-            completion(false, response.errorMsg ?? "")
+            completion(false, response.errMsg ?? "")
         }
         
     }
