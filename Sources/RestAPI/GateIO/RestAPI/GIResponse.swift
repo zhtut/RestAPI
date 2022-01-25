@@ -15,10 +15,8 @@ open class GIResponse: SSResponse {
     open var message: String?
     
     open var responseSucceed: Bool {
-        if let response = originResponse as? HTTPURLResponse {
-            if response.statusCode == 200 {
-                return true
-            }
+        if fetchSucceed {
+            return true
         }
         return false
     }
