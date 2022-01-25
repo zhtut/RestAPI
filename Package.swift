@@ -17,7 +17,8 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/zhtut/SSNetwork.git", branch: "master"),
-        .package(url: "https://github.com/zhtut/SSCommon.git", branch: "master"),
+//        .package(url: "https://github.com/zhtut/SSCommon.git", branch: "master"),
+        .package(name: "SSCommon", path: "../SSCommon"),
         .package(url: "https://github.com/zhtut/SSWebsocket.git", branch: "master"),
     ],
     targets: [

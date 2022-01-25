@@ -13,6 +13,7 @@ public enum Platform: String {
     case Okex
     case Huobi
     case Binance
+    case GateIO
     
     /// 附加平台在前面的日志输出
     /// - Parameter message: 原始日志
