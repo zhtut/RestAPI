@@ -18,7 +18,8 @@ open class BADepthBook {
     
     open func start() {
         if let symbol = symbol {
-            BAMarketWebSocket.shared.subscribe(params: ["\(symbol)@depth@100ms"])
+            let streamName = "\(symbol.lowercased())@bookTicker"
+            BAMarketWebSocket.shared.subscribe(params: [streamName])
         }
     }
 }

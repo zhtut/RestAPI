@@ -11,10 +11,10 @@ import SSNetwork
 
 open class BARestAPI: NSObject {
     open class func sendRequestWith(path: String,
-                               params: Any? = nil,
-                               method: SSHttpMethod? = nil,
-                               dataKey: String = "data",
-                               completion: @escaping (BAResponse) -> Void) {
+                                    params: Any? = nil,
+                                    method: SSHttpMethod = .GET,
+                                    dataKey: String = "",
+                                    completion: @escaping (BAResponse) -> Void) {
         var newMethod = method
         var newPath = path
         
@@ -27,6 +27,9 @@ open class BARestAPI: NSObject {
         } else if newPath.hasPrefix("DELETE") {
             newMethod = .DELETE
             newPath = newPath.replacingOccurrences(of: "\(SSHttpMethod.DELETE) ", with: "")
+        } else if newPath.hasPrefix("PUT") {
+            newMethod = .PUT
+            newPath = newPath.replacingOccurrences(of: "\(SSHttpMethod.PUT) ", with: "")
         }
         
         var needSign = false
@@ -72,7 +75,7 @@ open class BARestAPI: NSObject {
         headerFields["Accept"] = "application/json"
         
         let print = true
-        let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, params: sendParams, header: headerFields, method: newMethod!, timeOut: 10, printLog: print) { res in
+        let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, params: sendParams, header: headerFields, method: newMethod, timeOut: 10, printLog: print) { res in
             let response = BAResponse.init(response: res)
             if response.fetchSucceed {
                 if let dictionary = response.originJson as? [String: Any] {
@@ -96,11 +99,11 @@ open class BARestAPI: NSObject {
     }
     
     open class func sendRequestWith<T: Decodable>(path: String,
-                                             params: Any? = nil,
-                                             method: SSHttpMethod? = nil,
-                                             dataKey: String = "",
-                                             dataClass: T.Type,
-                                             completion: @escaping (BAResponse) -> Void) {
+                                                  params: Any? = nil,
+                                                  method: SSHttpMethod = .GET,
+                                                  dataKey: String = "",
+                                                  dataClass: T.Type,
+                                                  completion: @escaping (BAResponse) -> Void) {
         sendRequestWith(path: path, params: params, method: method, dataKey: dataKey) { response in
             if response.responseSucceed {
                 let da = response.data

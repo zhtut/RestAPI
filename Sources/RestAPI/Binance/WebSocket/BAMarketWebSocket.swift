@@ -9,30 +9,22 @@ import Foundation
 import SSCommon
 
 open class BAMarketWebSocket: BAWebSocket {
-
+    
     public static let shared = BAMarketWebSocket()
     
     open override var urlStr: String {
-        APIKeyConfig.default.BA_Websocket_URL_Str
+        return APIKeyConfig.default.BA_Websocket_URL_Str
     }
     
     var completions = [String: SSSucceedHandler]()
     
     /// k线图变化的通知
-    static let candleDidChangeNotification = Notification.Name("BACandleDidChangeNotification")
+    public static let candleDidChangeNotification = Notification.Name("BACandleDidChangeNotification")
+    /// 最新买卖价变化的通知
+    public static let bookTickerDidChangeNotification = Notification.Name("BABookTickerDidChangeNotification")
     
     open override func webSocketDidOpen() {
         super.webSocketDidOpen()
-//        subscribeCandle(symbol: "ethusdt", period: "1m")
-        
-        /// 订阅交易笔数
-//        let symbol = "ethusdt"
-//        let trade = "\(symbol)@trade"
-//        subscribe(params: [ trade ])
-        
-        /// 订阅深度数据
-//        let depth = "\(symbol)@depth"
-//        subscribe(params: [ depth ])
     }
     
     func subscribeCandle(symbol: String, period: String, completion: SSSucceedHandler? = nil) {
@@ -93,6 +85,10 @@ open class BAMarketWebSocket: BAWebSocket {
                     return
                 }
             }
+        } else if let stream = message.stringFor("stream") {
+            if stream.hasSuffix("@bookTicker") {
+                processBookTicker(message: message)
+            }
         }
     }
     
@@ -100,6 +96,26 @@ open class BAMarketWebSocket: BAWebSocket {
         if let tick = message["k"] as? [String: Any] {
             let candle = tick.transformToModel(BACandle.self)
             NotificationCenter.default.post(name: BAMarketWebSocket.candleDidChangeNotification, object: candle)
+        }
+    }
+    
+    open func subBookTicker(symbol: String) {
+        let streamName = "\(symbol.lowercased())@bookTicker"
+        subscribe(params: [streamName])
+    }
+    
+    open func unsubBookTicker(symbol: String) {
+        let streamName = "\(symbol.lowercased())@bookTicker"
+        unsubscribe(params: [streamName])
+    }
+    
+    /*
+     {"stream":"ethbusd@bookTicker","data":{"e":"bookTicker","u":1154786566700,"s":"ETHBUSD","b":"2450.03","B":"2.346","a":"2450.04","A":"1.626","T":1643162839528,"E":1643162839533}}
+     */
+    func processBookTicker(message: [String: Any]) {
+        if let data = message["data"] as? [String: Any],
+           let bookTicker = data.transformToModel(BABookTicker.self) {
+            NotificationCenter.default.post(name: BAMarketWebSocket.bookTickerDidChangeNotification, object: bookTicker)
         }
     }
 }

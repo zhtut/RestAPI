@@ -17,13 +17,14 @@ open class BAWebSocket: SSWebSocket {
     
     open func subscribe(method: String = "SUBSCRIBE",
                    params: [String]) {
-        let dic = [ "method": method, "params": params ] as [String: Any]
+        let dic = [ "method": method, "params": params, "id": Int(Date().timeIntervalSince1970)] as [String: Any]
+        print("BAWebsocket.send:\(dic.jsonStr ?? "")")
         sendMessage(message: dic)
     }
     
     open func unsubscribe(method: String = "UNSUBSCRIBE",
                    params: [String]) {
-        let dic = [ "method": method, "params": params ] as [String: Any]
+        let dic = [ "method": method, "params": params, "id": Int(Date().timeIntervalSince1970) ] as [String: Any]
         sendMessage(message: dic)
     }
     
