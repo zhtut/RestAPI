@@ -16,7 +16,20 @@ open class BAUserWebSocket: BAWebSocket {
     var listenKey: String?
     var completions = [String: SSSucceedHandler]()
     
-    var orders = [BAOrder]()
+    open var orders: [BAOrder]?
+    open var positions: [BAPosition]?
+    open var assets: [BAAsset]?
+    
+    open var busdBal: Double? {
+        if let assets = assets {
+            for asset in assets {
+                if asset.asset == "BUSD" {
+                    return asset.availableBalance.doubleValue
+                }
+            }
+        }
+        return nil
+    }
     
     open override var autoConnect: Bool {
         false
@@ -26,11 +39,14 @@ open class BAUserWebSocket: BAWebSocket {
         return APIKeyConfig.default.BA_Websocket_URL_Str
     }
     
-    /// 下单后订单变化
+    public static let orderReadyNotification = Notification.Name("BAOrderReadyNotification")
+    public static let accountReadyNotification = Notification.Name("BAAccountReadyNotification")
     public static let orderChangedNotification = Notification.Name("BAOrderChangedNotification")
+    public static let accountChangedNotification = Notification.Name("BAAccountChangedNotification")
     
     public override init() {
         super.init()
+        log("UserWebsocket初始化，准备请求ListenKey")
         refreshListenKey()
         DispatchQueue.main.asyncAfter(deadline: .now() + 30 * 60) {
             self.startPutListenKey()
@@ -40,8 +56,10 @@ open class BAUserWebSocket: BAWebSocket {
     func refreshListenKey() {
         createListenKey { succ, errMsg in
             if succ {
+                log("ListenKey请求成功，准备开始连接")
                 self.open()
             } else {
+                log("ListenKey请求失败：\(errMsg ?? "")，一秒后重试")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     self.refreshListenKey()
                 }
@@ -77,18 +95,23 @@ open class BAUserWebSocket: BAWebSocket {
     
     open override func webSocketDidOpen() {
         super.webSocketDidOpen()
+        
+        log("userSocket已连接，准备开始订阅")
+        
         let listenKey = listenKey ?? ""
         subscribe(params: [listenKey])
-        fetchPendingOrders { orders, errMsg in
-            if orders = orders {
-                self.orders = orders
-            }
-        }
+        
+        log("开始刷新订单")
+        refreshOrders()
+        
+        log("开始刷新账户信息")
+        refreshAccount()
     }
     
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
-        if let e = message["e"] as? String {
+        if let data = message["data"] as? [String: Any],
+            let e = data["e"] as? String {
             if e == "listenKeyExpired" {
                 refreshListenKey()
             } else if e == "ORDER_TRADE_UPDATE" {
@@ -96,56 +119,53 @@ open class BAUserWebSocket: BAWebSocket {
             } else if e == "ACCOUNT_UPDATE" {
                 processAccount(message: message)
             }
-        } else if let subbed = message["subbed"] as? String {
-            for key in completions.keys {
-                if key == subbed {
-                    let completion = completions[key]!
-                    if let status = message["status"] as? String {
-                        if status == "ok" {
-                            completion(true, nil)
-                        } else {
-                            completion(false, "订阅失败：\(message["msg"] ?? "")")
-                        }
-                    }
-                    completions.removeValue(forKey: key)
-                    return
-                }
-            }
-        } else if let stream = message.stringFor("stream") {
-            if stream.hasSuffix("@bookTicker") {
-                
-            }
+        } else {
+            log("other User websocket message:\(message.jsonStr ?? "")")
         }
     }
     
     func processOrder(message: [String: Any]) {
-        var order = BAOrder()
-        order.symbol = message.stringFor("s") ?? ""
-        order.clientOrderId = message.stringFor("c") ?? ""
-        order.side = message.stringFor("S") ?? ""
-        order.origType = message.stringFor("o") ?? ""
-        order.timeInForce = message.stringFor("f") ?? ""
-        order.origQty = message.stringFor("q") ?? ""
-        order.price = message.stringFor("p") ?? ""
-        order.avgPrice = message.stringFor("ap") ?? ""
-        order.stopPrice = message.stringFor("sp") ?? ""
-        order.status = message.stringFor("X") ?? ""
-        order.orderId = message.stringFor("i") ?? ""
-        order.executedQty = message.stringFor("z") ?? ""
-        order.time = message.stringFor("T") ?? ""
-        order.workingType = message.stringFor("wt") ?? ""
-        order.origType = message.stringFor("ot") ?? ""
-        order.positionSide = message.stringFor("ps") ?? ""
-        var orders = orders.filter({
-            $0.orderId != order.orderId
-        })
-        if order.status == NEW ||
-            order.status == PARTIALLY_FILLED {
-            orders.append(order)
+        if let a1 = message["data"] as? [String : Any],
+           let data = a1["o"] as? [String: Any] {
+            let order = BAOrder()
+            order.symbol = data.stringFor("s") ?? ""
+            order.clientOrderId = data.stringFor("c") ?? ""
+            order.side = data.stringFor("S") ?? ""
+            order.origType = data.stringFor("o") ?? ""
+            order.timeInForce = data.stringFor("f") ?? ""
+            order.origQty = data.stringFor("q") ?? ""
+            order.price = data.stringFor("p") ?? ""
+            order.avgPrice = data.stringFor("ap") ?? ""
+            order.stopPrice = data.stringFor("sp") ?? ""
+            order.status = data.stringFor("X") ?? ""
+            order.orderId = data.stringFor("i") ?? ""
+            order.executedQty = data.stringFor("z") ?? ""
+            order.time = data.stringFor("T") ?? ""
+            order.workingType = data.stringFor("wt") ?? ""
+            order.origType = data.stringFor("ot") ?? ""
+            order.positionSide = data.stringFor("ps") ?? ""
+            var orders = orders?.filter({
+                $0.orderId != order.orderId
+            })
+            if order.status == NEW ||
+                order.status == PARTIALLY_FILLED {
+                orders?.append(order)
+            }
+            self.orders = orders
+            log("订单\(order.orderId)变化：\(order.status), 剩余订单数量：\(orders!.count)")
+            NotificationCenter.default.post(name: BAUserWebSocket.orderChangedNotification, object: order)
         }
-        self.orders = orders
-        log("订单\(order.orderId)变化：\(order.status), 剩余订单数量：\(orders.count)")
-        NotificationCenter.default.post(name: OKUserWebSocket.orderChangedNotification, object: order)
+    }
+    
+    open func refreshOrders() {
+        fetchPendingOrders { orders, errMsg in
+            if let orders = orders {
+                self.orders = orders
+            } else {
+                self.orders = [BAOrder]()
+            }
+            NotificationCenter.default.post(name: BAUserWebSocket.orderReadyNotification, object: self.orders)
+        }
     }
     
     func fetchPendingOrders(completion: @escaping ([BAOrder]?, String?) -> Void) {
@@ -160,19 +180,78 @@ open class BAUserWebSocket: BAWebSocket {
     }
     
     func processAccount(message: [String: Any]) {
-        
+        if let a = message["a"] as? [String: Any] {
+            if let B = a["B"] as? [[String: Any]] {
+                for b in B {
+                    let a = b.stringFor("a")
+                    for asset in assets ?? [BAAsset]() {
+                        if a == asset.asset {
+                            asset.walletBalance = b.stringFor("wb") ?? ""
+                            asset.crossWalletBalance = b.stringFor("cw") ?? ""
+                        }
+                    }
+                }
+            }
+            if let P = a["P"] as? [[String: Any]] {
+                for p in P {
+                    let s = p.stringFor("s") ?? ""
+                    let ps = p.stringFor("ps") ?? "" // 持仓方向
+                    let pa = p.stringFor("pa") ?? "" // 仓位
+                    var find: BAPosition?
+                    for position in positions ?? [BAPosition]() {
+                        if position.symbol == s &&
+                            position.positionSide == ps {
+                            find = position
+                        }
+                    }
+                    if let find = find {
+                        if pa.doubleValue == 0.0 {
+                            positions?.remove(find)
+                        } else {
+                            find.positionAmt = pa
+                            find.entryPrice = p.stringFor("ep") ?? "" // 入仓价格
+                            find.unrealizedProfit = p.stringFor("up") ?? "" // 持仓未实现盈亏
+                            find.positionSide = ps
+                        }
+                    } else {
+                        let newPosition = BAPosition()
+                        newPosition.positionAmt = pa
+                        newPosition.entryPrice = p.stringFor("ep") ?? "" // 入仓价格
+                        newPosition.unrealizedProfit = p.stringFor("up") ?? "" // 持仓未实现盈亏
+                        newPosition.positionSide = ps
+                        positions?.append(newPosition)
+                    }
+                }
+            }
+        }
+        NotificationCenter.default.post(name: BAUserWebSocket.accountChangedNotification, object: nil)
     }
     
-    func refreshAccount() {
+    open func refreshAccount() {
         let path = "GET /fapi/v2/account (HMAC SHA256)"
         BARestAPI.sendRequestWith(path: path) { response in
             if let data = response.data as? [String: Any] {
-                if let positions = data {
-                    <#statements#>
+                if let positions = data["positions"] as? [[String: Any]],
+                   let models = positions.transformToModelArray(BAPosition.self) {
+                    let avail = models.filter { position in
+                        position.positionAmt.doubleValue! != 0.0
+                    }
+                    self.positions = avail
+                } else {
+                    self.positions = [BAPosition]()
+                }
+                if let assets = data["assets"] as? [[String: Any]],
+                   let models = assets.transformToModelArray(BAAsset.self) {
+                    self.assets = models
+                } else {
+                    self.assets = [BAAsset]()
                 }
             } else {
-
+                log("刷新Account失败：\(response.errMsg ?? "")")
+                self.positions = [BAPosition]()
+                self.assets = [BAAsset]()
             }
+            NotificationCenter.default.post(name: BAUserWebSocket.accountReadyNotification, object: nil)
         }
     }
     

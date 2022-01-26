@@ -7,7 +7,7 @@
 
 import Foundation
 
-open class BAInstrument: NSObject {
+open class BAInstrument {
     open var symbol: String? ///": "ETHBTC",
     open var status: String? ///": "TRADING",
     open var baseAsset: String? ///": "ETH",
