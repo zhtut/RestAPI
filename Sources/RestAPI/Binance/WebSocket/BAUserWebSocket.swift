@@ -7,23 +7,27 @@
 
 import Foundation
 import SSCommon
+import SSLog
 
 open class BAUserWebSocket: BAWebSocket {
     
     public static let shared = BAUserWebSocket()
     
     var listenKey: String?
-    
     var completions = [String: SSSucceedHandler]()
+    
+    var orders = [BAOrder]()
     
     open override var autoConnect: Bool {
         false
     }
     
     open override var urlStr: String {
-        let listenKey = listenKey ?? ""
-        return "wss://fstream.binance.com/ws/\(listenKey.lowercased())"
+        return APIKeyConfig.default.BA_Websocket_URL_Str
     }
+    
+    /// 下单后订单变化
+    public static let orderChangedNotification = Notification.Name("BAOrderChangedNotification")
     
     public override init() {
         super.init()
@@ -72,7 +76,14 @@ open class BAUserWebSocket: BAWebSocket {
     }
     
     open override func webSocketDidOpen() {
-         super.webSocketDidOpen()
+        super.webSocketDidOpen()
+        let listenKey = listenKey ?? ""
+        subscribe(params: [listenKey])
+        fetchPendingOrders { orders, errMsg in
+            if orders = orders {
+                self.orders = orders
+            }
+        }
     }
     
     open override func webSocketDidReceive(message: [String: Any]) {
@@ -80,6 +91,10 @@ open class BAUserWebSocket: BAWebSocket {
         if let e = message["e"] as? String {
             if e == "listenKeyExpired" {
                 refreshListenKey()
+            } else if e == "ORDER_TRADE_UPDATE" {
+                processOrder(message: message)
+            } else if e == "ACCOUNT_UPDATE" {
+                processAccount(message: message)
             }
         } else if let subbed = message["subbed"] as? String {
             for key in completions.keys {
@@ -102,4 +117,77 @@ open class BAUserWebSocket: BAWebSocket {
             }
         }
     }
+    
+    func processOrder(message: [String: Any]) {
+        var order = BAOrder()
+        order.symbol = message.stringFor("s") ?? ""
+        order.clientOrderId = message.stringFor("c") ?? ""
+        order.side = message.stringFor("S") ?? ""
+        order.origType = message.stringFor("o") ?? ""
+        order.timeInForce = message.stringFor("f") ?? ""
+        order.origQty = message.stringFor("q") ?? ""
+        order.price = message.stringFor("p") ?? ""
+        order.avgPrice = message.stringFor("ap") ?? ""
+        order.stopPrice = message.stringFor("sp") ?? ""
+        order.status = message.stringFor("X") ?? ""
+        order.orderId = message.stringFor("i") ?? ""
+        order.executedQty = message.stringFor("z") ?? ""
+        order.time = message.stringFor("T") ?? ""
+        order.workingType = message.stringFor("wt") ?? ""
+        order.origType = message.stringFor("ot") ?? ""
+        order.positionSide = message.stringFor("ps") ?? ""
+        var orders = orders.filter({
+            $0.orderId != order.orderId
+        })
+        if order.status == NEW ||
+            order.status == PARTIALLY_FILLED {
+            orders.append(order)
+        }
+        self.orders = orders
+        log("订单\(order.orderId)变化：\(order.status), 剩余订单数量：\(orders.count)")
+        NotificationCenter.default.post(name: OKUserWebSocket.orderChangedNotification, object: order)
+    }
+    
+    func fetchPendingOrders(completion: @escaping ([BAOrder]?, String?) -> Void) {
+        let path = "GET /fapi/v1/openOrders (HMAC SHA256)"
+        BARestAPI.sendRequestWith(path: path, dataClass: BAOrder.self) { response in
+            if let data = response.data as? [BAOrder] {
+                completion(data, nil)
+            } else {
+                completion(nil, response.errMsg)
+            }
+        }
+    }
+    
+    func processAccount(message: [String: Any]) {
+        
+    }
+    
+    func refreshAccount() {
+        let path = "GET /fapi/v2/account (HMAC SHA256)"
+        BARestAPI.sendRequestWith(path: path) { response in
+            if let data = response.data as? [String: Any] {
+                if let positions = data {
+                    <#statements#>
+                }
+            } else {
+
+            }
+        }
+    }
+    
+    /*
+     订单成交时收到的推送
+     2022-01-26 16:41:20:BA.didReceiveMessageWith:{"e":"ORDER_TRADE_UPDATE","T":1643186480846,"E":1643186480853,"o":{"s":"ETHBUSD","c":"ios_3pdK38TLtMRjqN6y5WBZ","S":"BUY","o":"LIMIT","f":"GTC","q":"0.003","p":"2487.51","ap":"0","sp":"0","x":"NEW","X":"NEW","i":2844843857,"l":"0","z":"0","L":"0","T":1643186480846,"t":0,"b":"7.46253","a":"0","m":false,"R":false,"wt":"CONTRACT_PRICE","ot":"LIMIT","ps":"BOTH","cp":false,"rp":"0","pP":false,"si":0,"ss":0}}
+     2022-01-26 16:41:23:BA.didReceiveMessageWith:{"e":"ACCOUNT_UPDATE","T":1643186482920,"E":1643186482925,"a":{"B":[{"a":"BUSD","wb":"788.59145825","cw":"788.59145825","bc":"0"}],"P":[{"s":"ETHBUSD","pa":"0.003","ep":"2487.51000","cr":"0","up":"0.00077345","mt":"cross","iw":"0","ps":"BOTH","ma":"BUSD"}],"m":"ORDER"}}
+     2022-01-26 16:41:23:BA.didReceiveMessageWith:{"e":"ORDER_TRADE_UPDATE","T":1643186482920,"E":1643186482925,"o":{"s":"ETHBUSD","c":"ios_3pdK38TLtMRjqN6y5WBZ","S":"BUY","o":"LIMIT","f":"GTC","q":"0.003","p":"2487.51","ap":"2487.51000","sp":"0","x":"TRADE","X":"FILLED","i":2844843857,"l":"0.003","z":"0.003","L":"2487.51","n":"-0.00074625","N":"BUSD","T":1643186482920,"t":87445238,"b":"0","a":"0","m":true,"R":false,"wt":"CONTRACT_PRICE","ot":"LIMIT","ps":"BOTH","cp":false,"rp":"0","pP":false,"si":0,"ss":0}}
+     
+     // 划转时收到的推送
+     16:54:07:BA.didReceiveMessageWith:{"stream":"znwAi62B0krfvfENOI2zqq5VSOAMU21QGFDAYHxUckgQ3LezOV4Of7RnBbUnDSpo","data":{"e":"ACCOUNT_UPDATE","T":1643187247436,"E":1643187247442,"a":{"B":[{"a":"BUSD","wb":"1575.59145825","cw":"1575.59145825","bc":"787"}],"P":[],"m":"DEPOSIT"}}}
+     
+     // 清仓推送
+     2022-01-26 17:35:04:BA.didReceiveMessageWith:{"stream":"znwAi62B0krfvfENOI2zqq5VSOAMU21QGFDAYHxUckgQ3LezOV4Of7RnBbUnDSpo","data":{"e":"ORDER_TRADE_UPDATE","T":1643189704431,"E":1643189704443,"o":{"s":"ETHBUSD","c":"ios_P6GCXs2KGbptudxYR9Wu","S":"SELL","o":"MARKET","f":"GTC","q":"0.003","p":"0","ap":"0","sp":"0","x":"NEW","X":"NEW","i":2845437381,"l":"0","z":"0","L":"0","T":1643189704431,"t":0,"b":"0","a":"0","m":false,"R":true,"wt":"CONTRACT_PRICE","ot":"MARKET","ps":"BOTH","cp":false,"rp":"0","pP":false,"si":0,"ss":0}}}
+     2022-01-26 17:35:04:BA.didReceiveMessageWith:{"stream":"znwAi62B0krfvfENOI2zqq5VSOAMU21QGFDAYHxUckgQ3LezOV4Of7RnBbUnDSpo","data":{"e":"ACCOUNT_UPDATE","T":1643189704431,"E":1643189704443,"a":{"B":[{"a":"BUSD","wb":"1575.58581278","cw":"1575.58581278","bc":"0"}],"P":[{"s":"ETHBUSD","pa":"0","ep":"0.00000","cr":"-0.00393000","up":"0","mt":"cross","iw":"0","ps":"BOTH","ma":"BUSD"}],"m":"ORDER"}}}
+     2022-01-26 17:35:04:BA.didReceiveMessageWith:{"stream":"znwAi62B0krfvfENOI2zqq5VSOAMU21QGFDAYHxUckgQ3LezOV4Of7RnBbUnDSpo","data":{"e":"ORDER_TRADE_UPDATE","T":1643189704431,"E":1643189704443,"o":{"s":"ETHBUSD","c":"ios_P6GCXs2KGbptudxYR9Wu","S":"SELL","o":"MARKET","f":"GTC","q":"0.003","p":"0","ap":"2486.20000","sp":"0","x":"TRADE","X":"FILLED","i":2845437381,"l":"0.003","z":"0.003","L":"2486.20","n":"0.00171547","N":"BUSD","T":1643189704431,"t":87458210,"b":"0","a":"0","m":false,"R":true,"wt":"CONTRACT_PRICE","ot":"MARKET","ps":"BOTH","cp":false,"rp":"-0.00393000","pP":false,"si":0,"ss":0}}}
+     */
 }
