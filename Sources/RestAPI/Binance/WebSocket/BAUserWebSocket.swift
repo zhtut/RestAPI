@@ -110,6 +110,7 @@ open class BAUserWebSocket: BAWebSocket {
     
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
+        log("BA.didReceiveMessageWith:\(message)")
         if let data = message["data"] as? [String: Any],
             let e = data["e"] as? String {
             if e == "listenKeyExpired" {
@@ -182,7 +183,8 @@ open class BAUserWebSocket: BAWebSocket {
     }
     
     func processAccount(message: [String: Any]) {
-        if let a = message["a"] as? [String: Any] {
+        if let data = message["data"] as? [String : Any],
+           let a = data["a"] as? [String: Any] {
             if let B = a["B"] as? [[String: Any]] {
                 for b in B {
                     let a = b.stringFor("a")
@@ -203,6 +205,7 @@ open class BAUserWebSocket: BAWebSocket {
                     for position in positions ?? [BAPosition]() {
                         if position.symbol == s {
                             find = position
+                            break
                         }
                     }
                     if let find = find {
