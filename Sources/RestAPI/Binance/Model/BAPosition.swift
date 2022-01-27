@@ -11,8 +11,7 @@ import Foundation
 open class BAPosition: Codable, Equatable {
     
     public static func == (lhs: BAPosition, rhs: BAPosition) -> Bool {
-        return lhs.symbol == rhs.symbol &&
-        rhs.positionSide == rhs.positionSide
+        return lhs.symbol == rhs.symbol
     }
     
     open var symbol = "" //  "BTCUSDT",  // 交易对

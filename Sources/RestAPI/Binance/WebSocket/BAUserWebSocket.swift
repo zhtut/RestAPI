@@ -161,10 +161,12 @@ open class BAUserWebSocket: BAWebSocket {
         fetchPendingOrders { orders, errMsg in
             if let orders = orders {
                 self.orders = orders
+                NotificationCenter.default.post(name: BAUserWebSocket.orderReadyNotification, object: self.orders)
             } else {
-                self.orders = [BAOrder]()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self.refreshOrders()
+                }
             }
-            NotificationCenter.default.post(name: BAUserWebSocket.orderReadyNotification, object: self.orders)
         }
     }
     
@@ -199,8 +201,7 @@ open class BAUserWebSocket: BAWebSocket {
                     let pa = p.stringFor("pa") ?? "" // 仓位
                     var find: BAPosition?
                     for position in positions ?? [BAPosition]() {
-                        if position.symbol == s &&
-                            position.positionSide == ps {
+                        if position.symbol == s {
                             find = position
                         }
                     }
@@ -246,12 +247,13 @@ open class BAUserWebSocket: BAWebSocket {
                 } else {
                     self.assets = [BAAsset]()
                 }
+                NotificationCenter.default.post(name: BAUserWebSocket.accountReadyNotification, object: nil)
             } else {
                 log("刷新Account失败：\(response.errMsg ?? "")")
-                self.positions = [BAPosition]()
-                self.assets = [BAAsset]()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self.refreshAccount()
+                }
             }
-            NotificationCenter.default.post(name: BAUserWebSocket.accountReadyNotification, object: nil)
         }
     }
     
