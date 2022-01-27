@@ -39,8 +39,6 @@ open class BAUserWebSocket: BAWebSocket {
         return APIKeyConfig.default.BA_Websocket_URL_Str
     }
     
-    public static let orderReadyNotification = Notification.Name("BAOrderReadyNotification")
-    public static let accountReadyNotification = Notification.Name("BAAccountReadyNotification")
     public static let orderChangedNotification = Notification.Name("BAOrderChangedNotification")
     public static let accountChangedNotification = Notification.Name("BAAccountChangedNotification")
     
