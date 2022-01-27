@@ -160,7 +160,6 @@ open class BAUserWebSocket: BAWebSocket {
         fetchPendingOrders { orders, errMsg in
             if let orders = orders {
                 self.orders = orders
-                NotificationCenter.default.post(name: BAUserWebSocket.orderReadyNotification, object: self.orders)
             } else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     self.refreshOrders()
@@ -248,7 +247,6 @@ open class BAUserWebSocket: BAWebSocket {
                 } else {
                     self.assets = [BAAsset]()
                 }
-                NotificationCenter.default.post(name: BAUserWebSocket.accountReadyNotification, object: nil)
             } else {
                 log("刷新Account失败：\(response.errMsg ?? "")")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
