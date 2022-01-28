@@ -110,7 +110,7 @@ open class BAUserWebSocket: BAWebSocket {
         super.webSocketDidReceive(message: message)
         log("BA.didReceiveMessageWith:\(message)")
         var data: [String: Any]
-        if let stream = message.stringFor("stream"),
+        if let _ = message.stringFor("stream"),
            let temp = message["data"] as? [String: Any] {
             data = temp
         } else {

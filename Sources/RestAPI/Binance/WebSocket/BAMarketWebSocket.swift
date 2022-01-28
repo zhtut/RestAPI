@@ -7,6 +7,7 @@
 
 import Foundation
 import SSCommon
+import SSLog
 
 open class BAMarketWebSocket: BAWebSocket {
     
@@ -15,8 +16,6 @@ open class BAMarketWebSocket: BAWebSocket {
     open override var urlStr: String {
         return APIKeyConfig.default.BA_Websocket_URL_Str
     }
-    
-    var completions = [String: SSSucceedHandler]()
     
     /// k线图变化的通知
     public static let candleDidChangeNotification = Notification.Name("BACandleDidChangeNotification")
@@ -27,22 +26,37 @@ open class BAMarketWebSocket: BAWebSocket {
         super.webSocketDidOpen()
     }
     
-    func subscribeCandle(symbol: String, period: String, completion: SSSucceedHandler? = nil) {
-        let str = "\(symbol)@kline_\(period)"
+    /*
+     m -> 分钟; h -> 小时; d -> 天; w -> 周; M -> 月
+     1m
+     3m
+     5m
+     15m
+     30m
+     1h
+     2h
+     4h
+     6h
+     8h
+     12h
+     1d
+     3d
+     1w
+     1M
+     */
+    open func subscribeCandle(symbol: String, period: String) {
+        let str = "\(symbol.lowercased())@kline_\(period)"
         subscribe(params: [ str ])
-        if completion != nil {
-            /// 把回调存进字典中，key就是
-            completions[str.lowercased()] = completion
-        }
     }
     
-    func unsubscribeCandle(symbol: String, period: String) {
-        let str = "\(symbol)@kline_\(period)"
+    open func unsubscribeCandle(symbol: String, period: String) {
+        let str = "\(symbol.lowercased())@kline_\(period)"
         unsubscribe(params: [ str ])
     }
 
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
+//        log("BAMarket.didReceiveMessageWith:\(message)")
         /*{
             "e": "kline",     // 事件类型
             "E": 123456789,   // 事件时间
@@ -67,33 +81,18 @@ open class BAMarketWebSocket: BAWebSocket {
                 "B": "123456"   // 忽略此参数
             }
         } */
-        if let e = message["e"] as? String,
-           e == "kline" {
-            processCandleMessage(message: message)
-        } else if let subbed = message["subbed"] as? String {
-            for key in completions.keys {
-                if key == subbed {
-                    let completion = completions[key]!
-                    if let status = message["status"] as? String {
-                        if status == "ok" {
-                            completion(true, nil)
-                        } else {
-                            completion(false, "订阅失败：\(message["msg"] ?? "")")
-                        }
-                    }
-                    completions.removeValue(forKey: key)
-                    return
-                }
-            }
-        } else if let stream = message.stringFor("stream") {
+        if let stream = message.stringFor("stream") {
             if stream.hasSuffix("@bookTicker") {
                 processBookTicker(message: message)
+            } else if stream.contains("kline") {
+                processCandleMessage(message: message)
             }
         }
     }
     
     func processCandleMessage(message: [String: Any]) {
-        if let tick = message["k"] as? [String: Any] {
+        if let data = message["data"] as? [String: Any],
+           let tick = data["k"] as? [String: Any] {
             let candle = tick.transformToModel(BACandle.self)
             NotificationCenter.default.post(name: BAMarketWebSocket.candleDidChangeNotification, object: candle)
         }
