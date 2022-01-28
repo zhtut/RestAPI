@@ -14,7 +14,7 @@ open class BAUserWebSocket: BAWebSocket {
     public static let shared = BAUserWebSocket()
     
     var listenKey: String?
-    var completions = [String: SSSucceedHandler]()
+    var completions = [String: SucceedHandler]()
     
     open var orders: [BAOrder]?
     open var positions: [BAPosition]?
@@ -65,7 +65,7 @@ open class BAUserWebSocket: BAWebSocket {
         }
     }
     
-    func createListenKey(completion: @escaping SSSucceedHandler) {
+    func createListenKey(completion: @escaping SucceedHandler) {
         let path = "POST /fapi/v1/listenKey (HMAC SHA256)"
         BARestAPI.sendRequestWith(path: path) { response in
             if response.responseSucceed {

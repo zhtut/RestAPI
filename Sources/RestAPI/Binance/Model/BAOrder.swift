@@ -56,7 +56,7 @@ open class BAOrder: Codable {
 //        return false
 //    }
     
-    open func cancelWith(completion: @escaping SSSucceedHandler) {
+    open func cancelWith(completion: @escaping SucceedHandler) {
         let path = "DELETE /fapi/v1/order (HMAC SHA256)"
         let params = ["symbol": symbol, "orderId": orderId]
         BARestAPI.sendRequestWith(path: path, params: params) { response in
@@ -68,7 +68,7 @@ open class BAOrder: Codable {
         }
     }
     
-    open class func cancel(orders: [BAOrder], completion: @escaping SSSucceedHandler) {
+    open class func cancel(orders: [BAOrder], completion: @escaping SucceedHandler) {
         if orders.count == 0 {
             completion(true, nil)
             return
@@ -90,6 +90,17 @@ open class BAOrder: Codable {
             }
             completion(false, response.errMsg)
         }
-        
+    }
+    
+    open class func cancelAllOrders(symbol: String, completion: @escaping SucceedHandler) {
+        let path = "DELETE /fapi/v1/allOpenOrders (HMAC SHA256)"
+        let params = ["symbol": symbol]
+        BARestAPI.sendRequestWith(path: path, params: params) { response in
+            if response.responseSucceed {
+                completion(true, nil)
+            } else {
+                completion(false, response.errMsg)
+            }
+        }
     }
 }

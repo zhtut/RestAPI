@@ -86,7 +86,7 @@ open class OKOrder: NSObject, Codable {
         }
     }
     
-    open func cancelWith(completion: @escaping SSSucceedHandler) {
+    open func cancelWith(completion: @escaping SucceedHandler) {
         let path = "POST /api/v5/trade/cancel-order"
         if let instId = instId,
            let ordId = ordId {
@@ -108,7 +108,7 @@ open class OKOrder: NSObject, Codable {
         }
     }
     
-    open class func cancel(orders: [OKOrder], completion: @escaping SSSucceedHandler) {
+    open class func cancel(orders: [OKOrder], completion: @escaping SucceedHandler) {
         if orders.count == 0 {
             completion(true, nil)
             return

@@ -14,7 +14,7 @@ open class OKSubscribeArg: NSObject, Codable {
     open var instType: String?
     open var ccy: String?
     open var uly: String?
-    open var completion: SSSucceedHandler?
+    open var completion: SucceedHandler?
     
     private enum CodingKeys: String, CodingKey {
         case channel, instId, instType, ccy, uly
