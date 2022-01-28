@@ -24,7 +24,7 @@ open class BAUserWebSocket: BAWebSocket {
         if let assets = assets {
             for asset in assets {
                 if asset.asset == "BUSD" {
-                    return asset.availableBalance.doubleValue
+                    return asset.walletBalance.doubleValue
                 }
             }
         }
@@ -109,14 +109,20 @@ open class BAUserWebSocket: BAWebSocket {
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
         log("BA.didReceiveMessageWith:\(message)")
-        if let data = message["data"] as? [String: Any],
-            let e = data["e"] as? String {
+        var data: [String: Any]
+        if let stream = message.stringFor("stream"),
+           let temp = message["data"] as? [String: Any] {
+            data = temp
+        } else {
+            data = message
+        }
+        if let e = data.stringFor("e") {
             if e == "listenKeyExpired" {
                 refreshListenKey()
             } else if e == "ORDER_TRADE_UPDATE" {
                 processOrder(message: message)
             } else if e == "ACCOUNT_UPDATE" {
-                processAccount(message: message)
+                processAccount(data: data)
             }
         } else {
             log("other User websocket message:\(message.jsonStr ?? "")")
@@ -179,16 +185,21 @@ open class BAUserWebSocket: BAWebSocket {
         }
     }
     
-    func processAccount(message: [String: Any]) {
-        if let data = message["data"] as? [String : Any],
-           let a = data["a"] as? [String: Any] {
+    func processAccount(data: [String: Any]) {
+        if let a = data["a"] as? [String: Any] {
             if let B = a["B"] as? [[String: Any]] {
                 for b in B {
-                    let a = b.stringFor("a")
+                    let sym = b.stringFor("a")
                     for asset in assets ?? [BAAsset]() {
-                        if a == asset.asset {
+                        if sym == asset.asset {
                             asset.walletBalance = b.stringFor("wb") ?? ""
                             asset.crossWalletBalance = b.stringFor("cw") ?? ""
+                            if let bc = b.stringFor("bc")?.doubleValue,
+                            let total = asset.walletBalance.doubleValue {
+                                let avail = bc + total
+                                asset.availableBalance = "\(avail)"
+                            }
+                            break
                         }
                     }
                 }
@@ -216,6 +227,7 @@ open class BAUserWebSocket: BAWebSocket {
                         }
                     } else {
                         let newPosition = BAPosition()
+                        newPosition.symbol = s
                         newPosition.positionAmt = pa
                         newPosition.entryPrice = p.stringFor("ep") ?? "" // 入仓价格
                         newPosition.unrealizedProfit = p.stringFor("up") ?? "" // 持仓未实现盈亏
