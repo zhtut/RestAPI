@@ -74,7 +74,7 @@ open class BARestAPI: NSObject {
         headerFields["X-MBX-APIKEY"] = APIKeyConfig.default.Ba_Api_Key
         headerFields["Accept"] = "application/json"
         
-        let print = urlStr.contains("rder")
+        let print = false
         let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, params: sendParams, header: headerFields, method: newMethod, timeOut: 10, printLog: print) { res in
             let response = BAResponse.init(response: res)
             if response.fetchSucceed {

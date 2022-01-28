@@ -108,7 +108,7 @@ open class BAUserWebSocket: BAWebSocket {
     
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
-        log("BA.didReceiveMessageWith:\(message)")
+//        log("BA.didReceiveMessageWith:\(message)")
         var data: [String: Any]
         if let _ = message.stringFor("stream"),
            let temp = message["data"] as? [String: Any] {
