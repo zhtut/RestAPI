@@ -46,13 +46,10 @@ open class BARestAPI: NSObject {
         }
         
         var newParams = [String: Any]()
-        if let dic = params as? [String: Any] {
-            newParams.merge(dic) { _, new in
-                new
-            }
+        if let params = params as? [String: Any] {
+            newParams = params
         }
         
-        var sendParams: Any?
         var paramStr = newParams.urlQueryStr ?? ""
         if needSign {
             if newParams["timestamp"] == nil {
@@ -64,9 +61,7 @@ open class BARestAPI: NSObject {
             paramStr = "\(paramStr)&signature=\(sign)"
         }
         
-        if newMethod == .POST {
-            sendParams = paramStr
-        } else {
+        if paramStr.count > 0 {
             urlStr = "\(urlStr)?\(paramStr)"
         }
         
@@ -75,7 +70,7 @@ open class BARestAPI: NSObject {
         headerFields["Accept"] = "application/json"
         
         let print = false
-        let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, params: sendParams, header: headerFields, method: newMethod, timeOut: 10, printLog: print) { res in
+        let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, header: headerFields, method: newMethod, timeOut: 10, printLog: print) { res in
             let response = BAResponse.init(response: res)
             if response.fetchSucceed {
                 if let dictionary = response.originJson as? [String: Any] {
