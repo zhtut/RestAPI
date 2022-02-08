@@ -45,17 +45,13 @@ open class BARestAPI: NSObject {
             urlStr = "\(APIKeyConfig.default.Ba_Base_URL_Str)/\(newPath)"
         }
         
-        var newParams = [String: Any]()
+        var paramStr = ""
         if let params = params as? [String: Any] {
-            newParams = params
+            paramStr = params.urlQueryStr ?? ""
         }
-        
-        var paramStr = newParams.urlQueryStr ?? ""
         if needSign {
-            if newParams["timestamp"] == nil {
-                let timestamp = Int(Date().timeIntervalSince1970 * 1000.0)
-                newParams["timestamp"] = timestamp
-            }
+            var newParams = params as? [String: Any] ?? [String: Any]()
+            newParams["timestamp"] = Int(Date().timeIntervalSince1970 * 1000.0)
             paramStr = newParams.urlQueryStr!
             let sign = paramStr.hmacSha256With(key: APIKeyConfig.default.Ba_Secret_Key)
             paramStr = "\(paramStr)&signature=\(sign)"
