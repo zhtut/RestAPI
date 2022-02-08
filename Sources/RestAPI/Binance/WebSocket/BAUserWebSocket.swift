@@ -143,9 +143,9 @@ open class BAUserWebSocket: BAWebSocket {
             order.avgPrice = data.stringFor("ap") ?? ""
             order.stopPrice = data.stringFor("sp") ?? ""
             order.status = data.stringFor("X") ?? ""
-            order.orderId = data.stringFor("i") ?? ""
+            order.orderId = data.intFor("i") ?? 0
             order.executedQty = data.stringFor("z") ?? ""
-            order.time = data.stringFor("T") ?? ""
+            order.time = data.intFor("T") ?? 0
             order.workingType = data.stringFor("wt") ?? ""
             order.origType = data.stringFor("ot") ?? ""
             order.positionSide = data.stringFor("ps") ?? ""
@@ -157,7 +157,7 @@ open class BAUserWebSocket: BAWebSocket {
                 orders?.append(order)
             }
             self.orders = orders
-            log("订单\(order.orderId)变化：\(order.status), 剩余订单数量：\(orders!.count)")
+            log("订单\(order.orderId ?? 0)变化：\(order.status ?? ""), 剩余订单数量：\(orders!.count)")
             NotificationCenter.default.post(name: BAUserWebSocket.orderChangedNotification, object: order)
         }
     }

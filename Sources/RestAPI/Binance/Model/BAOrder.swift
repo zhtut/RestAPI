@@ -23,29 +23,29 @@ public let NEW_ADL = "NEW_ADL" // 自动减仓序列(强平)
 
 open class BAOrder: Codable {
     
-    open var avgPrice = "" // : "0.00000",              // 平均成交价
-    open var clientOrderId = "" // ": "abc",             // 用户自定义的订单号
-    open var cumQuote = "" // ": "0",                    // 成交金额
-    open var executedQty = "" // ": "0",                 // 成交量
-    open var orderId = "" // ": 1573346959,              // 系统订单号
-    open var origQty = "" // ": "0.40",                  // 原始委托数量
-    open var origType = "" // ": "TRAILING_STOP_MARKET", // 触发前订单类型
-    open var price = "" // ": "0",                       // 委托价格
-    open var reduceOnly = "" // ": false,                // 是否仅减仓
-    open var side = "" // ": "BUY",                      // 买卖方向
-    open var positionSide = "" // ": "SHORT",            // 持仓方向
-    open var status = "" // ": "NEW",                    // 订单状态
-    open var stopPrice = "" // ": "9300",                    // 触发价，对`TRAILING_STOP_MARKET`无效
-    open var closePosition = "" // ": false,   // 是否条件全平仓
-    open var symbol = "" // ": "BTCUSDT",                // 交易对
-    open var time = "" // ": 1579276756075,              // 订单时间
-    open var timeInForce = "" // ": "GTC",               // 有效方法
-    open var type = "" // ": "TRAILING_STOP_MARKET",     // 订单类型
-    open var activatePrice = "" // ": "9020",            // 跟踪止损激活价格, 仅`TRAILING_STOP_MARKET` 订单返回此字段
-    open var priceRate = "" // ": "0.3",                 // 跟踪止损回调比例, 仅`TRAILING_STOP_MARKET` 订单返回此字段
-    open var updateTime = "" // ": 1579276756075,        // 更新时间
-    open var workingType = "" // ": "CONTRACT_PRICE", // 条件价格触发类型
-    open var priceProtect = "" // ": false            // 是否开启条件单触发保护
+    open var avgPrice: String? // : "0.00000",              // 平均成交价
+    open var clientOrderId: String? // ": "abc",             // 用户自定义的订单号
+    open var cumQuote: String? // ": "0",                    // 成交金额
+    open var executedQty: String? // ": "0",                 // 成交量
+    open var orderId: Int? // ": 1573346959,              // 系统订单号
+    open var origQty: String? // ": "0.40",                  // 原始委托数量
+    open var origType: String? // ": "TRAILING_STOP_MARKET", // 触发前订单类型
+    open var price: String? // ": "0",                       // 委托价格
+    open var reduceOnly: Bool? // ": false,                // 是否仅减仓
+    open var side: String? // ": "BUY",                      // 买卖方向
+    open var positionSide: String? // ": "SHORT",            // 持仓方向
+    open var status: String? // ": "NEW",                    // 订单状态
+    open var stopPrice: String? // ": "9300",                    // 触发价，对`TRAILING_STOP_MARKET`无效
+    open var closePosition: Bool? // ": false,   // 是否条件全平仓
+    open var symbol: String? // ": "BTCUSDT",                // 交易对
+    open var time: Int? // ": 1579276756075,              // 订单时间
+    open var timeInForce: String? // ": "GTC",               // 有效方法
+    open var type: String? // ": "TRAILING_STOP_MARKET",     // 订单类型
+    open var activatePrice: String? // ": "9020",            // 跟踪止损激活价格, 仅`TRAILING_STOP_MARKET` 订单返回此字段
+    open var priceRate: String? // ": "0.3",                 // 跟踪止损回调比例, 仅`TRAILING_STOP_MARKET` 订单返回此字段
+    open var updateTime: Int? // ": 1579276756075,        // 更新时间
+    open var workingType: String? // ": "CONTRACT_PRICE", // 条件价格触发类型
+    open var priceProtect: Bool? // ": false            // 是否开启条件单触发保护
     
     /// 是否开单
 //    open var isOpen: Bool {
@@ -58,7 +58,7 @@ open class BAOrder: Codable {
     
     open func cancelWith(completion: @escaping SucceedHandler) {
         let path = "DELETE /fapi/v1/order (HMAC SHA256)"
-        let params = ["symbol": symbol, "orderId": orderId]
+        let params = ["symbol": symbol ?? "", "orderId": orderId ?? 0] as [String : Any]
         BARestAPI.sendRequestWith(path: path, params: params) { response in
             if response.responseSucceed {
                 completion(true, nil)
@@ -74,13 +74,13 @@ open class BAOrder: Codable {
             return
         }
         let path = "DELETE /fapi/v1/batchOrders (HMAC SHA256)"
-        var orderIds = [String]()
+        var orderIds = [Int]()
         for or in orders {
-            orderIds.append(or.orderId)
+            orderIds.append(or.orderId ?? 0)
         }
         var symbol = ""
         if let first = orders.first {
-            symbol = first.symbol
+            symbol = first.symbol ?? ""
         }
         let params = ["symbol": symbol, "orderIdList": orderIds] as [String : Any]
         BARestAPI.sendRequestWith(path: path, params: params) { response in
