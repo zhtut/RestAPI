@@ -29,4 +29,11 @@ open class BAPosition: Codable, Equatable {
     open var positionSide = "" //  "BOTH",  // 持仓方向
     open var positionAmt = "" //  "0",      // 持仓数量
     open var updateTime = 0 //  0         // 更新时间
+    
+    open var isBuy: Bool {
+        if let positionAmt = positionAmt.doubleValue {
+            return positionAmt > 0.0
+        }
+        return false
+    }
 }
