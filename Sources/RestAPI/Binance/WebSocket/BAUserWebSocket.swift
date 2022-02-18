@@ -152,6 +152,9 @@ open class BAUserWebSocket: BAWebSocket {
             var orders = orders?.filter({
                 $0.orderId != order.orderId
             })
+            if orders == nil {
+                orders = [BAOrder]()
+            }
             if order.status == NEW ||
                 order.status == PARTIALLY_FILLED {
                 orders?.append(order)

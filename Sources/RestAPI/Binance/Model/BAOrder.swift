@@ -68,11 +68,27 @@ open class BAOrder: Codable {
         }
     }
     
-    open class func cancel(orders: [BAOrder], completion: @escaping SucceedHandler) {
+    open class func cancel(orders: [BAOrder], maxCount: Int = 5, completion: @escaping SucceedHandler) {
         if orders.count == 0 {
             completion(true, nil)
             return
         }
+        
+        if orders.count > maxCount {
+            var orders = orders
+            while orders.count > 0 {
+                let topFive = Array(orders.prefix(maxCount))
+                orders = orders.suffix(orders.count - topFive.count)
+                let needCompletion = orders.count <= maxCount
+                cancel(orders: topFive) { succ, errMsg in
+                    if needCompletion {
+                        completion(succ, errMsg)
+                    }
+                }
+            }
+            return
+        }
+        
         let path = "DELETE /fapi/v1/batchOrders (HMAC SHA256)"
         var orderIds = [Int]()
         for or in orders {
