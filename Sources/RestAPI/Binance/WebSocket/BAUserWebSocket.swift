@@ -40,7 +40,9 @@ open class BAUserWebSocket: BAWebSocket {
     }
     
     public static let orderChangedNotification = Notification.Name("BAOrderChangedNotification")
+    public static let orderRefreshedNotification = Notification.Name("BAOrderRefreshedNotification")
     public static let accountChangedNotification = Notification.Name("BAAccountChangedNotification")
+    public static let accountRefreshedNotification = Notification.Name("BAAccountRefreshedNotification")
     
     public override init() {
         super.init()
@@ -169,10 +171,9 @@ open class BAUserWebSocket: BAWebSocket {
         fetchPendingOrders { orders, errMsg in
             if let orders = orders {
                 self.orders = orders
+                NotificationCenter.default.post(name: BAUserWebSocket.orderRefreshedNotification, object: nil)
             } else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    self.refreshOrders()
-                }
+                log("刷新订单失败")
             }
         }
     }
@@ -262,11 +263,9 @@ open class BAUserWebSocket: BAWebSocket {
                 } else {
                     self.assets = [BAAsset]()
                 }
+                NotificationCenter.default.post(name: BAUserWebSocket.accountRefreshedNotification, object: nil)
             } else {
                 log("刷新Account失败：\(response.errMsg ?? "")")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    self.refreshAccount()
-                }
             }
         }
     }
