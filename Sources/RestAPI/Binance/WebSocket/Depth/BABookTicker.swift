@@ -18,11 +18,11 @@ public struct BABookTicker: Codable {
     public var T = 0 // :1643162839528,
     public var E = 0 // :1643162839533
     
-    public var center: Double {
-        if let ask = a.doubleValue,
-           let bid = b.doubleValue {
+    public var center: Decimal {
+        if let ask = a.decimalValue,
+           let bid = b.decimalValue {
             return (ask + bid) / 2.0
         }
-        return 0.0
+        return Decimal(0.0)
     }
 }

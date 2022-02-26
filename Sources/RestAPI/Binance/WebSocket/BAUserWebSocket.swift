@@ -20,11 +20,11 @@ open class BAUserWebSocket: BAWebSocket {
     open var positions: [BAPosition]?
     open var assets: [BAAsset]?
     
-    open var busdBal: Double? {
+    open var busdBal: Decimal? {
         if let assets = assets {
             for asset in assets {
                 if asset.asset == "BUSD" {
-                    return asset.walletBalance.doubleValue
+                    return asset.walletBalance.decimalValue
                 }
             }
         }

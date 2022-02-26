@@ -2,21 +2,21 @@
   "object": {
     "pins": [
       {
+        "package": "SSNetwork",
+        "repositoryURL": "https://github.com/zhtut/SSNetwork.git",
+        "state": {
+          "branch": "master",
+          "revision": "87fb02534f4f8d8c331ecae63df36287edbd59a2",
+          "version": null
+        }
+      },
+      {
         "package": "SSWebsocket",
         "repositoryURL": "https://github.com/zhtut/SSWebsocket.git",
         "state": {
           "branch": "master",
           "revision": "c78d9c456d5054613d7925d16af54faa98f729e9",
           "version": null
-        }
-      },
-      {
-        "package": "swift-crypto",
-        "repositoryURL": "https://github.com/apple/swift-crypto.git",
-        "state": {
-          "branch": null,
-          "revision": "9c53b7a758bb849a7df1bd2314395f5f0c14306f",
-          "version": "2.0.3"
         }
       },
       {
