@@ -20,30 +20,36 @@ open class BAPosManager {
     
     public init() {
         let _ = NotificationCenter.default.addObserver(forName: BAUserWebSocket.accountRefreshedNotification, object: nil, queue: nil) { noti in
-            self.positionChanged(noti: noti)
+            self.positionRefreshed(noti: noti)
         }
         let _ = NotificationCenter.default.addObserver(forName: BAUserWebSocket.accountChangedNotification, object: nil, queue: nil) { noti in
             self.positionChanged(noti: noti)
         }
     }
     
+    open func positionRefreshed(noti: Notification) {
+        let busd = BAUserWebSocket.shared.busdBal ?? 0.0
+        log("账户拉取成功：当前BUSD:\(busd)")
+        if let position = BAUserWebSocket.shared.positions?.first {
+            log("position数量:\(position.positionAmt)")
+        }
+        configLever()
+    }
+    
     open func positionChanged(noti: Notification) {
-        logAccount()
+        let busd = BAUserWebSocket.shared.busdBal ?? 0.0
+        log("账户信息变化：当前BUSD:\(busd)")
+        if let position = BAUserWebSocket.shared.positions?.first {
+            log("position数量:\(position.positionAmt)")
+        }
+        configLever()
+    }
+    
+    open func configLever() {
         if let positions = BAUserWebSocket.shared.positions,
            let first = positions.first,
            let lever = first.leverage.intValue {
             self.lever = lever
-        }
-    }
-    
-    open func logAccount() {
-        let busd = BAUserWebSocket.shared.busdBal ?? 0.0
-        log("账户信息变化：当前BUSD:\(busd)")
-        if let positions = BAUserWebSocket.shared.positions {
-            log("当前Position数量:\(positions.count)")
-            for position in positions {
-                log("position张数:\(position.positionAmt)")
-            }
         }
     }
     

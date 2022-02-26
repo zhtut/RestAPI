@@ -7,6 +7,7 @@
 
 import Foundation
 import SSCommon
+import SSLog
 
 open class BAOrderManager {
     
@@ -17,9 +18,9 @@ open class BAOrderManager {
      GTX - Good Till Crossing 无法成为挂单方就撤销
      */
     open class func orderParamsWith(instId: String,
-                               isBuy: Bool,
-                               price: Decimal? = nil,
-                               sz: Decimal) -> [String: Any] {
+                                    isBuy: Bool,
+                                    price: Decimal? = nil,
+                                    sz: Decimal) -> [String: Any] {
         var params = [String: Any]()
         params["symbol"] = instId
         params["positionSide"] = "BOTH"
@@ -88,8 +89,21 @@ open class BAOrderManager {
         }
     }
     
-    open class func order(params: [String: Any], completion: @escaping SucceedHandler) {
+    @discardableResult
+    open class func order(params: [String: Any], completion: @escaping SucceedHandler) -> String {
         let path = "POST /fapi/v1/order (HMAC SHA256)"
+        var params = params
+        var clientOrdId = ""
+        if let temp = params.stringFor("newClientOrderId") {
+            clientOrdId = temp
+        } else {
+            clientOrdId = Date.timestamp
+            params["newClientOrderId"] = clientOrdId
+        }
+        if let side = params["side"],
+        let sz = params["quantity"] {
+            log("准备下单，side: \(side), 数量：\(sz)")
+        }
         BARestAPI.sendRequestWith(path: path, params: params) { response in
             if response.responseSucceed {
                 completion(true, nil)
@@ -97,10 +111,11 @@ open class BAOrderManager {
                 completion(false, response.errMsg)
             }
         }
+        return clientOrdId
     }
     
     // 一键清仓
-    open class func clearPosition(completion: @escaping SucceedHandler) {
+    open class func closePosition(completion: @escaping SucceedHandler) {
         if let positions = BAUserWebSocket.shared.positions {
             for position in positions {
                 if let positionAmt = position.positionAmt.decimalValue {
@@ -108,8 +123,8 @@ open class BAOrderManager {
                     let symbol = position.symbol
                     let sz = dabs(positionAmt)
                     let closeParams = orderParamsWith(instId: symbol,
-                                                                   isBuy: !isBuy,
-                                                                   sz: sz)
+                                                      isBuy: !isBuy,
+                                                      sz: sz)
                     order(params: closeParams, completion: completion)
                 }
             }
