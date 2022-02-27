@@ -97,11 +97,11 @@ open class BAOrderManager {
         if let temp = params.stringFor("newClientOrderId") {
             clientOrdId = temp
         } else {
-            clientOrdId = Date.timestamp
+            clientOrdId = "\(Date.timestamp)"
             params["newClientOrderId"] = clientOrdId
         }
         if let side = params["side"],
-        let sz = params["quantity"] {
+           let sz = params["quantity"] {
             log("准备下单，side: \(side), 数量：\(sz)")
         }
         BARestAPI.sendRequestWith(path: path, params: params) { response in
@@ -127,6 +127,72 @@ open class BAOrderManager {
                                                       sz: sz)
                     order(params: closeParams, completion: completion)
                 }
+            }
+        }
+    }
+    
+    open class func fetchUserTrades(instId: String,
+                                    startTime: String? = nil,
+                                    endTime: String? = nil,
+                                    fromId: Int? = nil,
+                                    limit: Int? = nil,
+                                    completion: @escaping ([BAUserTrade]?, String?) -> Void) {
+        let path = "GET /fapi/v1/userTrades (HMAC SHA256)"
+        var params = ["symbol": instId] as [String: Any]
+        if let startTime = startTime,
+           let timestamp = startTime.commonDate?.timestamp {
+            params["startTime"] = timestamp
+        }
+        if let endTime = endTime,
+           let timestamp = endTime.commonDate?.timestamp {
+            params["endTime"] = timestamp
+        }
+        if let fromId = fromId {
+            params["fromId"] = fromId
+        }
+        if let limit = limit {
+            params["limit"] = limit
+        }
+        BARestAPI.sendRequestWith(path: path, params: params, dataClass: BAUserTrade.self) { response in
+            if response.responseSucceed {
+                if let data = response.data as? [BAUserTrade] {
+                    completion(data, nil)
+                }
+            } else {
+                completion(nil, response.errMsg)
+            }
+        }
+    }
+    
+    open class func fetchHistoryOrders(instId: String,
+                                       orderId: String? = nil,
+                                       startTime: String? = nil,
+                                       endTime: String? = nil,
+                                       limit: Int? = nil,
+                                       completion: @escaping ([BAOrder]?, String?) -> Void) {
+        let path = "GET /fapi/v1/allOrders (HMAC SHA256)"
+        var params = ["symbol": instId] as [String: Any]
+        if let orderId = orderId {
+            params["orderId"] = orderId
+        }
+        if let startTime = startTime,
+           let timestamp = startTime.commonDate?.timestamp {
+            params["startTime"] = timestamp
+        }
+        if let endTime = endTime,
+           let timestamp = endTime.commonDate?.timestamp {
+            params["endTime"] = timestamp
+        }
+        if let limit = limit {
+            params["limit"] = limit
+        }
+        BARestAPI.sendRequestWith(path: path, params: params, dataClass: BAOrder.self) { response in
+            if response.responseSucceed {
+                if let data = response.data as? [BAOrder] {
+                    completion(data, nil)
+                }
+            } else {
+                completion(nil, response.errMsg)
             }
         }
     }
