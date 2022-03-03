@@ -17,6 +17,8 @@ open class BAMarketWebSocket: BAWebSocket {
         return APIKeyConfig.default.BA_Websocket_URL_Str
     }
     
+    var orderBook = BAOrderBook()
+    
     /// k线图变化的通知
     public static let candleDidChangeNotification = Notification.Name("BACandleDidChangeNotification")
     /// 最新买卖价变化的通知
@@ -56,7 +58,7 @@ open class BAMarketWebSocket: BAWebSocket {
 
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
-//        log("BAMarket.didReceiveMessageWith:\(message)")
+//        log("BAMarket.didReceiveMessageWith:\(message.jsonStr ?? "")")
         /*{
             "e": "kline",     // 事件类型
             "E": 123456789,   // 事件时间
@@ -86,6 +88,8 @@ open class BAMarketWebSocket: BAWebSocket {
                 processBookTicker(message: message)
             } else if stream.contains("kline") {
                 processCandleMessage(message: message)
+            } else if stream.contains("depth") {
+                processOrderBook(message: message)
             }
         }
     }
@@ -98,7 +102,10 @@ open class BAMarketWebSocket: BAWebSocket {
         }
     }
     
+    // MARK: BookTicker
+    
     open func subBookTicker(symbol: String) {
+        orderBook.instId = symbol
         let streamName = "\(symbol.lowercased())@bookTicker"
         subscribe(params: [streamName])
     }
@@ -116,5 +123,119 @@ open class BAMarketWebSocket: BAWebSocket {
            let bookTicker = data.transformToModel(BABookTicker.self) {
             NotificationCenter.default.post(name: BAMarketWebSocket.bookTickerDidChangeNotification, object: bookTicker)
         }
+    }
+    
+    // MARK: OrderBook
+    open func subOrderBook(symbol: String) {
+        let streamName = "\(symbol.lowercased())@depth"
+        subscribe(params: [streamName])
+    }
+    
+    open func unsubOrderBook(symbol: String) {
+        let streamName = "\(symbol.lowercased())@depth"
+        unsubscribe(params: [streamName])
+    }
+    
+    /*
+     2022-03-03 20:05:01:BAMarket.didReceiveMessageWith:["data": {
+     E = 1646309101352;
+     T = 1646309101331;
+     U = 1257016466251;
+     a =     (
+     (
+     "2917.66",
+     "0.003"
+     ),
+     (
+     "2917.67",
+     "0.000"
+     ),
+     (
+     "2917.69",
+     "0.002"
+     ),
+     (
+     "2917.75",
+     "0.000"
+     ),
+     (
+     "2917.76",
+     "1.022"
+     ),
+     (
+     "2917.77",
+     "0.517"
+     ),
+     (
+     "2917.78",
+     "0.000"
+     ),
+     (
+     "2917.79",
+     "0.031"
+     ),
+     (
+     "2917.91",
+     "0.034"
+     ),
+     (
+     "2918.98",
+     "0.003"
+     ),
+     (
+     "2919.13",
+     "4.370"
+     ),
+     (
+     "2921.24",
+     "0.000"
+     )
+     );
+     b =     (
+     (
+     "2891.41",
+     "0.000"
+     ),
+     (
+     "2914.68",
+     "0.000"
+     ),
+     (
+     "2914.69",
+     "0.299"
+     ),
+     (
+     "2916.69",
+     "7.413"
+     ),
+     (
+     "2916.71",
+     "4.022"
+     ),
+     (
+     "2916.72",
+     "0.517"
+     ),
+     (
+     "2916.80",
+     "5.250"
+     ),
+     (
+     "2917.40",
+     "0.000"
+     ),
+     (
+     "2917.41",
+     "12.731"
+     )
+     );
+     e = depthUpdate;
+     pu = 1257016466051;
+     s = ETHBUSD;
+     u = 1257016472748;
+     }, "stream": ethbusd@depth]
+     */
+    func processOrderBook(message: [String: Any]) {
+        orderBook.update(message: message)
     }
 }
