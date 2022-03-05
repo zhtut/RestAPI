@@ -142,7 +142,7 @@ open class BAPosManager {
     
     open var baseSz: Decimal {
         let lotSz = instrument?.lotSz.decimalValue ?? 0.0
-        return lotSz
+        return lotSz * 2.0
     }
     
     open func orderSz(isBuy: Bool) -> Decimal {
