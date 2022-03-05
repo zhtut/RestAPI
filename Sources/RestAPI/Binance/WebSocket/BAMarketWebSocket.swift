@@ -125,6 +125,16 @@ open class BAMarketWebSocket: BAWebSocket {
         }
     }
     
+    // MARK: Trade
+    open func subAggTrade(symbol: String) {
+        let streamName = "\(symbol.lowercased())@aggTrade"
+        subscribe(params: [streamName])
+    }
+    open func unsubAggTrade(symbol: String) {
+        let streamName = "\(symbol.lowercased())@aggTrade"
+        unsubscribe(params: [streamName])
+    }
+    
     // MARK: OrderBook
     open func subOrderBook(symbol: String) {
         let streamName = "\(symbol.lowercased())@depth"
@@ -134,6 +144,13 @@ open class BAMarketWebSocket: BAWebSocket {
     open func unsubOrderBook(symbol: String) {
         let streamName = "\(symbol.lowercased())@depth"
         unsubscribe(params: [streamName])
+    }
+    
+    func processAggTrade(message: [String: Any]) {
+        if let e = message.stringFor("e"),
+           e == "aggTrade" {
+            log("aggTrade \(message.jsonStr ?? "")")
+        }
     }
     
     /*

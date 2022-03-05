@@ -33,8 +33,8 @@ open class BAOrderBook {
                 if let message = response.data as? [String: Any] {
                      if let a = message["asks"] as? [[String]],
                        let b = message["bids"] as? [[String]] {
-                         asks.removeAll()
-                         bids.removeAll()
+                         self.asks.removeAll()
+                         self.bids.removeAll()
                          self.updateAsks(a: a)
                          self.updateBids(b: b)
                     }
@@ -71,7 +71,7 @@ open class BAOrderBook {
         T = message.intFor("T") ?? 0
         u = message.intFor("u") ?? 0
         
-        logOrderBook()
+//        logOrderBook()
     }
     
     open func updateAsks(a: [[String]]) {
