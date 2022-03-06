@@ -13,7 +13,7 @@ open class BASetup {
     
     public static let shared = BASetup()
     
-    open var instId = "ETHBUSD"
+    open var instId = "BTCBUSD"
 
     open var instrument: Instrument?
     open var completion: SucceedHandler?

@@ -142,7 +142,7 @@ open class BAPosManager {
     
     open var baseSz: Decimal {
         let lotSz = instrument?.lotSz.decimalValue ?? 0.0
-        return lotSz * 2.0
+        return lotSz
     }
     
     open func orderSz(isBuy: Bool) -> Decimal {
@@ -150,14 +150,17 @@ open class BAPosManager {
         if maxSz == 0 {
             return baseSz
         }
+        let baseSz = self.baseSz * 5
+        var retSz = Decimal(0.0)
         if isBuy {
             /// 如果买了一半，则不再买，卖出2份
             let rate = posSz / maxSz
-            return baseSz * (1 - rate)
+            retSz = baseSz * (1.0 - rate)
         } else {
             /// 如果买了一半，则不再买，卖出2份
             let rate = -posSz / maxSz
-            return baseSz * (1 - rate)
+            retSz = baseSz * (1.0 - rate)
         }
+        return retSz
     }
 }
