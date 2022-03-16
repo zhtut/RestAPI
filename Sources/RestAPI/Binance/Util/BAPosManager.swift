@@ -142,25 +142,34 @@ open class BAPosManager {
     
     open var baseSz: Decimal {
         let lotSz = instrument?.lotSz.decimalValue ?? 0.0
+        if let instId = instrument?.instId {
+            if instId.hasPrefix("BTC") {
+                return lotSz
+            } else {
+                return lotSz * 2.0
+            }
+        }
         return lotSz
     }
     
     open func orderSz(isBuy: Bool) -> Decimal {
-        let maxSz = total / 2.0
-        if maxSz == 0 {
+        let maxSz = total * 0.8
+        if maxSz == 0 ||
+            dabs(posSz) < maxSz {
             return baseSz
         }
-        let baseSz = self.baseSz * 5
-        var retSz = Decimal(0.0)
         if isBuy {
-            /// 如果买了一半，则不再买，卖出2份
-            let rate = posSz / maxSz
-            retSz = baseSz * (1.0 - rate)
+            if posSz > 0 {
+                return baseSz
+            } else {
+                return 2 * baseSz
+            }
         } else {
-            /// 如果买了一半，则不再买，卖出2份
-            let rate = -posSz / maxSz
-            retSz = baseSz * (1.0 - rate)
+            if posSz < 0 {
+                return 2 * baseSz
+            } else {
+                return baseSz
+            }
         }
-        return retSz
     }
 }
