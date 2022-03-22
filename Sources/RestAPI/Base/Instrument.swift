@@ -26,4 +26,12 @@ public struct Instrument: Codable {
         let jsonString = self.transformToJson()
         return "\(jsonString ?? [:])"
     }
+    
+    public func precisionPrice(_ price: Decimal) -> Decimal {
+        return price.precisionStringWith(precision: tickSz).decimalValue ?? 0
+    }
+    
+    public func precisionSize(_ size: Decimal) -> Decimal {
+        return size.precisionStringWith(precision: lotSz).decimalValue ?? 0
+    }
 }

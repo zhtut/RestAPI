@@ -162,7 +162,7 @@ open class BAUserWebSocket: BAWebSocket {
                 orders?.append(order)
             }
             self.orders = orders
-            log("订单\(order.orderId ?? 0)变化：\(order.status ?? ""), 剩余订单数量：\(orders!.count)")
+            log("订单变化，\(order.side == BUY ? "买入": "卖出")\(order.price ?? "")：\(order.status ?? ""), 剩余订单数量：\(orders!.count)")
             NotificationCenter.default.post(name: BAUserWebSocket.orderChangedNotification, object: order)
         }
     }

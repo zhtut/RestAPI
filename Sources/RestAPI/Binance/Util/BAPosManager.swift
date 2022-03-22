@@ -13,10 +13,11 @@ open class BAPosManager {
     
     public static let shared = BAPosManager()
     
-    open var bookTickerManger: BABookTickerManger?
-    open var instrument: Instrument?
-    
     open var lever: Int = 1
+    
+    open var instrument: Instrument {
+        return BAAppSetup.shared.instrument
+    }
     
     public init() {
         let _ = NotificationCenter.default.addObserver(forName: BAUserWebSocket.accountRefreshedNotification, object: nil, queue: nil) { noti in
@@ -40,7 +41,7 @@ open class BAPosManager {
         let busd = BAUserWebSocket.shared.busdBal ?? 0.0
         log("账户信息变化：当前BUSD:\(busd)")
         if let position = BAUserWebSocket.shared.positions?.first {
-            log("position数量:\(position.positionAmt)")
+            log("position数量变化:\(position.positionAmt)，持仓价格：\(position.entryPrice)")
         }
         configLever()
     }
@@ -54,7 +55,12 @@ open class BAPosManager {
     }
     
     open var total: Decimal {
-        return dabs(posSz) + canOpenSz + orderPosSz
+        if let busd = BAUserWebSocket.shared.busdBal,
+           let currPx = BABookTickerManger.shared.centerPrice {
+            let total = busd * lever.decimalValue / currPx
+            return total
+        }
+        return 0
     }
     
     /// 冻结在订单中的合约张数
@@ -132,44 +138,16 @@ open class BAPosManager {
     
     /// 可开张数
     open var canOpenSz: Decimal {
-        if let busd = BAUserWebSocket.shared.busdBal,
-           let currPx = bookTickerManger?.centerPrice {
-            let canOpen = busd * lever.decimalValue / currPx
-            return canOpen - dabs(posSz) - orderPosSz
-        }
-        return 0
+        return total - dabs(posSz) - orderPosSz
     }
     
     open var baseSz: Decimal {
-        let lotSz = instrument?.lotSz.decimalValue ?? 0.0
-        if let instId = instrument?.instId {
-            if instId.hasPrefix("BTC") {
-                return lotSz
-            } else {
-                return lotSz * 2.0
-            }
-        }
-        return lotSz
-    }
-    
-    open func orderSz(isBuy: Bool) -> Decimal {
-        let maxSz = total * 0.8
-        if maxSz == 0 ||
-            dabs(posSz) < maxSz {
-            return baseSz
-        }
-        if isBuy {
-            if posSz > 0 {
-                return baseSz
-            } else {
-                return 2 * baseSz
-            }
+        let lotSz = instrument.lotSz.decimalValue ?? 0.0
+        let instId = instrument.instId
+        if instId.hasPrefix("BTC") {
+            return lotSz
         } else {
-            if posSz < 0 {
-                return 2 * baseSz
-            } else {
-                return baseSz
-            }
+            return lotSz * 2.0
         }
     }
 }

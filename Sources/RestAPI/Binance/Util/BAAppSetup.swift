@@ -9,13 +9,13 @@ import Foundation
 import SSLog
 import SSCommon
 
-open class BASetup {
+open class BAAppSetup {
     
-    public static let shared = BASetup()
+    public static let shared = BAAppSetup()
     
     open var instId = "ETHBUSD"
 
-    open var instrument: Instrument?
+    open var instrument: Instrument!
     open var completion: SucceedHandler?
     
     open var bookTickerManger = BABookTickerManger.shared
@@ -23,31 +23,18 @@ open class BASetup {
     
     public init() {
         log("init方法，开始app")
-        setup()
+        let _ = BAUserWebSocket.shared
     }
     
     open func setup() {
-        let _ = BAUserWebSocket.shared
-        
         bookTickerManger.instId = instId
         bookTickerManger.subcribeDepth()
-        
-        posManager.bookTickerManger = bookTickerManger
         
         log("开始请求产品信息")
         requestInstrument { succ, errMsg in
             if succ {
-                log("请求产品信息成功，开始取消所有订单")
-                self.posManager.instrument = self.instrument
-                self.cancelAllOrders { succ, errMsg in
-                    if succ {
-                        log("取消所有订单成功，初始化完成")
-                        self.completion?(true, nil)
-                    } else {
-                        log("取消所有订单失败：\(errMsg ?? "")，程序退出")
-                        exit(1)
-                    }
-                }
+                log("请求产品信息成功，初始化完成")
+                self.completion?(true, nil)
             } else {
                 log("请求产品信息失败：\(errMsg ?? "")，程序退出")
                 exit(1)
@@ -85,9 +72,5 @@ open class BASetup {
             
             completion(false, response.errMsg)
         }
-    }
-    
-    open func cancelAllOrders(completion: @escaping SucceedHandler) {
-        BAOrder.cancelAllOrders(symbol: instId, completion: completion)
     }
 }

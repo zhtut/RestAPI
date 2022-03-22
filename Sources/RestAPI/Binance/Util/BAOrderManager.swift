@@ -29,7 +29,7 @@ open class BAOrderManager {
         } else {
             params["side"] = SELL
         }
-        if let instrument = BASetup.shared.instrument {
+        if let instrument = BAAppSetup.shared.instrument {
             let sz = sz.precisionStringWith(precision:instrument.lotSz)
             params["quantity"] = sz
             if let price = price {
