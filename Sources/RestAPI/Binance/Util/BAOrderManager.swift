@@ -85,6 +85,11 @@ open class BAOrderManager {
         }
     }
     
+    open class func createClientOrdId() -> String {
+        let curr = Date().timeIntervalSince1970 * 1000.0 * 1000.0
+        return "\(Int(curr))"
+    }
+    
     /*
      GTC - Good Till Cancel 成交为止
      IOC - Immediate or Cancel 无法立即成交(吃单)的部分就撤销
@@ -103,8 +108,7 @@ open class BAOrderManager {
         } else {
             params["side"] = SELL
         }
-        let clientOrdId = "\(Date.timestamp)"
-        params[newClientOrderId] = clientOrdId
+        params[newClientOrderId] = createClientOrdId()
         if let instrument = BAAppSetup.shared.instrument {
             let sz = sz.precisionStringWith(precision:instrument.lotSz)
             params["quantity"] = sz
@@ -178,7 +182,7 @@ open class BAOrderManager {
         if let temp = params.stringFor("newClientOrderId") {
             clientOrdId = temp
         } else {
-            clientOrdId = "\(Date.timestamp)"
+            clientOrdId = self.createClientOrdId()
             params["newClientOrderId"] = clientOrdId
         }
         if let side = params["side"],
