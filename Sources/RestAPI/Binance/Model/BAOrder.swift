@@ -13,9 +13,11 @@ public let SELL = "SELL"
 //public let LONG = "LONG"
 //public let SHORT = "SHORT"
 
+public let NEWING = "NEWING"
 public let NEW = "NEW"
 public let PARTIALLY_FILLED = "PARTIALLY_FILLED"
 public let FILLED = "FILLED"
+public let CANCELING = "CANCELING"
 public let CANCELED = "CANCELED"
 public let EXPIRED = "EXPIRED"
 public let NEW_INSURANCE = "NEW_INSURANCE" //  风险保障基金(强平)
@@ -55,6 +57,14 @@ open class BAOrder: Codable {
 //        }
 //        return false
 //    }
+    
+    open var isWaitingFill: Bool {
+        if status == NEW ||
+            status == PARTIALLY_FILLED {
+            return true
+        }
+        return false
+    }
     
     open func cancelWith(completion: @escaping SucceedHandler) {
         let path = "DELETE /fapi/v1/order (HMAC SHA256)"
