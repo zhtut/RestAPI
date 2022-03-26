@@ -39,9 +39,9 @@ open class BAPosManager {
     
     open func positionChanged(noti: Notification) {
         let busd = BAUserWebSocket.shared.busdBal ?? 0.0
-        log("账户信息变化：当前BUSD:\(busd)")
+        log("--------------\n账户信息变化：当前BUSD:\(busd)")
         if let position = BAUserWebSocket.shared.positions?.first {
-            log("position数量变化:\(position.positionAmt)，持仓价格：\(position.entryPrice)")
+            log("position数量变化:\(position.positionAmt)，持仓价格：\(position.entryPrice)，canOpen:\(canOpenSz), total: \(total)")
         }
         configLever()
     }
