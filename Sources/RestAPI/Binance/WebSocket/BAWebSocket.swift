@@ -53,4 +53,16 @@ open class BAWebSocket: SSWebSocket {
             }
         }
     }
+    
+    open override func webSocket(didCloseWithCode code: Int, reason: String?) {
+        super.webSocket(didCloseWithCode: code, reason: reason)
+        log("websocket断开连接\(urlStr)，code: \(code)，原因：\(reason ?? "")")
+        open()
+    }
+    
+    open override func webSocket(didFailWithError error: Error) {
+        super.webSocket(didFailWithError: error)
+        log("websocket收到错误：\(error)")
+        open()
+    }
 }
