@@ -134,7 +134,11 @@ open class BAOrderBookPrice {
     
     public convenience init(array: [String]) {
         self.init()
-        p = Decimal(string: array[0])!
-        s = Decimal(string: array[1])!
+        if let p = Decimal(string: array[0]) {
+            self.p = p
+        }
+        if let s = Decimal(string: array[1]) {
+            self.s = s
+        }
     }
 }

@@ -18,7 +18,11 @@ open class BABookTickerManger {
     public static let bookTickerChangedNotification = Notification.Name("BABookTickerChangedNotification")
     
     open func subcribeDepth() {
-        BAMarketWebSocket.shared.subBookTicker(symbol: instId!)
+        guard let instId = instId else {
+            return
+        }
+
+        BAMarketWebSocket.shared.subBookTicker(symbol: instId)
         let _ = NotificationCenter.default.addObserver(forName: BAMarketWebSocket.bookTickerDidChangeNotification, object: nil, queue: nil) { noti in
             self.bookTickerDidChange(noti: noti)
         }

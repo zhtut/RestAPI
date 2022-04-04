@@ -18,11 +18,15 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/zhtut/SSNetwork.git", branch: "main"),
-//        .package(name: "SSNetwork", path: "../SSNetwork"),
-        .package(url: "https://github.com/zhtut/SSCommon.git", branch: "main"),
-//        .package(name: "SSCommon", path: "../SSCommon"),
+//        .package(name: "SSNetwork", path: "../Tools/SSNetwork"),
         .package(url: "https://github.com/zhtut/SSWebsocket.git", branch: "main"),
-//        .package(name: "SSWebsocket", path: "../SSWebsocket"),
+//        .package(name: "SSWebsocket", path: "../Tools/SSWebsocket"),
+        .package(url: "https://github.com/zhtut/SSCommon.git", branch: "main"),
+//        .package(name: "SSCommon", path: "../Tools/SSCommon"),
+        .package(url: "https://github.com/zhtut/SSLog.git", branch: "main"),
+//        .package(name: "SSLog", path: "../Tools/SSLog"),
+        .package(url: "https://github.com/zhtut/SSEncrypt.git", branch: "main"),
+//        .package(name: "SSEncrypt", path: "../Tools/SSEncrypt"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -32,9 +36,9 @@ let package = Package(
             dependencies: [
                 "SSNetwork",
                 "SSWebsocket",
-                .product(name: "SSCommon", package: "SSCommon"),
-                .product(name: "SSEncrypt", package: "SSCommon"),
-                .product(name: "SSLog", package: "SSCommon"),
+                "SSCommon",
+                "SSEncrypt",
+                "SSLog",
             ]),
         .testTarget(name: "RestAPITests", dependencies: ["RestAPI"]),
     ]

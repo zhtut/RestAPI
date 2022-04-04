@@ -49,6 +49,10 @@ open class BAOrder: Codable {
     open var workingType: String? // ": "CONTRACT_PRICE", // 条件价格触发类型
     open var priceProtect: Bool? // ": false            // 是否开启条件单触发保护
     
+    open var isBuy: Bool {
+        return side == BUY
+    }
+    
     /// 是否开单
 //    open var isOpen: Bool {
 //        if (side == BUY && positionSide == LONG) ||

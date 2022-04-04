@@ -16,7 +16,10 @@ open class BAOrderBookManager {
     public static let orderBookChangedNotification = Notification.Name("BAOrderBookChangedNotification")
     
     open func subcribeOrderBook() {
-        BAMarketWebSocket.shared.subOrderBook(symbol: instId!)
+        guard let instId = instId else {
+            return
+        }
+        BAMarketWebSocket.shared.subOrderBook(symbol: instId)
 //        let _ = NotificationCenter.default.addObserver(forName: BAMarketWebSocket.bookTickerDidChangeNotification, object: nil, queue: nil) { noti in
 //            self.bookTickerDidChange(noti: noti)
 //        }

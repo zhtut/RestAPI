@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SSCommon
+import SSEncrypt
 import SSNetwork
 
 open class BARestAPI: NSObject {
@@ -52,9 +52,10 @@ open class BARestAPI: NSObject {
         if needSign {
             var newParams = params as? [String: Any] ?? [String: Any]()
             newParams["timestamp"] = Int(Date().timeIntervalSince1970 * 1000.0)
-            paramStr = newParams.urlQueryStr!
-            let sign = paramStr.hmacSha256With(key: APIKeyConfig.default.Ba_Secret_Key)
-            paramStr = "\(paramStr)&signature=\(sign)"
+            if let queryStr = newParams.urlQueryStr {
+                let sign = queryStr.hmacSha256With(key: APIKeyConfig.default.Ba_Secret_Key)
+                paramStr = "\(queryStr)&signature=\(sign)"
+            }
         }
         
         if paramStr.count > 0 {

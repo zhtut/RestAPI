@@ -15,6 +15,10 @@ import Dispatch
 
 open class BAWebSocket: SSWebSocket {
     
+    open override var autoConnect: Bool {
+        false
+    }
+    
     open func subscribe(method: String = "SUBSCRIBE",
                    params: [String]) {
         let dic = [ "method": method, "params": params, "id": Int(Date().timeIntervalSince1970)] as [String: Any]
@@ -33,22 +37,30 @@ open class BAWebSocket: SSWebSocket {
         sendPing()
     }
     
-    open override func webSocketDidReceive(message: [String: Any]) {
-        super.webSocketDidReceive(message: message)
+    open func webSocketDidReceive(message: [String: Any]) {
+        
     }
     
-    open override func webSocketDidReceive(string: String) {
-        super.webSocketDidReceive(string: string)
+    open override func webSocket(didReceiveMessageWith string: String) {
+        super.webSocket(didReceiveMessageWith: string)
         if string == "pong" {
+            log("websocket.ba收到pong")
             DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
                 if self.isConnected {
                     self.sendPing()
                 }
             }
+        } else if string == "ping" {
+            log("websocket.ba收到ping")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+                if self.isConnected {
+                    self.webSocket?.send("pong")
+                }
+            }
         } else {
             if let data = string.data(using: .utf8),
-               let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) {
-                let dic = json as! [String: Any]
+               let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments),
+               let dic = json as? [String: Any] {
                 webSocketDidReceive(message: dic)
             }
         }
@@ -63,6 +75,5 @@ open class BAWebSocket: SSWebSocket {
     open override func webSocket(didFailWithError error: Error) {
         super.webSocket(didFailWithError: error)
         log("websocket收到错误：\(error)")
-        open()
     }
 }

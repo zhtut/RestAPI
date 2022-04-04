@@ -27,6 +27,9 @@ open class BAAppSetup {
     }
     
     open func setup() {
+//        BAMarketWebSocket.shared.open()
+//        BAUserWebSocket.shared.refreshListenKey() ///< 这里请求成功会自动open
+        
         bookTickerManger.instId = instId
         bookTickerManger.subcribeDepth()
         
@@ -34,6 +37,10 @@ open class BAAppSetup {
         requestInstrument { succ, errMsg in
             if succ {
                 log("请求产品信息成功，初始化完成")
+                guard let _ = self.instrument else {
+                    log("请求产品信息失败：\(errMsg ?? "")，程序退出")
+                    exit(1)
+                }
                 self.completion?(true, nil)
             } else {
                 log("请求产品信息失败：\(errMsg ?? "")，程序退出")

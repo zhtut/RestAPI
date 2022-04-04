@@ -1,0 +1,70 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "SSCommon",
+        "repositoryURL": "https://github.com/zhtut/SSCommon.git",
+        "state": {
+          "branch": "main",
+          "revision": "705cc8490870af650eda3c6859dab16af6183f18",
+          "version": null
+        }
+      },
+      {
+        "package": "SSNetwork",
+        "repositoryURL": "https://github.com/zhtut/SSNetwork.git",
+        "state": {
+          "branch": "main",
+          "revision": "87fb02534f4f8d8c331ecae63df36287edbd59a2",
+          "version": null
+        }
+      },
+      {
+        "package": "SSWebsocket",
+        "repositoryURL": "https://github.com/zhtut/SSWebsocket.git",
+        "state": {
+          "branch": "main",
+          "revision": "bce1661d305bb674d1e5a4d951e5f1ad0fbeef3c",
+          "version": null
+        }
+      },
+      {
+        "package": "swift-crypto",
+        "repositoryURL": "https://github.com/apple/swift-crypto.git",
+        "state": {
+          "branch": null,
+          "revision": "067254c79435de759aeef4a6a03e43d087d61312",
+          "version": "2.0.5"
+        }
+      },
+      {
+        "package": "swift-nio",
+        "repositoryURL": "https://github.com/apple/swift-nio.git",
+        "state": {
+          "branch": null,
+          "revision": "d6e3762e0a5f7ede652559f53623baf11006e17c",
+          "version": "2.39.0"
+        }
+      },
+      {
+        "package": "swift-nio-ssl",
+        "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
+        "state": {
+          "branch": null,
+          "revision": "b5260a31c2a72a89fa684f5efb3054d8725a2316",
+          "version": "2.18.0"
+        }
+      },
+      {
+        "package": "websocket-kit",
+        "repositoryURL": "https://github.com/vapor/websocket-kit.git",
+        "state": {
+          "branch": null,
+          "revision": "e32033ad3c68ebec1b761bc961be7bd56bad02f8",
+          "version": "2.3.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

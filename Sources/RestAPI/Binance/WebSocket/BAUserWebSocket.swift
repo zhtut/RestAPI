@@ -46,18 +46,23 @@ open class BAUserWebSocket: BAWebSocket {
     
     public override init() {
         super.init()
-        log("UserWebsocket初始化，准备请求ListenKey")
-        refreshListenKey()
+        log("UserWebsocket初始化")
         DispatchQueue.main.asyncAfter(deadline: .now() + 30 * 60) {
             self.startPutListenKey()
         }
     }
     
-    func refreshListenKey() {
+    open func refreshListenKey() {
+        log("开始请求ListenKey")
         createListenKey { succ, errMsg in
             if succ {
-                log("ListenKey请求成功，准备开始连接")
-                self.open()
+                if self.isConnected {
+                    log("ListenKey请求成功，发送给远端")
+                    self.sendListenKey()
+                } else {
+                    log("ListenKey请求成功，准备开始连接")
+                    self.open()
+                }
             } else {
                 log("ListenKey请求失败：\(errMsg ?? "")，一秒后重试")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -85,10 +90,8 @@ open class BAUserWebSocket: BAWebSocket {
     func startPutListenKey() {
         let path = "PUT /fapi/v1/listenKey (HMAC SHA256)"
         BARestAPI.sendRequestWith(path: path) { response in
-            if response.responseSucceed {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 30 * 60) {
-                    self.startPutListenKey()
-                }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30 * 60) {
+                self.startPutListenKey()
             }
         }
     }
@@ -98,14 +101,18 @@ open class BAUserWebSocket: BAWebSocket {
         
         log("userSocket已连接，准备开始订阅")
         
-        let listenKey = listenKey ?? ""
-        subscribe(params: [listenKey])
+        sendListenKey()
         
         log("开始刷新订单")
         refreshOrders()
         
         log("开始刷新账户信息")
         refreshAccount()
+    }
+    
+    open func sendListenKey() {
+        let listenKey = listenKey ?? ""
+        subscribe(params: [listenKey])
     }
     
     open override func webSocketDidReceive(message: [String: Any]) {
@@ -162,7 +169,7 @@ open class BAUserWebSocket: BAWebSocket {
                 orders?.append(order)
             }
             self.orders = orders
-            log("订单变化，\(order.side == BUY ? "买入": "卖出")\(order.price ?? "")：\(order.status ?? ""), 剩余订单数量：\(orders!.count)")
+            log("订单变化，\(order.price ?? "")\(order.side == BUY ? "买入": "卖出")\(order.origQty ?? "")：\(order.status ?? ""), 剩余订单数量：\(orders!.count)")
             NotificationCenter.default.post(name: BAUserWebSocket.orderChangedNotification, object: order)
         }
     }
