@@ -32,13 +32,26 @@ open class BAWebSocket: SSWebSocket {
         sendMessage(message: dic)
     }
     
-    open override func webSocketDidOpen() {
-        super.webSocketDidOpen()
-        sendPing()
-    }
-    
     open func webSocketDidReceive(message: [String: Any]) {
         
+    }
+    
+    // MARK: 代理
+    
+    open override func webSocketDidOpen() {
+        super.webSocketDidOpen()
+        log("webSocketDidOpen")
+    }
+    
+    open override func webSocketDidReceivePing() {
+        super.webSocketDidReceivePing()
+        log("收到ping")
+    }
+    
+    open override func webSocketDidReceivePong() {
+        super.webSocketDidReceivePong()
+        log("收到pong")
+        sendPing()
     }
     
     open override func webSocket(didReceiveMessageWith string: String) {

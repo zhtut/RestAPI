@@ -26,13 +26,6 @@ open class BATradeWebSocket: BAWebSocket {
     /// k线图变化的通知
     public static let tradeDidChangeNotification = Notification.Name("BATradeDidChangeNotification")
     
-    open override func webSocketDidOpen() {
-        super.webSocketDidOpen()
-        /// 订阅交易记录
-//        let str = "\(instId.lowercased())@trade"
-//        subscribe(params: [ str ])
-    }
-    
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
 //        log("TradeWebSocket.didReceiveMessageWith:\(message.jsonStr ?? "")")
