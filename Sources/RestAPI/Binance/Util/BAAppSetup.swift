@@ -27,8 +27,8 @@ open class BAAppSetup {
     }
     
     open func setup() {
-//        BAMarketWebSocket.shared.open()
-//        BAUserWebSocket.shared.refreshListenKey() ///< 这里请求成功会自动open
+        BAMarketWebSocket.shared.open()
+        BAUserWebSocket.shared.refreshListenKey() ///< 这里请求成功会自动open
         
         bookTickerManger.instId = instId
         bookTickerManger.subcribeDepth()
