@@ -65,7 +65,7 @@ open class BAPosManager {
     
     /// 冻结在订单中的合约张数
     open var orderPosSz: Decimal {
-        if let orders = BAUserWebSocket.shared.orders,
+        if let orders = BAOrderManager.shared.orders,
             orders.count > 0 {
             var count = Decimal(0.0)
             for or in orders {

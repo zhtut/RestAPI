@@ -16,7 +16,13 @@ open class BAOrderManager {
     
     public static let shared = BAOrderManager()
     
-    open var orders: [BAOrder]?
+    open var orders: [BAOrder]? {
+        didSet {
+            if let orders = orders {
+                log("激活的订单变化：\(orders.count)")
+            }
+        }
+    }
     
     public init() {
         let _ = NotificationCenter.default.addObserver(forName: BAUserWebSocket.orderChangedNotification, object: nil, queue: nil) { noti in
@@ -52,11 +58,9 @@ open class BAOrderManager {
     func orderChanged(noti: Notification) {
         if let order = noti.object as? BAOrder,
            let orders = orders {
-            let ord = order.clientOrderId
-            
             /// 更新正在等待成交的订单
             var otherOrders = orders.filter { filter in
-                return filter.clientOrderId != ord
+                return filter.clientOrderId != order.clientOrderId
             }
             if order.isWaitingFill {
                 otherOrders.append(order)
@@ -83,6 +87,20 @@ open class BAOrderManager {
             })
             self.orders = other
         }
+    }
+    
+    func removeOrderWith(orderId: Int) {
+        guard orderId > 0 else {
+            return
+        }
+        let other = orders?.filter({
+            $0.orderId != orderId
+        })
+        self.orders = other
+    }
+    
+    func removeAllOrder() {
+        self.orders?.removeAll()
     }
     
     open class func createClientOrdId() -> String {
