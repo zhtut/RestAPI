@@ -37,9 +37,9 @@ open class BAOrderManager {
                 self.orders = orders
             } else {
                 log("刷新订单失败")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    self.refreshOrders()
-                }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                self.refreshOrders()
             }
         }
     }
