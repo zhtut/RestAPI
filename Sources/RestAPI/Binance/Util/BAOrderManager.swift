@@ -89,6 +89,13 @@ open class BAOrderManager {
         }
     }
     
+    func removeOrderWith(clientOrderId: String) {
+        let other = orders?.filter({
+            $0.clientOrderId != clientOrderId
+        })
+        self.orders = other
+    }
+    
     func removeOrderWith(orderId: Int) {
         guard orderId > 0 else {
             return

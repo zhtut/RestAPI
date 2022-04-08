@@ -114,6 +114,7 @@ open class BAOrder: Codable {
                 BAOrderManager.shared.removeOrderWith(orderId: ord)
             } else if let clientOrderId = or.clientOrderId {
                 clientOrderIds.append(clientOrderId)
+                BAOrderManager.shared.removeOrderWith(clientOrderId: clientOrderId)
             }
             if let sym = or.symbol,
                symbol == "" {
