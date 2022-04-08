@@ -106,18 +106,27 @@ open class BAOrder: Codable {
         
         let path = "DELETE /fapi/v1/batchOrders (HMAC SHA256)"
         var orderIds = [Int]()
+        var clientOrderIds = [String]()
         var symbol = ""
         for or in orders {
             if let ord = or.orderId {
                 orderIds.append(ord)
                 BAOrderManager.shared.removeOrderWith(orderId: ord)
+            } else if let clientOrderId = or.clientOrderId {
+                clientOrderIds.append(clientOrderId)
             }
-            if let symbol = or.symbol {
-                symbol = symbol
+            if let sym = or.symbol,
+               symbol == "" {
+                symbol = sym
             }
         }
         
-        let params = ["symbol": symbol, "orderIdList": orderIds] as [String : Any]
+        if orderIds.count == 0 && clientOrderIds.count == 0 {
+            completion(true, nil);
+            return
+        }
+        
+        let params = ["symbol": symbol, "orderIdList": orderIds, "origClientOrderIdList": clientOrderIds] as [String : Any]
         BARestAPI.sendRequestWith(path: path, params: params) { response in
             if response.responseSucceed {
                 completion(true, nil)
