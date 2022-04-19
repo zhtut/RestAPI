@@ -57,6 +57,18 @@ open class BAInstrument {
         return model
     }
     
+    open var minSz: String? {
+        if let filters = filters {
+            for dic in filters {
+                if let filterType = dic.stringFor("filterType"),
+                   filterType == "LOT_SIZE" {
+                    return dic.stringFor("minQty")
+                }
+            }
+        }
+        return nil
+    }
+    
     open var lotSz: String? {
         if let filters = filters {
             for dic in filters {

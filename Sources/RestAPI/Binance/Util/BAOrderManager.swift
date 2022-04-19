@@ -76,6 +76,7 @@ open class BAOrderManager {
             order.clientOrderId = ord
             order.status = NEWING
             order.price = price
+            order.symbol = params.stringFor("symbol")
             orders?.append(order)
         }
     }

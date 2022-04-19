@@ -15,6 +15,8 @@ open class BAPosManager {
     
     open var lever: Int = 1
     
+    open var initalBusd: Decimal = 0
+    
     open var instrument: Instrument {
         return BAAppSetup.shared.instrument
     }
@@ -39,7 +41,10 @@ open class BAPosManager {
     
     open func positionChanged(noti: Notification) {
         let busd = BAUserWebSocket.shared.busdBal ?? 0.0
-        log("--------------账户信息变化：当前BUSD:\(busd)")
+        if initalBusd == 0 {
+            initalBusd = busd
+        }
+        log("--------------账户信息变化：初始busd:\(self.initalBusd), 当前BUSD:\(busd)，已赚\(busd - initalBusd)")
         if let position = BAUserWebSocket.shared.positions?.first {
             log("position数量变化:\(position.positionAmt)，持仓价格：\(position.entryPrice)，canOpen:\(canOpenSz), total: \(total)")
         }
@@ -142,12 +147,12 @@ open class BAPosManager {
     }
     
     open var baseSz: Decimal {
+        var minSz = instrument.minSz.decimalValue ?? 0.0
         let lotSz = instrument.lotSz.decimalValue ?? 0.0
-        let instId = instrument.instId
-        if instId.hasPrefix("BTC") {
-            return lotSz
-        } else {
-            return lotSz * 2.0
+        let currPx = BABookTickerManger.shared.centerPrice ?? 0.0
+        while minSz * currPx < 5 {
+            minSz += lotSz
         }
+        return minSz
     }
 }

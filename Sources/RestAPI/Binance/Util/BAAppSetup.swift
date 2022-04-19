@@ -70,6 +70,8 @@ open class BAAppSetup {
                         instrument.tickSz = ins.tickSz ?? "" ///: String?
                         /// 下单数量精度，如 1：BTC-USDT-200925 0.001：BTC-USDT
                         instrument.lotSz = ins.lotSz ?? "" /// : String?
+                        /// 下单最小值
+                        instrument.minSz = ins.minSz ?? ""
                         self.instrument = instrument
                         completion(true, nil)
                         return

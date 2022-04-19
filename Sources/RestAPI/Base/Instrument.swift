@@ -21,6 +21,8 @@ public struct Instrument: Codable {
     public var tickSz: String = ""
     /// 下单数量精度，如 BTCUSDT的下单数量必须大于 0.00001，并且累加也是0.00001往上加，如0.00002
     public var lotSz: String = ""
+    /// 下单最小值
+    public var minSz: String = ""
     
     public var description: String {
         let jsonString = self.transformToJson()
