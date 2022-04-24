@@ -73,7 +73,6 @@ open class BAOrder: Codable {
     open func cancelWith(completion: @escaping SucceedHandler) {
         let path = "DELETE /fapi/v1/order (HMAC SHA256)"
         let params = ["symbol": symbol ?? "", "orderId": orderId ?? 0] as [String : Any]
-        BAOrderManager.shared.removeOrderWith(orderId: orderId ?? 0)
         BARestAPI.sendRequestWith(path: path, params: params) { response in
             if response.responseSucceed {
                 completion(true, nil)
@@ -111,10 +110,8 @@ open class BAOrder: Codable {
         for or in orders {
             if let ord = or.orderId {
                 orderIds.append(ord)
-                BAOrderManager.shared.removeOrderWith(orderId: ord)
             } else if let clientOrderId = or.clientOrderId {
                 clientOrderIds.append(clientOrderId)
-                BAOrderManager.shared.removeOrderWith(clientOrderId: clientOrderId)
             }
             if let sym = or.symbol,
                symbol == "" {
@@ -140,7 +137,6 @@ open class BAOrder: Codable {
     open class func cancelAllOrders(symbol: String, completion: @escaping SucceedHandler) {
         let path = "DELETE /fapi/v1/allOpenOrders (HMAC SHA256)"
         let params = ["symbol": symbol]
-        BAOrderManager.shared.removeAllOrder()
         BARestAPI.sendRequestWith(path: path, params: params) { response in
             if response.responseSucceed {
                 completion(true, nil)

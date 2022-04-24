@@ -14,7 +14,6 @@ open class BAUserWebSocket: BAWebSocket {
     public static let shared = BAUserWebSocket()
     
     var listenKey: String?
-    var completions = [String: SucceedHandler]()
     
     open var orders: [BAOrder]?
     open var positions: [BAPosition]?

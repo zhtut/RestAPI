@@ -36,14 +36,14 @@ open class BAPosManager {
         if let position = BAUserWebSocket.shared.positions?.first {
             log("position数量:\(position.positionAmt)")
         }
+        if initalBusd == 0 {
+            initalBusd = busd
+        }
         configLever()
     }
     
     open func positionChanged(noti: Notification) {
         let busd = BAUserWebSocket.shared.busdBal ?? 0.0
-        if initalBusd == 0 {
-            initalBusd = busd
-        }
         log("--------------账户信息变化：初始busd:\(self.initalBusd), 当前BUSD:\(busd)，已赚\(busd - initalBusd)")
         if let position = BAUserWebSocket.shared.positions?.first {
             log("position数量变化:\(position.positionAmt)，持仓价格：\(position.entryPrice)，canOpen:\(canOpenSz), total: \(total)")
@@ -70,7 +70,7 @@ open class BAPosManager {
     
     /// 冻结在订单中的合约张数
     open var orderPosSz: Decimal {
-        if let orders = BAOrderManager.shared.orders,
+        if let orders = BAUserWebSocket.shared.orders,
             orders.count > 0 {
             var count = Decimal(0.0)
             for or in orders {

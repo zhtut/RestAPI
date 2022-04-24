@@ -14,108 +14,6 @@ let clientOrderId = "clientOrderId"
 
 open class BAOrderManager {
     
-    public static let shared = BAOrderManager()
-    
-    open var orders: [BAOrder]? {
-        didSet {
-            if let orders = orders {
-                log("激活的订单变化：\(orders.count)")
-            }
-        }
-    }
-    
-    public init() {
-        let _ = NotificationCenter.default.addObserver(forName: BAUserWebSocket.orderChangedNotification, object: nil, queue: nil) { noti in
-            self.orderChanged(noti: noti)
-        }
-        refreshOrders()
-    }
-    
-    open func refreshOrders() {
-        fetchPendingOrders { orders, errMsg in
-            if let orders = orders {
-                self.orders = orders
-            } else {
-                log("刷新订单失败")
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                self.refreshOrders()
-            }
-        }
-    }
-    
-    func fetchPendingOrders(completion: @escaping ([BAOrder]?, String?) -> Void) {
-        let path = "GET /fapi/v1/openOrders (HMAC SHA256)"
-        BARestAPI.sendRequestWith(path: path, dataClass: BAOrder.self) { response in
-            if let data = response.data as? [BAOrder] {
-                completion(data, nil)
-            } else {
-                completion(nil, response.errMsg)
-            }
-        }
-    }
-    
-    func orderChanged(noti: Notification) {
-        if let order = noti.object as? BAOrder,
-           let orders = orders {
-            /// 更新正在等待成交的订单
-            var otherOrders = orders.filter { filter in
-                return filter.clientOrderId != order.clientOrderId
-            }
-            if order.isWaitingFill {
-                otherOrders.append(order)
-            }
-            self.orders = otherOrders
-        }
-    }
-    
-    func addOrderWith(params: [String: Any]) {
-        if let ord = params.stringFor(newClientOrderId),
-           let price = params.stringFor("price") {
-            let order = BAOrder()
-            order.clientOrderId = ord
-            order.status = NEWING
-            order.price = price
-            order.symbol = params.stringFor("symbol")
-            orders?.append(order)
-        }
-    }
-    
-    func removeOrderWith(params: [String: Any]) {
-        if let ord = params.stringFor(newClientOrderId) {
-            let other = orders?.filter({
-                $0.clientOrderId != ord
-            })
-            self.orders = other
-        }
-    }
-    
-    func removeOrderWith(clientOrderId: String) {
-        let other = orders?.filter({
-            $0.clientOrderId != clientOrderId
-        })
-        self.orders = other
-    }
-    
-    func removeOrderWith(orderId: Int) {
-        guard orderId > 0 else {
-            return
-        }
-        let other = orders?.filter({
-            $0.orderId != orderId
-        })
-        self.orders = other
-    }
-    
-    func removeAllOrder() {
-        self.orders?.removeAll()
-    }
-    
-    open class func createClientOrdId() -> String {
-        let curr = Date().timeIntervalSince1970 * 1000.0 * 1000.0
-        return "\(Int(curr))"
-    }
-    
     /*
      GTC - Good Till Cancel 成交为止
      IOC - Immediate or Cancel 无法立即成交(吃单)的部分就撤销
@@ -134,7 +32,6 @@ open class BAOrderManager {
         } else {
             params["side"] = SELL
         }
-        params[newClientOrderId] = createClientOrdId()
         if let instrument = BAAppSetup.shared.instrument {
             let sz = sz.precisionStringWith(precision:instrument.lotSz)
             params["quantity"] = sz
@@ -173,18 +70,13 @@ open class BAOrderManager {
         
         let path = "POST /fapi/v1/batchOrders (HMAC SHA256)"
         let params = ["batchOrders": batchParams]
-        for orderDic in batchParams {
-            self.shared.addOrderWith(params: orderDic)
-        }
         BARestAPI.sendRequestWith(path: path, params: params) { response in
             if response.responseSucceed,
                let data = response.data as? [[String: Any]] {
                 var result = [(Bool, String?)]()
-                for (i, dic) in data.enumerated() {
+                for (_, dic) in data.enumerated() {
                     if dic.stringFor("code") != nil {
                         result.append((false, dic.stringFor("msg")))
-                        let orderDic = batchParams[i] as [String: Any]
-                        self.shared.removeOrderWith(params: orderDic)
                     } else {
                         result.append((true, nil))
                     }
@@ -203,24 +95,18 @@ open class BAOrderManager {
     @discardableResult
     open class func order(params: [String: Any], completion: @escaping SucceedHandler) -> String {
         let path = "POST /fapi/v1/order (HMAC SHA256)"
-        var params = params
         var clientOrdId = ""
         if let temp = params.stringFor("newClientOrderId") {
             clientOrdId = temp
-        } else {
-            clientOrdId = self.createClientOrdId()
-            params["newClientOrderId"] = clientOrdId
         }
         if let side = params["side"],
            let sz = params["quantity"] {
             log("准备下单，side: \(side), 数量：\(sz)")
         }
-        self.shared.addOrderWith(params: params)
         BARestAPI.sendRequestWith(path: path, params: params) { response in
             if response.responseSucceed {
                 completion(true, nil)
             } else {
-                self.shared.removeOrderWith(params: params)
                 completion(false, response.errMsg)
             }
         }
