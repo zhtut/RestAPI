@@ -24,11 +24,14 @@ open class BAAppSetup {
     public init() {
         log("init方法，开始app")
         let _ = BAUserWebSocket.shared
+        
+        sendPushNotication("开始记录日志")
+        let _ = Timer.scheduledTimer(withTimeInterval: 5 * 60, repeats: true) { timer in
+            sendPushNotication("状态消息，当前状态正常")
+        }
     }
     
     open func setup() {
-        BAMarketWebSocket.shared.open()
-        BAUserWebSocket.shared.refreshListenKey() ///< 这里请求成功会自动open
         
         bookTickerManger.instId = instId
         bookTickerManger.subcribeDepth()

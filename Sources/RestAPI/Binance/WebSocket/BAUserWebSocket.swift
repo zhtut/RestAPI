@@ -35,8 +35,14 @@ open class BAUserWebSocket: BAWebSocket {
     }
     
     open override var urlStr: String {
-        return APIKeyConfig.default.BA_Websocket_URL_Str
+        if let listenKey = listenKey {
+            let str = "\(APIKeyConfig.default.BA_Websocket_URL_Str)/\(listenKey)"
+            return str
+        }
+        return ""
     }
+    
+    var putTimer: Timer?
     
     public static let orderChangedNotification = Notification.Name("BAOrderChangedNotification")
     public static let orderRefreshedNotification = Notification.Name("BAOrderRefreshedNotification")
@@ -46,22 +52,14 @@ open class BAUserWebSocket: BAWebSocket {
     public override init() {
         super.init()
         log("UserWebsocket初始化")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 30 * 60) {
-            self.startPutListenKey()
-        }
+        refreshListenKey()
     }
     
     open func refreshListenKey() {
         log("开始请求ListenKey")
         createListenKey { succ, errMsg in
             if succ {
-                if self.isConnected {
-                    log("ListenKey请求成功，发送给远端")
-                    self.sendListenKey()
-                } else {
-                    log("ListenKey请求成功，准备开始连接")
-                    self.open()
-                }
+                self.open()
             } else {
                 log("ListenKey请求失败：\(errMsg ?? "")，一秒后重试")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -87,31 +85,34 @@ open class BAUserWebSocket: BAWebSocket {
     }
     
     func startPutListenKey() {
+        putTimer?.invalidate()
+        putTimer = Timer.scheduledTimer(withTimeInterval: 30 * 60, repeats: true, block: { timer in
+            self.putListenKey()
+        })
+    }
+    
+    func stopPutListenKey() {
+        putTimer?.invalidate()
+    }
+    
+    func putListenKey() {
         let path = "PUT /fapi/v1/listenKey (HMAC SHA256)"
         BARestAPI.sendRequestWith(path: path) { response in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 30 * 60) {
-                self.startPutListenKey()
-            }
+            
         }
     }
     
     open override func webSocketDidOpen() {
         super.webSocketDidOpen()
         
-        log("userSocket已连接，准备开始订阅")
-        
-        sendListenKey()
-        
         log("开始刷新订单")
         refreshOrders()
         
         log("开始刷新账户信息")
         refreshAccount()
-    }
-    
-    open func sendListenKey() {
-        let listenKey = listenKey ?? ""
-        subscribe(params: [listenKey])
+        
+        log("开始刷新ListenKey的有效期")
+        startPutListenKey()
     }
     
     open override func webSocketDidReceive(message: [String: Any]) {
@@ -138,8 +139,7 @@ open class BAUserWebSocket: BAWebSocket {
     }
     
     func processOrder(message: [String: Any]) {
-        if let a1 = message["data"] as? [String : Any],
-           let data = a1["o"] as? [String: Any] {
+        if let data = message["o"] as? [String: Any] {
             let order = BAOrder()
             order.symbol = data.stringFor("s") ?? ""
             order.clientOrderId = data.stringFor("c") ?? ""

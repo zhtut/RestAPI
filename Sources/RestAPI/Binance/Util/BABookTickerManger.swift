@@ -15,15 +15,17 @@ open class BABookTickerManger {
     open var centerPrice: Decimal?
     open var bookTicker: BABookTicker?
     
+    open var bookTickerWebSocket: BABookTickerWebSocket?
+    
     public static let bookTickerChangedNotification = Notification.Name("BABookTickerChangedNotification")
     
     open func subcribeDepth() {
         guard let instId = instId else {
             return
         }
-
-        BAMarketWebSocket.shared.subBookTicker(symbol: instId)
-        let _ = NotificationCenter.default.addObserver(forName: BAMarketWebSocket.bookTickerDidChangeNotification, object: nil, queue: nil) { noti in
+        
+        bookTickerWebSocket = BABookTickerWebSocket(symbol: instId)
+        let _ = NotificationCenter.default.addObserver(forName: BABookTickerWebSocket.bookTickerDidChangeNotification, object: nil, queue: nil) { noti in
             self.bookTickerDidChange(noti: noti)
         }
     }

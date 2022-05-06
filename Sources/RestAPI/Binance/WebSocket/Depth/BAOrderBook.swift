@@ -56,9 +56,8 @@ open class BAOrderBook {
             return
         }
         
-        if let data = message["data"] as? [String: Any],
-           let a = data["a"] as? [[String]],
-           let b = data["b"] as? [[String]] {
+        if let a = message["a"] as? [[String]],
+           let b = message["b"] as? [[String]] {
             updateAsks(a: a)
             updateBids(b: b)
         }
