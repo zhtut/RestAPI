@@ -18,12 +18,14 @@ open class BAAppSetup {
     open var instrument: Instrument!
     open var completion: SucceedHandler?
     
-    open var bookTickerManger = BABookTickerManger.shared
-    open var posManager = BAPosManager.shared
+    let bookTickerManger = BABookTickerManger.shared
     
     public init() {
         log("init方法，开始app")
-        let _ = BAUserWebSocket.shared
+        bookTickerManger.instId = instId
+        bookTickerManger.subcribeDepth()
+        
+        let _ = BAPosManager.shared
         
         sendPushNotication("开始记录日志")
         let _ = Timer.scheduledTimer(withTimeInterval: 5 * 60, repeats: true) { timer in
@@ -33,9 +35,6 @@ open class BAAppSetup {
     
     open func setup() {
         
-        bookTickerManger.instId = instId
-        bookTickerManger.subcribeDepth()
-        
         log("开始请求产品信息")
         requestInstrument { succ, errMsg in
             if succ {
@@ -44,7 +43,10 @@ open class BAAppSetup {
                     log("请求产品信息失败：\(errMsg ?? "")，程序退出")
                     exit(1)
                 }
-                self.completion?(true, nil)
+                let websocket = BAUserWebSocket.shared
+                websocket.didReadyBlock = {
+                    self.completion?(true, nil)
+                }
             } else {
                 log("请求产品信息失败：\(errMsg ?? "")，程序退出")
                 exit(1)

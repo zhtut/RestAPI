@@ -22,7 +22,7 @@ open class BAPosManager {
     }
     
     public init() {
-        let _ = NotificationCenter.default.addObserver(forName: BAUserWebSocket.accountRefreshedNotification, object: nil, queue: nil) { noti in
+        let _ = NotificationCenter.default.addObserver(forName: BAUserWebSocket.websocketDidReadyNotification, object: nil, queue: nil) { noti in
             self.positionRefreshed(noti: noti)
         }
         let _ = NotificationCenter.default.addObserver(forName: BAUserWebSocket.accountChangedNotification, object: nil, queue: nil) { noti in

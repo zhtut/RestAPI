@@ -13,6 +13,8 @@ open class BAUserWebSocket: BAWebSocket {
     
     public static let shared = BAUserWebSocket()
     
+    open var didReadyBlock: (() -> Void)?
+    
     var listenKey: String?
     
     open var orders: [BAOrder]?
@@ -44,15 +46,20 @@ open class BAUserWebSocket: BAWebSocket {
     
     var putTimer: Timer?
     
-    public static let orderChangedNotification = Notification.Name("BAOrderChangedNotification")
-    public static let orderRefreshedNotification = Notification.Name("BAOrderRefreshedNotification")
+    public static let websocketDidReadyNotification = Notification.Name("BAWebsocketDidReadyNotification")
     public static let accountChangedNotification = Notification.Name("BAAccountChangedNotification")
-    public static let accountRefreshedNotification = Notification.Name("BAAccountRefreshedNotification")
+    public static let orderChangedNotification = Notification.Name("BAOrderChangedNotification")
     
     public override init() {
         super.init()
         log("UserWebsocket初始化")
         refreshListenKey()
+        
+        log("开始刷新订单")
+        refreshOrders()
+        
+        log("开始刷新账户信息")
+        refreshAccount()
     }
     
     open func refreshListenKey() {
@@ -60,6 +67,9 @@ open class BAUserWebSocket: BAWebSocket {
         createListenKey { succ, errMsg in
             if succ {
                 self.open()
+                
+                log("开始刷新ListenKey的有效期")
+                self.startPutListenKey()
             } else {
                 log("ListenKey请求失败：\(errMsg ?? "")，一秒后重试")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -104,15 +114,7 @@ open class BAUserWebSocket: BAWebSocket {
     
     open override func webSocketDidOpen() {
         super.webSocketDidOpen()
-        
-        log("开始刷新订单")
-        refreshOrders()
-        
-        log("开始刷新账户信息")
-        refreshAccount()
-        
-        log("开始刷新ListenKey的有效期")
-        startPutListenKey()
+        self.websocketDidReady()
     }
     
     open override func webSocketDidReceive(message: [String: Any]) {
@@ -173,11 +175,27 @@ open class BAUserWebSocket: BAWebSocket {
         }
     }
     
+    func websocketDidReady() {
+        guard let _ = self.orders else {
+            return
+        }
+        guard let _ = self.positions else {
+            return
+        }
+        guard self.isConnected else {
+            return
+        }
+        if let didReadyBlock = didReadyBlock {
+            didReadyBlock()
+        }
+        NotificationCenter.default.post(name: BAUserWebSocket.websocketDidReadyNotification, object: nil)
+    }
+    
     open func refreshOrders() {
         fetchPendingOrders { orders, errMsg in
             if let orders = orders {
                 self.orders = orders
-                NotificationCenter.default.post(name: BAUserWebSocket.orderRefreshedNotification, object: nil)
+                self.websocketDidReady()
             } else {
                 log("刷新订单失败")
             }
@@ -269,7 +287,7 @@ open class BAUserWebSocket: BAWebSocket {
                 } else {
                     self.assets = [BAAsset]()
                 }
-                NotificationCenter.default.post(name: BAUserWebSocket.accountRefreshedNotification, object: nil)
+                self.websocketDidReady()
             } else {
                 log("刷新Account失败：\(response.errMsg ?? "")")
             }
