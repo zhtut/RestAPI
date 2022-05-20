@@ -25,7 +25,7 @@ open class BAUserWebSocket: BAWebSocket {
         if let assets = assets {
             for asset in assets {
                 if asset.asset == "BUSD" {
-                    return asset.walletBalance.decimalValue
+                    return asset.marginBalance.decimalValue
                 }
             }
         }

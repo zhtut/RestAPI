@@ -29,8 +29,11 @@ open class BAAppSetup {
         }
     }
     
-    open func setup() {
-        
+    open func setup(instId: String) {
+        self.instId = instId
+        let bookTickerManger = BABookTickerManger.shared
+        bookTickerManger.instId = instId
+        bookTickerManger.subcribeDepth()
         log("开始请求产品信息")
         requestInstrument { succ, errMsg in
             if succ {
@@ -41,6 +44,7 @@ open class BAAppSetup {
                 }
                 let websocket = BAUserWebSocket.shared
                 websocket.didReadyBlock = {
+                    BAPosManager.shared.configLever()
                     self.completion?(true, nil)
                 }
             } else {

@@ -143,7 +143,9 @@ open class BAPosManager {
     
     /// 可开张数
     open var canOpenSz: Decimal {
-        return total - dabs(posSz) - orderPosSz
+        let canopen = total - dabs(posSz) - orderPosSz
+        let temp = canopen.precisionStringWith(precision: BAAppSetup.shared.instrument.lotSz)
+        return temp.decimalValue!
     }
     
     open var baseSz: Decimal {
