@@ -11,6 +11,10 @@ import SSCommon
 /// 币种信息
 public struct Instrument: Codable {
     
+    public init() {
+        
+    }
+    
     /// symbol
     public var instId: String = ""
     /// 交易货币币种，如 BTC-USDT 中BTC ，仅适用于币币
