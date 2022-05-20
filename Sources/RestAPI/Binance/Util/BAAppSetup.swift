@@ -13,7 +13,7 @@ open class BAAppSetup {
     
     public static let shared = BAAppSetup()
     
-    open var instId = "ETHBUSD"
+    open var instId = ""
 
     open var instrument: Instrument!
     open var completion: SucceedHandler?
@@ -22,8 +22,6 @@ open class BAAppSetup {
     
     public init() {
         log("init方法，开始app")
-        bookTickerManger.instId = instId
-        bookTickerManger.subcribeDepth()
         
         let _ = BAPosManager.shared
         
