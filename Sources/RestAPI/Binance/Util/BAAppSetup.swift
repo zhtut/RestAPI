@@ -18,8 +18,6 @@ open class BAAppSetup {
     open var instrument: Instrument!
     open var completion: SucceedHandler?
     
-    let bookTickerManger = BABookTickerManger.shared
-    
     public init() {
         log("init方法，开始app")
         
