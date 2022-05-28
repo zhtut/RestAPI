@@ -13,11 +13,9 @@ public let SELL = "SELL"
 //public let LONG = "LONG"
 //public let SHORT = "SHORT"
 
-public let NEWING = "NEWING"
 public let NEW = "NEW"
 public let PARTIALLY_FILLED = "PARTIALLY_FILLED"
 public let FILLED = "FILLED"
-public let CANCELING = "CANCELING"
 public let CANCELED = "CANCELED"
 public let EXPIRED = "EXPIRED"
 public let NEW_INSURANCE = "NEW_INSURANCE" //  风险保障基金(强平)
@@ -82,7 +80,7 @@ open class BAOrder: Codable {
         }
     }
     
-    open class func cancel(orders: [BAOrder], maxCount: Int = 5, completion: @escaping SucceedHandler) {
+    open class func cancel(orders: [BAOrder], maxCount: Int = 10, completion: @escaping SucceedHandler) {
         if orders.count == 0 {
             completion(true, nil)
             return

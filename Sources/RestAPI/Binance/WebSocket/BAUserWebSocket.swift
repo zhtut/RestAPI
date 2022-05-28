@@ -13,6 +13,7 @@ open class BAUserWebSocket: BAWebSocket {
     
     public static let shared = BAUserWebSocket()
     
+    var didNoticeReady = false
     open var didReadyBlock: (() -> Void)?
     
     var listenKey: String?
@@ -130,17 +131,20 @@ open class BAUserWebSocket: BAWebSocket {
         if let e = data.stringFor("e") {
             if e == "listenKeyExpired" {
                 refreshListenKey()
+                return
             } else if e == "ORDER_TRADE_UPDATE" {
                 processOrder(message: message)
+                return
             } else if e == "ACCOUNT_UPDATE" {
                 processAccount(data: data)
+                return
             }
-        } else {
-            log("other User websocket message:\(message.jsonStr ?? "")")
         }
+        log("other User websocket message:\(message.jsonStr ?? "")")
     }
     
     func processOrder(message: [String: Any]) {
+        log("order变化：\(message.jsonStr ?? "")")
         if let data = message["o"] as? [String: Any] {
             let order = BAOrder()
             order.symbol = data.stringFor("s") ?? ""
@@ -170,12 +174,18 @@ open class BAUserWebSocket: BAWebSocket {
                 orders?.append(order)
             }
             self.orders = orders
-            log("订单变化，\(order.price ?? "")\(order.side == BUY ? "买入": "卖出")\(order.origQty ?? "")：\(order.status ?? "")")
+            log("有订单发生变化，\(order.price ?? "")\(order.side == BUY ? "买入": "卖出")\(order.origQty ?? "")：\(order.status ?? "")")
+            log("当前订单数量：\(self.orders?.count ?? 0)")
             NotificationCenter.default.post(name: BAUserWebSocket.orderChangedNotification, object: order)
+        } else {
+            fatalError("order没有op字段")
         }
     }
     
     func websocketDidReady() {
+        if self.didNoticeReady {
+            return
+        }
         guard let _ = self.orders else {
             return
         }
@@ -189,15 +199,20 @@ open class BAUserWebSocket: BAWebSocket {
             didReadyBlock()
         }
         NotificationCenter.default.post(name: BAUserWebSocket.websocketDidReadyNotification, object: nil)
+        self.didNoticeReady = true
     }
     
     open func refreshOrders() {
         fetchPendingOrders { orders, errMsg in
             if let orders = orders {
                 self.orders = orders
+                log("已刷新，当前订单数量：\(self.orders?.count ?? 0)")
                 self.websocketDidReady()
             } else {
                 log("刷新订单失败")
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                self.refreshOrders()
             }
         }
     }

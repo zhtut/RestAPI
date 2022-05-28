@@ -19,6 +19,8 @@ open class BAWebSocket: SSWebSocket {
         false
     }
     
+    open var didOpenHandler: (() -> Void)?
+    
 //    open func subscribe(method: String = "SUBSCRIBE",
 //                   params: [String]) {
 //        let dic = [ "method": method, "params": params, "id": Int(Date().timeIntervalSince1970)] as [String: Any]
@@ -41,6 +43,8 @@ open class BAWebSocket: SSWebSocket {
     open override func webSocketDidOpen() {
         super.webSocketDidOpen()
         log("\(urlStr) webSocketDidOpen")
+        didOpenHandler?()
+        didOpenHandler = nil
     }
     
     open override func webSocketDidReceivePing() {

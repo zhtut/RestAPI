@@ -9,8 +9,8 @@ import Foundation
 import SSCommon
 import SSLog
 
-let newClientOrderId = "newClientOrderId"
-let clientOrderId = "clientOrderId"
+public let newClientOrderId = "newClientOrderId"
+public let clientOrderId = "clientOrderId"
 
 open class BAOrderManager {
     
@@ -96,7 +96,7 @@ open class BAOrderManager {
     open class func order(params: [String: Any], completion: @escaping SucceedHandler) -> String {
         let path = "POST /fapi/v1/order (HMAC SHA256)"
         var clientOrdId = ""
-        if let temp = params.stringFor("newClientOrderId") {
+        if let temp = params.stringFor(newClientOrderId) {
             clientOrdId = temp
         }
         if let side = params["side"],

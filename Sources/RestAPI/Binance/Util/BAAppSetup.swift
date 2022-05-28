@@ -18,22 +18,23 @@ open class BAAppSetup {
     open var instrument: Instrument!
     open var completion: SucceedHandler?
     
-    public init() {
-        log("init方法，开始app")
-        
-        let _ = BAPosManager.shared
+    open func setup(instId: String, completion: @escaping SucceedHandler) {
+        log("setup App方法，开始app")
         
         sendPushNotication("开始记录日志")
         let _ = Timer.scheduledTimer(withTimeInterval: 5 * 60, repeats: true) { timer in
             sendPushNotication("状态消息，当前状态正常")
         }
-    }
-    
-    open func setup(instId: String) {
+        
+        let _ = BAPosManager.shared
+        
         self.instId = instId
+        self.completion = completion
+        
         let bookTickerManger = BABookTickerManger.shared
         bookTickerManger.instId = instId
         bookTickerManger.subcribeDepth()
+        
         log("开始请求产品信息")
         requestInstrument { succ, errMsg in
             if succ {

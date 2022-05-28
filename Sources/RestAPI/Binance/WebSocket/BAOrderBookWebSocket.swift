@@ -11,14 +11,14 @@ import SSLog
 
 open class BAOrderBookWebSocket: BAWebSocket {
     
-    var symbol = ""
-    var orderBook: BAOrderBook?
+    open var symbol = ""
+    open var orderBook = BAOrderBook()
+    open var orderBookChangedHandler: ((_ orderBook: BAOrderBook) -> Void)?
     
     public convenience init(symbol: String) {
         self.init()
         self.symbol = symbol
-        orderBook = BAOrderBook()
-        orderBook?.instId = symbol
+        orderBook.instId = symbol
         self.open()
     }
     
@@ -26,13 +26,12 @@ open class BAOrderBookWebSocket: BAWebSocket {
         let str = "\(APIKeyConfig.default.BA_Websocket_URL_Str)/\(symbol.lowercased())@depth@100ms"
         return str
     }
-    
-    /// OrderBook变化的通知
-    public static let orderBookDidChangeNotification = Notification.Name("BAOrderBookDidChangeNotification")
 
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
-        orderBook?.update(message: message)
-        NotificationCenter.default.post(name: BAOrderBookWebSocket.orderBookDidChangeNotification, object: orderBook)
+        let result = orderBook.update(message: message)
+        if result {
+            orderBookChangedHandler?(orderBook)
+        }
     }
 }

@@ -45,15 +45,15 @@ open class BAOrderBook {
         }
     }
     
-    open func update(message: [String: Any]) {
+    open func update(message: [String: Any]) -> Bool {
         if self.isRefreshing {
-            return
+            return false
         }
         
         let pu = message.intFor("pu") ?? 0
         if pu != u {
             refreshOrderBook()
-            return
+            return false
         }
         
         if let a = message["a"] as? [[String]],
@@ -70,7 +70,7 @@ open class BAOrderBook {
         T = message.intFor("T") ?? 0
         u = message.intFor("u") ?? 0
         
-//        logOrderBook()
+        return true
     }
     
     open func updateAsks(a: [[String]]) {
@@ -79,7 +79,7 @@ open class BAOrderBook {
             var newAsks = asks.filter { orderBook in
                 return ob.p != orderBook.p
             }
-            if ob.s > 0 {
+            if ob.v > 0 {
                 newAsks.append(ob)
             }
             asks = newAsks
@@ -95,7 +95,7 @@ open class BAOrderBook {
             var newBids = bids.filter { orderBook in
                 return ob.p != orderBook.p
             }
-            if ob.s > 0 {
+            if ob.v > 0 {
                 newBids.append(ob)
             }
             bids = newBids
@@ -122,22 +122,25 @@ open class BAOrderBook {
     open func logPrice(arr: [BAOrderBookPrice], index: Int) {
         if arr.count > index {
             let price = arr[index]
-            log("\(price.p) \(price.s)")
+            log("\(price.p) \(price.v)")
         }
     }
 }
 
+/// 盘口价格
 open class BAOrderBookPrice {
-    var p: Decimal = 0
-    var s: Decimal = 0
+    /// 价格
+    open var p: Decimal = 0
+    /// 数量
+    open var v: Decimal = 0
     
     public convenience init(array: [String]) {
         self.init()
         if let p = Decimal(string: array[0]) {
             self.p = p
         }
-        if let s = Decimal(string: array[1]) {
-            self.s = s
+        if let v = Decimal(string: array[1]) {
+            self.v = v
         }
     }
 }
