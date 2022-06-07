@@ -18,6 +18,8 @@ open class BAUserWebSocket: BAWebSocket {
     
     var listenKey: String?
     
+    var expiredOrders = [Int]()
+    
     open var orders: [BAOrder]?
     open var positions: [BAPosition]?
     open var assets: [BAAsset]?
@@ -157,7 +159,11 @@ open class BAUserWebSocket: BAWebSocket {
             order.avgPrice = data.stringFor("ap") ?? ""
             order.stopPrice = data.stringFor("sp") ?? ""
             order.status = data.stringFor("X") ?? ""
-            order.orderId = data.intFor("i") ?? 0
+            guard let ord = data.intFor("i") else { return }
+            if self.expiredOrders.contains(ord) {
+                return
+            }
+            order.orderId = ord
             order.executedQty = data.stringFor("z") ?? ""
             order.time = data.intFor("T") ?? 0
             order.workingType = data.stringFor("wt") ?? ""
@@ -177,6 +183,14 @@ open class BAUserWebSocket: BAWebSocket {
             log("有订单发生变化，\(order.price ?? "")\(order.side == BUY ? "买入": "卖出")\(order.origQty ?? "")：\(order.status ?? "")")
             log("当前订单数量：\(self.orders?.count ?? 0)")
             NotificationCenter.default.post(name: BAUserWebSocket.orderChangedNotification, object: order)
+            
+            // 失效的订单加入一个数组中，五秒后移除
+            if order.status == EXPIRED {
+                self.expiredOrders.append(ord)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                self.expiredOrders.remove(ord)
+            }
         } else {
             fatalError("order没有op字段")
         }
