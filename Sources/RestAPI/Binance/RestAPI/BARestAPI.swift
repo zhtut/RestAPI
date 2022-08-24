@@ -10,6 +10,7 @@ import SSEncrypt
 import SSNetwork
 
 open class BARestAPI: NSObject {
+    @available(*, renamed: "sendRequestWith(path:params:method:dataKey:)")
     open class func sendRequestWith(path: String,
                                     params: Any? = nil,
                                     method: SSHttpMethod = .GET,
@@ -90,29 +91,52 @@ open class BARestAPI: NSObject {
         }
     }
     
+    open class func sendRequestWith(path: String,
+                                    params: Any? = nil,
+                                    method: SSHttpMethod = .GET,
+                                    dataKey: String = "") async -> BAResponse {
+        return await withCheckedContinuation { continuation in
+            sendRequestWith(path: path, params: params, method: method, dataKey: dataKey) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
+    
+    @available(*, renamed: "sendRequestWith(path:params:method:dataKey:dataClass:)")
     open class func sendRequestWith<T: Decodable>(path: String,
                                                   params: Any? = nil,
                                                   method: SSHttpMethod = .GET,
                                                   dataKey: String = "",
                                                   dataClass: T.Type,
                                                   completion: @escaping (BAResponse) -> Void) {
-        sendRequestWith(path: path, params: params, method: method, dataKey: dataKey) { response in
-            if response.responseSucceed {
-                let da = response.data
-                if da is [String: Any] {
-                    if let dic = da as? [String: Any],
-                       let dataModel = dic.transformToModel(dataClass.self) {
-                        response.data = dataModel
-                    }
-                } else if da is [Any] {
-                    if let array = da as? [[String: Any]],
-                       let models = array.transformToModelArray(dataClass.self) {
-                        response.data = models
-                    }
+        Task {
+            let result: BAResponse = await sendRequestWith(path: path, params: params, method: method, dataKey: dataKey, dataClass: dataClass)
+            completion(result)
+        }
+    }
+    
+    
+    open class func sendRequestWith<T: Decodable>(path: String,
+                                                  params: Any? = nil,
+                                                  method: SSHttpMethod = .GET,
+                                                  dataKey: String = "",
+                                                  dataClass: T.Type) async -> BAResponse {
+        let response = await sendRequestWith(path: path, params: params, method: method, dataKey: dataKey)
+        if response.responseSucceed {
+            let da = response.data
+            if da is [String: Any] {
+                if let dic = da as? [String: Any],
+                   let dataModel = dic.transformToModel(dataClass.self) {
+                    response.data = dataModel
+                }
+            } else if da is [Any] {
+                if let array = da as? [[String: Any]],
+                   let models = array.transformToModelArray(dataClass.self) {
+                    response.data = models
                 }
             }
-            
-            completion(response)
         }
+        return response
     }
 }
