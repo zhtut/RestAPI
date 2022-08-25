@@ -13,7 +13,7 @@ open class BAAppSetup {
     
     public static let shared = BAAppSetup()
     
-    open var instId = ""
+    open var instId = "ETHBUSD"
 
     open var instrument: Instrument!
     open var completion: SucceedHandler?
