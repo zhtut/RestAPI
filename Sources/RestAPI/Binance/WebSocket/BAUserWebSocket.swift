@@ -146,7 +146,6 @@ open class BAUserWebSocket: BAWebSocket {
     }
     
     func processOrder(message: [String: Any]) {
-        log("order变化：\(message.jsonStr ?? "")")
         if let data = message["o"] as? [String: Any] {
             let order = BAOrder()
             order.symbol = data.stringFor("s") ?? ""
@@ -180,10 +179,12 @@ open class BAUserWebSocket: BAWebSocket {
                 orders?.append(order)
             }
             self.orders = orders
-            log("有订单发生变化，\(order.price ?? "")\(order.side == BUY ? "买入": "卖出")\(order.origQty ?? "")：\(order.status ?? "")")
+            let price = order.price?.intValue > 0 ? : order.price ?? "" : "市价"
+            let action = order.side == BUY ? "买入": "卖出"
+            let qty = order.origQty ?? ""
+            log("订单变化: \(price)\(action)\(qty), 状态: \(order.status ?? "")")
             log("当前订单数量：\(self.orders?.count ?? 0)")
             NotificationCenter.default.post(name: BAUserWebSocket.orderChangedNotification, object: order)
-            
             // 失效的订单加入一个数组中，五秒后移除
             if order.status == EXPIRED {
                 self.expiredOrders.append(ord)
@@ -220,7 +221,6 @@ open class BAUserWebSocket: BAWebSocket {
         fetchPendingOrders { orders, errMsg in
             if let orders = orders {
                 self.orders = orders
-                log("已刷新，当前订单数量：\(self.orders?.count ?? 0)")
                 self.websocketDidReady()
             } else {
                 log("刷新订单失败")
