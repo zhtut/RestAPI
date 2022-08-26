@@ -125,9 +125,11 @@ open class BAOrderManager {
                                                       isBuy: !isBuy,
                                                       sz: sz)
                     order(params: closeParams, completion: completion)
+                    return
                 }
             }
         }
+        completion(false, "没有持仓，不需要清仓")
     }
     
     open class func fetchUserTrades(instId: String,
