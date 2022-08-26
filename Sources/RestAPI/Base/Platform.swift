@@ -35,3 +35,10 @@ open class PlatformBase: NSObject {
         platform.log(message)
     }
 }
+
+public struct NormalError: Error {
+    public var errMsg: String
+    public init(errMsg: String) {
+        self.errMsg = errMsg
+    }
+}
