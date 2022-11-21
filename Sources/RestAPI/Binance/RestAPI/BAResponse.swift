@@ -9,31 +9,39 @@ import Foundation
 import SSCommon
 import SSNetwork
 
-open class BAResponse: SSResponse {
-
-    open var code: Int?
-    open var data: Any?
-    open var msg: String?
+public struct BAResponse {
     
-    open var responseSucceed: Bool {
-        if fetchSucceed {
+    public var res: SSResponse
+    
+    init(res: SSResponse) async {
+        self.res = res
+        if let json = await res.bodyJson {
+            if res.succeed {
+                self.data = json
+            } else {
+                if let dict = json as? [String: Any] {
+                    self.code = dict["code"] as? Int
+                    self.msg = dict["msg"] as? String
+                }
+            }
+        }
+    }
+    
+    public var code: Int?
+    public var data: Any?
+    public var msg: String?
+    
+    public var responseSucceed: Bool {
+        if res.succeed {
             return code == nil || code == 200
         }
         return false
     }
     
-    open var serverErrMsg: String? {
+    public var errMsg: String? {
         if self.code != nil && self.msg != nil {
             return self.msg
         }
-        return nil
-    }
-    
-    open var errMsg: String? {
-        if fetchSucceed {
-            return serverErrMsg
-        } else {
-            return systemErrMsg
-        }
+        return res.error?.localizedDescription
     }
 }

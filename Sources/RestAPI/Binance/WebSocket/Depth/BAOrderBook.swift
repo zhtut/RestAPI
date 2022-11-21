@@ -24,35 +24,34 @@ open class BAOrderBook {
     
     open var isRefreshing = false
     
-    open func refreshOrderBook() {
+    open func refreshOrderBook() async {
         isRefreshing = true
         let path = "GET /fapi/v1/depth"
         let params = ["symbol": instId, "limit": 100] as [String: Any]
-        BARestAPI.sendRequestWith(path: path, params: params) { response in
-            if response.responseSucceed {
-                if let message = response.data as? [String: Any] {
-                     if let a = message["asks"] as? [[String]],
-                       let b = message["bids"] as? [[String]] {
-                         self.asks.removeAll()
-                         self.bids.removeAll()
-                         self.updateAsks(a: a)
-                         self.updateBids(b: b)
-                    }
-                    self.u = message.intFor("lastUpdateId") ?? 0
-                    self.isRefreshing = false
+        let response = await BARestAPI.sendRequestWith(path: path, params: params)
+        if response.responseSucceed {
+            if let message = response.data as? [String: Any] {
+                if let a = message["asks"] as? [[String]],
+                   let b = message["bids"] as? [[String]] {
+                    self.asks.removeAll()
+                    self.bids.removeAll()
+                    self.updateAsks(a: a)
+                    self.updateBids(b: b)
                 }
+                self.u = message.intFor("lastUpdateId") ?? 0
+                self.isRefreshing = false
             }
         }
     }
     
-    open func update(message: [String: Any]) -> Bool {
+    open func update(message: [String: Any]) async -> Bool {
         if self.isRefreshing {
             return false
         }
         
         let pu = message.intFor("pu") ?? 0
         if pu != u {
-            refreshOrderBook()
+            await refreshOrderBook()
             return false
         }
         

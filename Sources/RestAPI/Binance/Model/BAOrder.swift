@@ -68,37 +68,30 @@ open class BAOrder: Codable {
         return false
     }
     
-    open func cancelWith(completion: @escaping SucceedHandler) {
+    open func cancel() async -> (succ: Bool, errMsg: String?) {
         let path = "DELETE /fapi/v1/order (HMAC SHA256)"
         let params = ["symbol": symbol ?? "", "orderId": orderId ?? 0] as [String : Any]
-        BARestAPI.sendRequestWith(path: path, params: params) { response in
-            if response.responseSucceed {
-                completion(true, nil)
-                return
-            }
-            completion(false, response.errMsg)
-        }
+        let response = await BARestAPI.sendRequestWith(path: path, params: params)
+        return (response.responseSucceed, response.errMsg)
     }
     
-    open class func cancel(orders: [BAOrder], maxCount: Int = 10, completion: @escaping SucceedHandler) {
+    
+    open class func cancel(orders: [BAOrder], maxCount: Int = 10) async -> (succ: Bool, errMsg: String?) {
         if orders.count == 0 {
-            completion(true, nil)
-            return
+            return (true, nil)
         }
         
         if orders.count > maxCount {
-            var orders = orders
-            while orders.count > 0 {
-                let topFive = Array(orders.prefix(maxCount))
-                orders = orders.suffix(orders.count - topFive.count)
-                let needCompletion = orders.count <= maxCount
-                cancel(orders: topFive) { succ, errMsg in
-                    if needCompletion {
-                        completion(succ, errMsg)
-                    }
+            var orders1 = orders
+            while orders1.count > 0 {
+                let topFive = Array(orders1.prefix(maxCount))
+                orders1 = orders1.suffix(orders1.count - topFive.count)
+                let needCompletion = orders1.count <= maxCount
+                let (succ, errMsg) = await cancel(orders: topFive)
+                if needCompletion {
+                    return (succ, errMsg)
                 }
             }
-            return
         }
         
         let path = "DELETE /fapi/v1/batchOrders (HMAC SHA256)"
@@ -118,29 +111,18 @@ open class BAOrder: Codable {
         }
         
         if orderIds.count == 0 && clientOrderIds.count == 0 {
-            completion(true, nil);
-            return
+            return (true, nil);
         }
         
         let params = ["symbol": symbol, "orderIdList": orderIds, "origClientOrderIdList": clientOrderIds] as [String : Any]
-        BARestAPI.sendRequestWith(path: path, params: params) { response in
-            if response.responseSucceed {
-                completion(true, nil)
-                return
-            }
-            completion(false, response.errMsg)
-        }
+        let response =  await BARestAPI.sendRequestWith(path: path, params: params)
+        return (response.responseSucceed, response.errMsg)
     }
     
-    open class func cancelAllOrders(symbol: String, completion: @escaping SucceedHandler) {
+    open class func cancelAllOrders(symbol: String) async -> (succ: Bool, errMsg: String?) {
         let path = "DELETE /fapi/v1/allOpenOrders (HMAC SHA256)"
         let params = ["symbol": symbol]
-        BARestAPI.sendRequestWith(path: path, params: params) { response in
-            if response.responseSucceed {
-                completion(true, nil)
-            } else {
-                completion(false, response.errMsg)
-            }
-        }
+        let response = await BARestAPI.sendRequestWith(path: path, params: params)
+        return (response.responseSucceed, response.errMsg)
     }
 }

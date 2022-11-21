@@ -46,75 +46,71 @@ open class BAOrderManager {
         return params
     }
     
+    @available(*, renamed: "batchOrder(batchParams:maxCount:)")
     open class func batchOrder(batchParams: [[String: Any]], maxCount: Int = 5, completion: @escaping ([(Bool, String?)]) -> Void) {
+        Task {
+            let result = await batchOrder(batchParams: batchParams, maxCount: maxCount)
+            completion(result)
+        }
+    }
+    
+    
+    open class func batchOrder(batchParams: [[String: Any]], maxCount: Int = 5) async -> [(Bool, String?)] {
         if batchParams.count == 0 {
-            completion([(Bool, String?)]())
-            return
+            return [(Bool, String?)]()
         }
         let originParams = batchParams
         if batchParams.count > maxCount {
-            var batchParams = batchParams
+            var batchParams1 = batchParams
             var completions = [(Bool, String?)]()
-            while batchParams.count > 0 {
-                let top = Array(batchParams.prefix(maxCount))
-                batchOrder(batchParams: top) { result in
-                    completions += result
-                    if completions.count == originParams.count {
-                        completion(completions)
-                    }
+            while batchParams1.count > 0 {
+                let top = Array(batchParams1.prefix(maxCount))
+                let result = await batchOrder(batchParams: top)
+                completions += result
+                if completions.count == originParams.count {
+                    return completions
                 }
-                batchParams = batchParams.suffix(batchParams.count - top.count)
+                batchParams1 = batchParams1.suffix(batchParams1.count - top.count)
             }
-            return
+            return [(Bool, String?)]()
         }
         
         let path = "POST /fapi/v1/batchOrders (HMAC SHA256)"
         let params = ["batchOrders": batchParams]
-        BARestAPI.sendRequestWith(path: path, params: params) { response in
-            if response.responseSucceed,
-               let data = response.data as? [[String: Any]] {
-                var result = [(Bool, String?)]()
-                for (_, dic) in data.enumerated() {
-                    if dic.stringFor("code") != nil {
-                        result.append((false, dic.stringFor("msg")))
-                    } else {
-                        result.append((true, nil))
-                    }
+        let response = await BARestAPI.sendRequestWith(path: path, params: params)
+        if response.responseSucceed,
+           let data = response.data as? [[String: Any]] {
+            var result = [(Bool, String?)]()
+            for (_, dic) in data.enumerated() {
+                if dic.stringFor("code") != nil {
+                    result.append((false, dic.stringFor("msg")))
+                } else {
+                    result.append((true, nil))
                 }
-                completion(result)
-            } else {
-                var result = [(Bool, String?)]()
-                for _ in batchParams {
-                    result.append((false, response.errMsg))
-                }
-                completion(result)
             }
+            return result
+        } else {
+            var result = [(Bool, String?)]()
+            for _ in batchParams {
+                result.append((false, response.errMsg))
+            }
+            return result
         }
     }
     
     @discardableResult
-    open class func order(params: [String: Any], completion: @escaping SucceedHandler) -> String {
+    open class func order(params: [String: Any]) async -> (succ: Bool, errMsg: String?) {
         let path = "POST /fapi/v1/order (HMAC SHA256)"
-        var clientOrdId = ""
-        if let temp = params.stringFor(newClientOrderId) {
-            clientOrdId = temp
-        }
         if let side = params["side"],
            let sz = params["quantity"] {
             log("准备下单，side: \(side), 数量：\(sz)")
         }
-        BARestAPI.sendRequestWith(path: path, params: params) { response in
-            if response.responseSucceed {
-                completion(true, nil)
-            } else {
-                completion(false, response.errMsg)
-            }
-        }
-        return clientOrdId
+        let response =  await BARestAPI.sendRequestWith(path: path, params: params)
+        return (response.responseSucceed, response.errMsg)
     }
     
     // 一键清仓
-    open class func closePosition(completion: @escaping SucceedHandler) {
+    open class func closePosition() async -> (succ: Bool, errMsg: String?) {
         if let positions = BAUserWebSocket.shared.positions {
             for position in positions {
                 if let positionAmt = position.positionAmt.decimalValue {
@@ -124,20 +120,18 @@ open class BAOrderManager {
                     let closeParams = orderParamsWith(instId: symbol,
                                                       isBuy: !isBuy,
                                                       sz: sz)
-                    order(params: closeParams, completion: completion)
-                    return
+                    return await order(params: closeParams)
                 }
             }
         }
-        completion(false, "没有持仓，不需要清仓")
+        return (false, "没有持仓，不需要清仓")
     }
     
     open class func fetchUserTrades(instId: String,
                                     startTime: String? = nil,
                                     endTime: String? = nil,
                                     fromId: Int? = nil,
-                                    limit: Int? = nil,
-                                    completion: @escaping ([BAUserTrade]?, String?) -> Void) {
+                                    limit: Int? = nil) async -> ([BAUserTrade]?, String?) {
         let path = "GET /fapi/v1/userTrades (HMAC SHA256)"
         var params = ["symbol": instId] as [String: Any]
         if let startTime = startTime,
@@ -154,23 +148,21 @@ open class BAOrderManager {
         if let limit = limit {
             params["limit"] = limit
         }
-        BARestAPI.sendRequestWith(path: path, params: params, dataClass: BAUserTrade.self) { response in
-            if response.responseSucceed {
-                if let data = response.data as? [BAUserTrade] {
-                    completion(data, nil)
-                }
-            } else {
-                completion(nil, response.errMsg)
+        
+        let response = await BARestAPI.sendRequestWith(path: path, params: params, dataClass: BAUserTrade.self)
+        if response.responseSucceed {
+            if let data = response.res.model as? [BAUserTrade] {
+                return (data, nil)
             }
         }
+        return (nil, response.errMsg)
     }
     
     open class func fetchHistoryOrders(instId: String,
                                        orderId: String? = nil,
                                        startTime: String? = nil,
                                        endTime: String? = nil,
-                                       limit: Int? = nil,
-                                       completion: @escaping ([BAOrder]?, String?) -> Void) {
+                                       limit: Int? = nil) async -> ([BAOrder]?, String?) {
         let path = "GET /fapi/v1/allOrders (HMAC SHA256)"
         var params = ["symbol": instId] as [String: Any]
         if let orderId = orderId {
@@ -187,14 +179,12 @@ open class BAOrderManager {
         if let limit = limit {
             params["limit"] = limit
         }
-        BARestAPI.sendRequestWith(path: path, params: params, dataClass: BAOrder.self) { response in
-            if response.responseSucceed {
-                if let data = response.data as? [BAOrder] {
-                    completion(data, nil)
-                }
-            } else {
-                completion(nil, response.errMsg)
+        let response = await BARestAPI.sendRequestWith(path: path, params: params, dataClass: BAOrder.self)
+        if response.responseSucceed {
+            if let data = response.res.model as? [BAOrder] {
+                return (data, nil)
             }
         }
+        return (nil, response.errMsg)
     }
 }

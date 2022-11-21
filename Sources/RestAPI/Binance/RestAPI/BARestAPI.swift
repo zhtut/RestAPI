@@ -9,29 +9,27 @@ import Foundation
 import SSEncrypt
 import SSNetwork
 
-open class BARestAPI: NSObject {
-    @available(*, renamed: "sendRequestWith(path:params:method:dataKey:)")
+open class BARestAPI {
+    @discardableResult
     open class func sendRequestWith(path: String,
                                     params: Any? = nil,
-                                    method: SSHttpMethod = .GET,
-                                    dataKey: String = "",
-                                    completion: @escaping (BAResponse) -> Void) {
+                                    method: SSHTTPMethod = .GET,
+                                    dataKey: String? = nil,
+                                    dataClass: Decodable.Type? = nil) async -> BAResponse {
         var newMethod = method
         var newPath = path
         
         if newPath.hasPrefix("GET") {
             newMethod = .GET
-            newPath = newPath.replacingOccurrences(of: "\(SSHttpMethod.GET) ", with: "")
         } else if newPath.hasPrefix("POST") {
             newMethod = .POST
-            newPath = newPath.replacingOccurrences(of: "\(SSHttpMethod.POST) ", with: "")
         } else if newPath.hasPrefix("DELETE") {
             newMethod = .DELETE
-            newPath = newPath.replacingOccurrences(of: "\(SSHttpMethod.DELETE) ", with: "")
         } else if newPath.hasPrefix("PUT") {
             newMethod = .PUT
-            newPath = newPath.replacingOccurrences(of: "\(SSHttpMethod.PUT) ", with: "")
         }
+        
+        newPath = newPath.replacingOccurrences(of: "\(newMethod) ", with: "")
         
         var needSign = false
         if newPath.hasSuffix(" (HMAC SHA256)") {
@@ -68,75 +66,8 @@ open class BARestAPI: NSObject {
         headerFields["Accept"] = "application/json"
         
         let print = false
-        let _ = SSNetworkHelper.sendRequest(urlStr: urlStr, header: headerFields, method: newMethod, timeOut: 10, printLog: print) { res in
-            let response = BAResponse.init(response: res)
-            if response.fetchSucceed {
-                if let dictionary = response.originJson as? [String: Any] {
-                    if dataKey.count > 0 {
-                        let da = dictionary[dataKey]
-                        response.data = da
-                    } else {
-                        response.data = response.originJson
-                    }
-                } else {
-                    response.data = response.originJson
-                }
-            } else {
-                if let dictionary = response.originJson as? [String: Any] {
-                    response.code = Int(dictionary["code"] as? String ?? "")
-                    response.msg = dictionary["msg"] as? String
-                }
-            }
-            completion(response)
-        }
-    }
-    
-    open class func sendRequestWith(path: String,
-                                    params: Any? = nil,
-                                    method: SSHttpMethod = .GET,
-                                    dataKey: String = "") async -> BAResponse {
-        return await withCheckedContinuation { continuation in
-            sendRequestWith(path: path, params: params, method: method, dataKey: dataKey) { result in
-                continuation.resume(returning: result)
-            }
-        }
-    }
-    
-    
-    @available(*, renamed: "sendRequestWith(path:params:method:dataKey:dataClass:)")
-    open class func sendRequestWith<T: Decodable>(path: String,
-                                                  params: Any? = nil,
-                                                  method: SSHttpMethod = .GET,
-                                                  dataKey: String = "",
-                                                  dataClass: T.Type,
-                                                  completion: @escaping (BAResponse) -> Void) {
-        Task {
-            let result: BAResponse = await sendRequestWith(path: path, params: params, method: method, dataKey: dataKey, dataClass: dataClass)
-            completion(result)
-        }
-    }
-    
-    
-    open class func sendRequestWith<T: Decodable>(path: String,
-                                                  params: Any? = nil,
-                                                  method: SSHttpMethod = .GET,
-                                                  dataKey: String = "",
-                                                  dataClass: T.Type) async -> BAResponse {
-        let response = await sendRequestWith(path: path, params: params, method: method, dataKey: dataKey)
-        if response.responseSucceed {
-            let da = response.data
-            if da is [String: Any] {
-                if let dic = da as? [String: Any],
-                   let dataModel = dic.transformToModel(dataClass.self) {
-                    response.data = dataModel
-                }
-            } else if da is [Any] {
-                if let array = da as? [[String: Any]],
-                   let models = array.transformToModelArray(dataClass.self) {
-                    response.data = models
-                }
-            }
-        }
-        return response
+        let response = await SSNetwork.sendRequest(urlStr: urlStr, header: headerFields, method: newMethod, printLog: print, dataKey: dataKey, modelType: dataClass)
+        let baRes = await BAResponse(res: response)
+        return baRes
     }
 }

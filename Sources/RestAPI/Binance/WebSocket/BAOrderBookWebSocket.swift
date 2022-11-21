@@ -29,9 +29,11 @@ open class BAOrderBookWebSocket: BAWebSocket {
 
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
-        let result = orderBook.update(message: message)
-        if result {
-            orderBookChangedHandler?(orderBook)
+        Task {
+            let result = await orderBook.update(message: message)
+            if result {
+                orderBookChangedHandler?(orderBook)
+            }
         }
     }
 }

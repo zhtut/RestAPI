@@ -8,6 +8,10 @@
 import Foundation
 import SSCommon
 
+public struct CommonError: Error {
+    var errMsg: String
+}
+
 /// 币种信息
 public struct Instrument: Codable {
     

@@ -56,51 +56,55 @@ open class BAUserWebSocket: BAWebSocket {
     public override init() {
         super.init()
         log("UserWebsocket初始化")
-        refreshListenKey()
-        
-        log("开始刷新订单")
-        refreshOrders()
-        
-        log("开始刷新账户信息")
-        refreshAccount()
+        Task {
+            await self.refreshListenKey()
+            
+            log("开始刷新订单")
+            await refreshOrders()
+            
+            log("开始刷新账户信息")
+            await refreshAccount()
+        }
     }
     
-    open func refreshListenKey() {
+    open func refreshListenKey() async {
         log("开始请求ListenKey")
-        createListenKey { succ, errMsg in
-            if succ {
-                self.open()
-                
-                log("开始刷新ListenKey的有效期")
-                self.startPutListenKey()
-            } else {
-                log("ListenKey请求失败：\(errMsg ?? "")，一秒后重试")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    self.refreshListenKey()
+        let result = await createListenKey()
+        if result.succ {
+            self.open()
+            
+            log("开始刷新ListenKey的有效期")
+            self.startPutListenKey()
+        } else {
+            log("ListenKey请求失败：\(result.errMsg ?? "")，一秒后重试")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                Task {
+                   await self.refreshListenKey()
                 }
             }
         }
     }
     
-    func createListenKey(completion: @escaping SucceedHandler) {
+    func createListenKey() async -> (succ: Bool, errMsg: String?) {
         let path = "POST /fapi/v1/listenKey (HMAC SHA256)"
-        BARestAPI.sendRequestWith(path: path) { response in
-            if response.responseSucceed {
-                if let data = response.data as? [String: Any],
-                   let listenKey = data.stringFor("listenKey") {
-                    self.listenKey = listenKey
-                    completion(true, nil)
-                    return
-                }
+        let response = await BARestAPI.sendRequestWith(path: path)
+        if response.responseSucceed {
+            if let data = response.data as? [String: Any],
+               let listenKey = data.stringFor("listenKey") {
+                self.listenKey = listenKey
+                return (true, nil)
+                
             }
-            completion(false, response.errMsg)
         }
+        return (false, response.errMsg)
     }
     
     func startPutListenKey() {
         putTimer?.invalidate()
         putTimer = Timer.scheduledTimer(withTimeInterval: 30 * 60, repeats: true, block: { timer in
-            self.putListenKey()
+            Task {
+                await self.putListenKey()
+            }
         })
     }
     
@@ -108,11 +112,9 @@ open class BAUserWebSocket: BAWebSocket {
         putTimer?.invalidate()
     }
     
-    func putListenKey() {
+    func putListenKey() async {
         let path = "PUT /fapi/v1/listenKey (HMAC SHA256)"
-        BARestAPI.sendRequestWith(path: path) { response in
-            
-        }
+        await BARestAPI.sendRequestWith(path: path)
     }
     
     open override func webSocketDidOpen() {
@@ -132,7 +134,9 @@ open class BAUserWebSocket: BAWebSocket {
         }
         if let e = data.stringFor("e") {
             if e == "listenKeyExpired" {
-                refreshListenKey()
+                Task {
+                    await refreshListenKey()
+                }
                 return
             } else if e == "ORDER_TRADE_UPDATE" {
                 processOrder(message: message)
@@ -217,28 +221,28 @@ open class BAUserWebSocket: BAWebSocket {
         self.didNoticeReady = true
     }
     
-    open func refreshOrders() {
-        fetchPendingOrders { orders, errMsg in
-            if let orders = orders {
-                self.orders = orders
-                self.websocketDidReady()
-            } else {
-                log("刷新订单失败")
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                self.refreshOrders()
+    open func refreshOrders() async {
+        let orderResult = await fetchPendingOrders()
+        if let orders = orderResult.0 {
+            self.orders = orders
+            self.websocketDidReady()
+        } else {
+            log("刷新订单失败")
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            Task {
+               await self.refreshOrders()
             }
         }
     }
     
-    func fetchPendingOrders(completion: @escaping ([BAOrder]?, String?) -> Void) {
+    func fetchPendingOrders() async -> ([BAOrder]?, String?) {
         let path = "GET /fapi/v1/openOrders (HMAC SHA256)"
-        BARestAPI.sendRequestWith(path: path, dataClass: BAOrder.self) { response in
-            if let data = response.data as? [BAOrder] {
-                completion(data, nil)
-            } else {
-                completion(nil, response.errMsg)
-            }
+        let response = await BARestAPI.sendRequestWith(path: path, dataClass: BAOrder.self)
+        if let data = response.res.model as? [BAOrder] {
+            return (data, nil)
+        } else {
+            return (nil, response.errMsg)
         }
     }
     
@@ -297,29 +301,28 @@ open class BAUserWebSocket: BAWebSocket {
         NotificationCenter.default.post(name: BAUserWebSocket.accountChangedNotification, object: nil)
     }
     
-    open func refreshAccount() {
+    open func refreshAccount() async {
         let path = "GET /fapi/v2/account (HMAC SHA256)"
-        BARestAPI.sendRequestWith(path: path) { response in
-            if let data = response.data as? [String: Any] {
-                if let positions = data["positions"] as? [[String: Any]],
-                   let models = positions.transformToModelArray(BAPosition.self) {
-                    let avail = models.filter { position in
-                        position.positionAmt.doubleValue! != 0.0
-                    }
-                    self.positions = avail
-                } else {
-                    self.positions = [BAPosition]()
+        let response = await BARestAPI.sendRequestWith(path: path)
+        if let data = response.data as? [String: Any] {
+            if let positions = data["positions"] as? [[String: Any]],
+               let models = positions.transformToModelArray(BAPosition.self) {
+                let avail = models.filter { position in
+                    position.positionAmt.doubleValue! != 0.0
                 }
-                if let assets = data["assets"] as? [[String: Any]],
-                   let models = assets.transformToModelArray(BAAsset.self) {
-                    self.assets = models
-                } else {
-                    self.assets = [BAAsset]()
-                }
-                self.websocketDidReady()
+                self.positions = avail
             } else {
-                log("刷新Account失败：\(response.errMsg ?? "")")
+                self.positions = [BAPosition]()
             }
+            if let assets = data["assets"] as? [[String: Any]],
+               let models = assets.transformToModelArray(BAAsset.self) {
+                self.assets = models
+            } else {
+                self.assets = [BAAsset]()
+            }
+            self.websocketDidReady()
+        } else {
+            log("刷新Account失败：\(response.errMsg ?? "")")
         }
     }
     
