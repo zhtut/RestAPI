@@ -211,7 +211,7 @@ open class BAUserWebSocket: BAWebSocket {
         guard let _ = self.positions else {
             return
         }
-        guard self.isConnected else {
+        guard self.websocket?.state == .connected else {
             return
         }
         if let didReadyBlock = didReadyBlock {
@@ -239,7 +239,7 @@ open class BAUserWebSocket: BAWebSocket {
     func fetchPendingOrders() async -> ([BAOrder]?, String?) {
         let path = "GET /fapi/v1/openOrders (HMAC SHA256)"
         let response = await BARestAPI.sendRequestWith(path: path, dataClass: BAOrder.self)
-        if let data = response.res.model as? [BAOrder] {
+        if let data = response.data as? [BAOrder] {
             return (data, nil)
         } else {
             return (nil, response.errMsg)

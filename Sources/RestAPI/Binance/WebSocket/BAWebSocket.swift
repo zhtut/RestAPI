@@ -13,13 +13,28 @@ import SSLog
 import Dispatch
 #endif
 
-open class BAWebSocket: SSWebSocket {
+open class BAWebSocket: NSObject, SSWebSocketDelegate {
     
-    open override var autoConnect: Bool {
-        false
+    var urlStr: String {
+        ""
+    }
+    
+    open var autoConnect: Bool {
+        true
     }
     
     open var didOpenHandler: (() -> Void)?
+    
+    var websocket: SSWebSocket?
+    
+    open func open() {
+        guard let url = URL(string: urlStr) else {
+            return
+        }
+        let req = URLRequest(url: url)
+        websocket = SSWebSocket(request: req)
+        websocket?.open()
+    }
     
 //    open func subscribe(method: String = "SUBSCRIBE",
 //                   params: [String]) {
@@ -40,25 +55,21 @@ open class BAWebSocket: SSWebSocket {
     
     // MARK: 代理
     
-    open override func webSocketDidOpen() {
-        super.webSocketDidOpen()
+    open func webSocketDidOpen() {
         log("\(urlStr) webSocketDidOpen")
         didOpenHandler?()
         didOpenHandler = nil
     }
     
-    open override func webSocketDidReceivePing() {
-        super.webSocketDidReceivePing()
+    open func webSocketDidReceivePing() {
         log("收到ping")
     }
     
-    open override func webSocketDidReceivePong() {
-        super.webSocketDidReceivePong()
+    open func webSocketDidReceivePong() {
         log("收到pong")
     }
     
-    open override func webSocket(didReceiveMessageWith string: String) {
-        super.webSocket(didReceiveMessageWith: string)
+    open func webSocket(didReceiveMessageWith string: String) {
         DispatchQueue.global().async {
             if let data = string.data(using: .utf8),
                let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments),
@@ -70,14 +81,16 @@ open class BAWebSocket: SSWebSocket {
         }
     }
     
-    open override func webSocket(didCloseWithCode code: Int, reason: String?) {
-        super.webSocket(didCloseWithCode: code, reason: reason)
+    public func webSocket(didReceiveMessageWith data: Data) {
+        
+    }
+    
+    open func webSocket(didCloseWithCode code: Int, reason: String?) {
         sendPushNotication("websocket断开连接\(urlStr)，code: \(code)，原因：\(reason ?? "")", atSelf: true)
         open()
     }
     
-    open override func webSocket(didFailWithError error: Error) {
-        super.webSocket(didFailWithError: error)
+    open func webSocket(didFailWithError error: Error) {
         sendPushNotication("websocket收到错误：\(error)", atSelf: true)
     }
 }

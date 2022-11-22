@@ -17,7 +17,11 @@ public struct BAResponse {
         self.res = res
         if let json = await res.bodyJson {
             if res.succeed {
-                self.data = json
+                if let _ = res.modelType {
+                    self.data = self.res.model
+                } else {
+                    self.data = await self.res.data
+                }
             } else {
                 if let dict = json as? [String: Any] {
                     self.code = dict["code"] as? Int
