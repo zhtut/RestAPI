@@ -15,7 +15,7 @@ open class BABookTickerManger {
     open var centerPrice: Decimal?
     open var bookTicker: BABookTicker?
     
-    open var bookTickerWebSocket: BABookTickerWebSocket?
+    open var bookTickerWebSocket: BAFBookTickerWebSocket?
     
     public static let bookTickerChangedNotification = Notification.Name("BABookTickerChangedNotification")
     
@@ -24,8 +24,8 @@ open class BABookTickerManger {
             return
         }
         
-        bookTickerWebSocket = BABookTickerWebSocket(symbol: instId)
-        let _ = NotificationCenter.default.addObserver(forName: BABookTickerWebSocket.bookTickerDidChangeNotification, object: nil, queue: nil) { noti in
+        bookTickerWebSocket = BAFBookTickerWebSocket(symbol: instId)
+        let _ = NotificationCenter.default.addObserver(forName: BAFBookTickerWebSocket.bookTickerDidChangeNotification, object: nil, queue: nil) { noti in
             self.bookTickerDidChange(noti: noti)
         }
     }

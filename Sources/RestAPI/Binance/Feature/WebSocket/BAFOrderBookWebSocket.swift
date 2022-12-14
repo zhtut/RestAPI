@@ -1,5 +1,5 @@
 //
-//  BACandleWebSocket.swift
+//  BAFCandleWebSocket.swift
 //  
 //
 //  Created by zhtg on 2022/5/7.
@@ -9,7 +9,7 @@ import Foundation
 import SSCommon
 import SSLog
 
-open class BAOrderBookWebSocket: BAWebSocket {
+open class BAFOrderBookWebSocket: BAWebSocket {
     
     open var symbol = ""
     open var orderBook = BAOrderBook()

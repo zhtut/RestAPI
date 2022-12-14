@@ -111,7 +111,7 @@ open class BAOrderManager {
     
     // 一键清仓
     open class func closePosition() async -> (succ: Bool, errMsg: String?) {
-        if let positions = BAUserWebSocket.shared.positions {
+        if let positions = BAFAccountWebSocket.shared.positions {
             for position in positions {
                 if let positionAmt = position.positionAmt.decimalValue {
                     let isBuy = position.isBuy

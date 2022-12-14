@@ -68,6 +68,9 @@ open class BARestAPI {
         let print = false
         let response = await SSNetwork.sendRequest(urlStr: urlStr, header: headerFields, method: newMethod, printLog: print, dataKey: dataKey, modelType: dataClass)
         let baRes = await BAResponse(res: response)
+        if !baRes.responseSucceed {
+            await baRes.res.log()
+        }
         return baRes
     }
 }

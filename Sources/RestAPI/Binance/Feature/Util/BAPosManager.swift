@@ -22,18 +22,18 @@ open class BAPosManager {
     }
     
     public init() {
-        let _ = NotificationCenter.default.addObserver(forName: BAUserWebSocket.websocketDidReadyNotification, object: nil, queue: nil) { noti in
+        let _ = NotificationCenter.default.addObserver(forName: BAFAccountWebSocket.websocketDidReadyNotification, object: nil, queue: nil) { noti in
             self.positionRefreshed(noti: noti)
         }
-        let _ = NotificationCenter.default.addObserver(forName: BAUserWebSocket.accountChangedNotification, object: nil, queue: nil) { noti in
+        let _ = NotificationCenter.default.addObserver(forName: BAFAccountWebSocket.accountChangedNotification, object: nil, queue: nil) { noti in
             self.positionChanged(noti: noti)
         }
     }
     
     open func positionRefreshed(noti: Notification) {
-        let busd = BAUserWebSocket.shared.busdBal ?? 0.0
+        let busd = BAFAccountWebSocket.shared.busdBal ?? 0.0
         log("账户拉取成功：当前BUSD:\(busd)")
-        if let position = BAUserWebSocket.shared.positions?.first {
+        if let position = BAFAccountWebSocket.shared.positions?.first {
             log("position数量:\(position.positionAmt)")
         }
         if initalBusd == 0 {
@@ -43,16 +43,16 @@ open class BAPosManager {
     }
     
     open func positionChanged(noti: Notification) {
-        let busd = BAUserWebSocket.shared.busdBal ?? 0.0
+        let busd = BAFAccountWebSocket.shared.busdBal ?? 0.0
         log("--------------账户信息变化：初始busd:\(self.initalBusd), 当前BUSD:\(busd)，已赚\(busd - initalBusd)")
-        if let position = BAUserWebSocket.shared.positions?.first {
+        if let position = BAFAccountWebSocket.shared.positions?.first {
             log("position数量变化:\(position.positionAmt)，持仓价格：\(position.entryPrice)，canOpen:\(canOpenSz), total: \(total)")
         }
         configLever()
     }
     
     open func configLever() {
-        if let positions = BAUserWebSocket.shared.positions,
+        if let positions = BAFAccountWebSocket.shared.positions,
            let first = positions.first,
            let lever = first.leverage.intValue {
             self.lever = lever
@@ -60,7 +60,7 @@ open class BAPosManager {
     }
     
     open var total: Decimal {
-        if let busd = BAUserWebSocket.shared.busdBal,
+        if let busd = BAFAccountWebSocket.shared.busdBal,
            let currPx = BABookTickerManger.shared.centerPrice {
             let total = busd * lever.decimalValue / currPx
             return total
@@ -70,7 +70,7 @@ open class BAPosManager {
     
     /// 冻结在订单中的合约张数
     open var orderPosSz: Decimal {
-        if let orders = BAUserWebSocket.shared.orders,
+        if let orders = BAFAccountWebSocket.shared.orders,
             orders.count > 0 {
             var count = Decimal(0.0)
             for or in orders {
@@ -85,7 +85,7 @@ open class BAPosManager {
     
     /// 持仓总张数
     open var posSz: Decimal {
-        if let positions = BAUserWebSocket.shared.positions {
+        if let positions = BAFAccountWebSocket.shared.positions {
             var count = Decimal(0.0)
             for po in positions {
                 if let pos = po.positionAmt.decimalValue {
@@ -99,7 +99,7 @@ open class BAPosManager {
     
     /// 持仓成本价格
     open var posAvgPrice: Decimal? {
-        if let position = BAUserWebSocket.shared.positions?.first {
+        if let position = BAFAccountWebSocket.shared.positions?.first {
             return position.entryPrice.decimalValue
         }
         return nil
@@ -107,7 +107,7 @@ open class BAPosManager {
     
     /// 持仓多方向合约张数
     open var longPosSz: Decimal {
-        if let positions = BAUserWebSocket.shared.positions {
+        if let positions = BAFAccountWebSocket.shared.positions {
             var count = Decimal(0.0)
             for po in positions {
                 if let pos = po.positionAmt.decimalValue,
@@ -125,7 +125,7 @@ open class BAPosManager {
     
     /// 持仓空方向合约张数
     open var shortPosSz: Decimal {
-        if let positions = BAUserWebSocket.shared.positions {
+        if let positions = BAFAccountWebSocket.shared.positions {
             var count = Decimal(0.0)
             for po in positions {
                 if let pos = po.positionAmt.decimalValue,

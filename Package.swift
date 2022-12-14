@@ -17,10 +17,10 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/zhtut/SSNetwork.git", branch: "main"),
-//        .package(name: "SSNetwork", path: "../Tools/SSNetwork"),
-        .package(url: "https://github.com/zhtut/SSWebsocket.git", branch: "main"),
-//        .package(name: "SSWebsocket", path: "../Tools/SSWebsocket"),
+//        .package(url: "https://github.com/zhtut/SSNetwork.git", branch: "main"),
+        .package(name: "SSNetwork", path: "../Tools/SSNetwork"),
+//        .package(url: "https://github.com/zhtut/SSWebsocket.git", branch: "main"),
+        .package(name: "SSWebsocket", path: "../Tools/SSWebsocket"),
         .package(url: "https://github.com/zhtut/SSCommon.git", branch: "main"),
 //        .package(name: "SSCommon", path: "../Tools/SSCommon"),
         .package(url: "https://github.com/zhtut/SSLog.git", branch: "main"),

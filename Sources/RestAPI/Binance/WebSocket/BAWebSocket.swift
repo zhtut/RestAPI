@@ -28,11 +28,15 @@ open class BAWebSocket: NSObject, SSWebSocketDelegate {
     var websocket: SSWebSocket?
     
     open func open() {
+        if websocket?.state == .connected {
+            return
+        }
         guard let url = URL(string: urlStr) else {
             return
         }
         let req = URLRequest(url: url)
         websocket = SSWebSocket(request: req)
+        websocket?.delegate = self
         websocket?.open()
     }
     
@@ -70,14 +74,10 @@ open class BAWebSocket: NSObject, SSWebSocketDelegate {
     }
     
     open func webSocket(didReceiveMessageWith string: String) {
-        DispatchQueue.global().async {
-            if let data = string.data(using: .utf8),
-               let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments),
-               let dic = json as? [String: Any] {
-                DispatchQueue.main.async {
-                    self.webSocketDidReceive(message: dic)
-                }
-            }
+        if let data = string.data(using: .utf8),
+           let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments),
+           let dic = json as? [String: Any] {
+            self.webSocketDidReceive(message: dic)
         }
     }
     

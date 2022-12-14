@@ -1,5 +1,5 @@
 //
-//  BACandleWebSocket.swift
+//  BAFCandleWebSocket.swift
 //  
 //
 //  Created by zhtg on 2022/5/7.
@@ -9,7 +9,7 @@ import Foundation
 import SSCommon
 import SSLog
 
-open class BABookTickerWebSocket: BAWebSocket {
+open class BAFBookTickerWebSocket: BAWebSocket {
     
     var symbol = ""
     
@@ -33,7 +33,7 @@ open class BABookTickerWebSocket: BAWebSocket {
          {"stream":"ethbusd@bookTicker","data":{"e":"bookTicker","u":1154786566700,"s":"ETHBUSD","b":"2450.03","B":"2.346","a":"2450.04","A":"1.626","T":1643162839528,"E":1643162839533}}
          */
         if let bookTicker = message.transformToModel(BABookTicker.self) {
-            NotificationCenter.default.post(name: BABookTickerWebSocket.bookTickerDidChangeNotification, object: bookTicker)
+            NotificationCenter.default.post(name: BAFBookTickerWebSocket.bookTickerDidChangeNotification, object: bookTicker)
         }
     }
 }

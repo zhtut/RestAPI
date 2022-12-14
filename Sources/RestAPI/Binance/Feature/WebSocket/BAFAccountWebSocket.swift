@@ -1,5 +1,5 @@
 //
-//  BAUserWebSocket.swift
+//  BAFAccountWebSocket.swift
 //  SmartCurrency
 //
 //  Created by shutut on 2021/8/23.
@@ -9,9 +9,9 @@ import Foundation
 import SSCommon
 import SSLog
 
-open class BAUserWebSocket: BAWebSocket {
+open class BAFAccountWebSocket: BAWebSocket {
     
-    public static let shared = BAUserWebSocket()
+    public static let shared = BAFAccountWebSocket()
     
     var didNoticeReady = false
     open var didReadyBlock: (() -> Void)?
@@ -188,7 +188,7 @@ open class BAUserWebSocket: BAWebSocket {
             let qty = order.origQty ?? ""
             log("订单变化: \(price > 0 ? "\(price)" : "市价")\(action)\(qty), 状态: \(order.status ?? "")")
             log("当前订单数量：\(self.orders?.count ?? 0)")
-            NotificationCenter.default.post(name: BAUserWebSocket.orderChangedNotification, object: order)
+            NotificationCenter.default.post(name: BAFAccountWebSocket.orderChangedNotification, object: order)
             // 失效的订单加入一个数组中，五秒后移除
             if order.status == EXPIRED {
                 self.expiredOrders.append(ord)
@@ -217,7 +217,7 @@ open class BAUserWebSocket: BAWebSocket {
         if let didReadyBlock = didReadyBlock {
             didReadyBlock()
         }
-        NotificationCenter.default.post(name: BAUserWebSocket.websocketDidReadyNotification, object: nil)
+        NotificationCenter.default.post(name: BAFAccountWebSocket.websocketDidReadyNotification, object: nil)
         self.didNoticeReady = true
     }
     
@@ -298,7 +298,7 @@ open class BAUserWebSocket: BAWebSocket {
                 }
             }
         }
-        NotificationCenter.default.post(name: BAUserWebSocket.accountChangedNotification, object: nil)
+        NotificationCenter.default.post(name: BAFAccountWebSocket.accountChangedNotification, object: nil)
     }
     
     open func refreshAccount() async {

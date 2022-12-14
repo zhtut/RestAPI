@@ -1,5 +1,5 @@
 //
-//  BACandleWebSocket.swift
+//  BAFCandleWebSocket.swift
 //  
 //
 //  Created by zhtg on 2022/5/7.
@@ -9,7 +9,7 @@ import Foundation
 import SSCommon
 import SSLog
 
-open class BACandleWebSocket: BAWebSocket {
+open class BAFCandleWebSocket: BAWebSocket {
     
     var symbol = ""
     /// 1m
@@ -48,7 +48,7 @@ open class BACandleWebSocket: BAWebSocket {
         super.webSocketDidReceive(message: message)
         if let tick = message["k"] as? [String: Any] {
             let candle = tick.transformToModel(BACandle.self)
-            NotificationCenter.default.post(name: BACandleWebSocket.candleDidChangeNotification, object: candle)
+            NotificationCenter.default.post(name: BAFCandleWebSocket.candleDidChangeNotification, object: candle)
         }
     }
 }

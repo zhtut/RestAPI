@@ -40,7 +40,7 @@ open class BAAppSetup {
             guard let _ = self.instrument else {
                 throw CommonError(errMsg: "没有找到instrument")
             }
-            let websocket = BAUserWebSocket.shared
+            let websocket = BAFAccountWebSocket.shared
             return await withCheckedContinuation { continuation in
                 websocket.didReadyBlock = {
                     BAPosManager.shared.configLever()
