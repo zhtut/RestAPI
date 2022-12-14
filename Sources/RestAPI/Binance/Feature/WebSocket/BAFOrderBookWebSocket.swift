@@ -12,8 +12,8 @@ import SSLog
 open class BAFOrderBookWebSocket: BAWebSocket {
     
     open var symbol = ""
-    open var orderBook = BAOrderBook()
-    open var orderBookChangedHandler: ((_ orderBook: BAOrderBook) -> Void)?
+    open var orderBook = BAFOrderBook()
+    open var orderBookChangedHandler: ((_ orderBook: BAFOrderBook) -> Void)?
     
     public convenience init(symbol: String) {
         self.init()

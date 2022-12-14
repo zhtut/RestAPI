@@ -9,16 +9,16 @@ import Foundation
 import SSLog
 import SSCommon
 
-open class BAPosManager {
+open class BAFPosManager {
     
-    public static let shared = BAPosManager()
+    public static let shared = BAFPosManager()
     
     open var lever: Int = 1
     
     open var initalBusd: Decimal = 0
     
     open var instrument: Instrument {
-        return BAAppSetup.shared.instrument
+        return BAFAppSetup.shared.instrument
     }
     
     public init() {
@@ -61,7 +61,7 @@ open class BAPosManager {
     
     open var total: Decimal {
         if let busd = BAFAccountWebSocket.shared.busdBal,
-           let currPx = BABookTickerManger.shared.centerPrice {
+           let currPx = BAFBookTickerManger.shared.centerPrice {
             let total = busd * lever.decimalValue / currPx
             return total
         }
@@ -144,14 +144,14 @@ open class BAPosManager {
     /// 可开张数
     open var canOpenSz: Decimal {
         let canopen = total - dabs(posSz) - orderPosSz
-        let temp = canopen.precisionStringWith(precision: BAAppSetup.shared.instrument.lotSz)
+        let temp = canopen.precisionStringWith(precision: BAFAppSetup.shared.instrument.lotSz)
         return temp.decimalValue!
     }
     
     open var baseSz: Decimal {
         var minSz = instrument.minSz.decimalValue ?? 0.0
         let lotSz = instrument.lotSz.decimalValue ?? 0.0
-        let currPx = BABookTickerManger.shared.centerPrice ?? 0.0
+        let currPx = BAFBookTickerManger.shared.centerPrice ?? 0.0
         while minSz * currPx < 5 {
             minSz += lotSz
         }

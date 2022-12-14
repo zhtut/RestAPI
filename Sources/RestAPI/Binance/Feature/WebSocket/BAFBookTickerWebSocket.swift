@@ -25,14 +25,14 @@ open class BAFBookTickerWebSocket: BAWebSocket {
     }
     
     /// 最新买卖价变化的通知
-    public static let bookTickerDidChangeNotification = Notification.Name("BABookTickerDidChangeNotification")
+    public static let bookTickerDidChangeNotification = Notification.Name("BAFBookTickerDidChangeNotification")
 
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
         /*
          {"stream":"ethbusd@bookTicker","data":{"e":"bookTicker","u":1154786566700,"s":"ETHBUSD","b":"2450.03","B":"2.346","a":"2450.04","A":"1.626","T":1643162839528,"E":1643162839533}}
          */
-        if let bookTicker = message.transformToModel(BABookTicker.self) {
+        if let bookTicker = message.transformToModel(BAFBookTicker.self) {
             NotificationCenter.default.post(name: BAFBookTickerWebSocket.bookTickerDidChangeNotification, object: bookTicker)
         }
     }

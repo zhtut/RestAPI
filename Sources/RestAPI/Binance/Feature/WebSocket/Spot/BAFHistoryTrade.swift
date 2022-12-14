@@ -8,7 +8,7 @@
 import Foundation
 
 /// 市场交易记录
-public struct BAHistoryTrade: Codable {
+public struct BAFHistoryTrade: Codable {
     public var e: String? ///< ": "trade",     // 事件类型
     public var E: Int? ///< ": 123456789,   // 事件时间
     public var s: String? ///< ": "BNBBTC",    // 交易对

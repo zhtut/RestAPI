@@ -12,7 +12,7 @@ import SSLog
 public let newClientOrderId = "newClientOrderId"
 public let clientOrderId = "clientOrderId"
 
-open class BAOrderManager {
+open class BAFOrderManager {
     
     /*
      GTC - Good Till Cancel 成交为止
@@ -32,7 +32,7 @@ open class BAOrderManager {
         } else {
             params["side"] = SELL
         }
-        if let instrument = BAAppSetup.shared.instrument {
+        if let instrument = BAFAppSetup.shared.instrument {
             let sz = sz.precisionStringWith(precision:instrument.lotSz)
             params["quantity"] = sz
             if let price = price {

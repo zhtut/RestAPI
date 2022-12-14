@@ -8,12 +8,12 @@
 import Foundation
 import SSLog
 
-open class BAOrderBook {
+open class BAFOrderBook {
     
     open var instId = ""
     
-    open var bids = [BAOrderBookPrice]()
-    open var asks = [BAOrderBookPrice]()
+    open var bids = [BAFOrderBookPrice]()
+    open var asks = [BAFOrderBookPrice]()
     
     open var U: Int = 0
     open var E: Int = 0
@@ -74,7 +74,7 @@ open class BAOrderBook {
     
     open func updateAsks(a: [[String]]) {
         for arr in a {
-            let ob = BAOrderBookPrice(array: arr)
+            let ob = BAFOrderBookPrice(array: arr)
             var newAsks = asks.filter { orderBook in
                 return ob.p != orderBook.p
             }
@@ -90,7 +90,7 @@ open class BAOrderBook {
     
     open func updateBids(b: [[String]]) {
         for arr in b {
-            let ob = BAOrderBookPrice(array: arr)
+            let ob = BAFOrderBookPrice(array: arr)
             var newBids = bids.filter { orderBook in
                 return ob.p != orderBook.p
             }
@@ -118,7 +118,7 @@ open class BAOrderBook {
         logPrice(arr: bids, index: 4)
     }
     
-    open func logPrice(arr: [BAOrderBookPrice], index: Int) {
+    open func logPrice(arr: [BAFOrderBookPrice], index: Int) {
         if arr.count > index {
             let price = arr[index]
             log("\(price.p) \(price.v)")
@@ -127,7 +127,7 @@ open class BAOrderBook {
 }
 
 /// 盘口价格
-open class BAOrderBookPrice {
+open class BAFOrderBookPrice {
     /// 价格
     open var p: Decimal = 0
     /// 数量

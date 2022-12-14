@@ -9,7 +9,7 @@ import Foundation
 import SSCommon
 import SSLog
 
-open class BATradeWebSocket: BAWebSocket {
+open class BAFTradeWebSocket: BAWebSocket {
     
     open var instId = ""
     
@@ -44,8 +44,8 @@ open class BATradeWebSocket: BAWebSocket {
          } */
         if let e = message.stringFor("e"),
            e == "trade",
-           let tradeItem = message.transformToModel(BAHistoryTrade.self) {
-            NotificationCenter.default.post(name: BATradeWebSocket.tradeDidChangeNotification, object: tradeItem)
+           let tradeItem = message.transformToModel(BAFHistoryTrade.self) {
+            NotificationCenter.default.post(name: BAFTradeWebSocket.tradeDidChangeNotification, object: tradeItem)
         }
     }
     

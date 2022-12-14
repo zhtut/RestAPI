@@ -1,5 +1,5 @@
 //
-//  BABookTickerManger.swift
+//  BAFBookTickerManger.swift
 //  
 //
 //  Created by zhtg on 2022/2/26.
@@ -7,17 +7,17 @@
 
 import Foundation
 
-open class BABookTickerManger {
+open class BAFBookTickerManger {
 
-    public static let shared = BABookTickerManger()
+    public static let shared = BAFBookTickerManger()
     
     open var instId: String?
     open var centerPrice: Decimal?
-    open var bookTicker: BABookTicker?
+    open var bookTicker: BAFBookTicker?
     
     open var bookTickerWebSocket: BAFBookTickerWebSocket?
     
-    public static let bookTickerChangedNotification = Notification.Name("BABookTickerChangedNotification")
+    public static let bookTickerChangedNotification = Notification.Name("BAFBookTickerChangedNotification")
     
     open func subcribeDepth() {
         guard let instId = instId else {
@@ -31,10 +31,10 @@ open class BABookTickerManger {
     }
     
     open func bookTickerDidChange(noti: Notification) {
-        if let bookTicker = noti.object as? BABookTicker {
+        if let bookTicker = noti.object as? BAFBookTicker {
             centerPrice = bookTicker.center
             self.bookTicker = bookTicker
-            NotificationCenter.default.post(name: BABookTickerManger.bookTickerChangedNotification, object: bookTicker)
+            NotificationCenter.default.post(name: BAFBookTickerManger.bookTickerChangedNotification, object: bookTicker)
         }
     }
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct BABookTicker: Codable {
+public struct BAFBookTicker: Codable {
     public var e = "" // :"bookTicker",
     public var u = 0 // :1154786566700,
     public var s = "" // :"ETHBUSD",

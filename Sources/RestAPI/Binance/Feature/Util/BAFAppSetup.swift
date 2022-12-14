@@ -9,9 +9,9 @@ import Foundation
 import SSLog
 import SSCommon
 
-open class BAAppSetup {
+open class BAFAppSetup {
     
-    public static let shared = BAAppSetup()
+    public static let shared = BAFAppSetup()
     
     open var instId = "ETHBUSD"
 
@@ -25,11 +25,11 @@ open class BAAppSetup {
             sendPushNotication("状态消息，当前状态正常")
         }
         
-        let _ = BAPosManager.shared
+        let _ = BAFPosManager.shared
         
         self.instId = instId
         
-        let bookTickerManger = BABookTickerManger.shared
+        let bookTickerManger = BAFBookTickerManger.shared
         bookTickerManger.instId = instId
         bookTickerManger.subcribeDepth()
         
@@ -43,7 +43,7 @@ open class BAAppSetup {
             let websocket = BAFAccountWebSocket.shared
             return await withCheckedContinuation { continuation in
                 websocket.didReadyBlock = {
-                    BAPosManager.shared.configLever()
+                    BAFPosManager.shared.configLever()
                     continuation.resume()
                 }
             }
