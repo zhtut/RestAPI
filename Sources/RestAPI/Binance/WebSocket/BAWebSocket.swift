@@ -9,8 +9,8 @@ import Foundation
 import SSCommon
 import SSWebsocket
 import SSLog
-#if canImport(Dispatch)
-import Dispatch
+#if canImport(FoundationNetworking)
+import FoundationNetworking
 #endif
 
 open class BAWebSocket: NSObject, SSWebSocketDelegate {
