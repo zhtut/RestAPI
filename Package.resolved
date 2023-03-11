@@ -33,7 +33,7 @@
         "repositoryURL": "https://github.com/zhtut/SSNetwork.git",
         "state": {
           "branch": "main",
-          "revision": "130819000e8dce366141f66a991b3b206e30afdd",
+          "revision": "2545d8b1c92de8c69856552fbe9edc118bb9d965",
           "version": null
         }
       },
@@ -42,26 +42,8 @@
         "repositoryURL": "https://github.com/zhtut/SSWebsocket.git",
         "state": {
           "branch": "main",
-          "revision": "6d4d3df558f77f754b75678143008e8989afce4c",
+          "revision": "a688d82eb1c23b035015e46415d045ed42683b8c",
           "version": null
-        }
-      },
-      {
-        "package": "swift-atomics",
-        "repositoryURL": "https://github.com/apple/swift-atomics.git",
-        "state": {
-          "branch": null,
-          "revision": "919eb1d83e02121cdb434c7bfc1f0c66ef17febe",
-          "version": "1.0.2"
-        }
-      },
-      {
-        "package": "swift-collections",
-        "repositoryURL": "https://github.com/apple/swift-collections.git",
-        "state": {
-          "branch": null,
-          "revision": "f504716c27d2e5d4144fa4794b12129301d17729",
-          "version": "1.0.3"
         }
       },
       {
@@ -69,44 +51,8 @@
         "repositoryURL": "https://github.com/apple/swift-crypto.git",
         "state": {
           "branch": null,
-          "revision": "f652300628eb2003449e627f1f394a27ea2af9a8",
-          "version": "2.2.0"
-        }
-      },
-      {
-        "package": "swift-nio",
-        "repositoryURL": "https://github.com/apple/swift-nio.git",
-        "state": {
-          "branch": null,
-          "revision": "edfceecba13d68c1c993382806e72f7e96feaa86",
-          "version": "2.44.0"
-        }
-      },
-      {
-        "package": "swift-nio-ssl",
-        "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
-        "state": {
-          "branch": null,
-          "revision": "4fb7ead803e38949eb1d6fabb849206a72c580f3",
-          "version": "2.23.0"
-        }
-      },
-      {
-        "package": "swift-nio-transport-services",
-        "repositoryURL": "https://github.com/apple/swift-nio-transport-services.git",
-        "state": {
-          "branch": null,
-          "revision": "c0d9a144cfaec8d3d596aadde3039286a266c15c",
-          "version": "1.15.0"
-        }
-      },
-      {
-        "package": "websocket-kit",
-        "repositoryURL": "https://github.com/vapor/websocket-kit.git",
-        "state": {
-          "branch": null,
-          "revision": "2d9d2188a08eef4a869d368daab21b3c08510991",
-          "version": "2.6.1"
+          "revision": "da0fe44138ab86e380f40a2acbd8a611b07d3f64",
+          "version": "2.4.0"
         }
       }
     ]
