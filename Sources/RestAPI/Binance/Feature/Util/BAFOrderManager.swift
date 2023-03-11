@@ -131,7 +131,7 @@ open class BAFOrderManager {
                                     startTime: String? = nil,
                                     endTime: String? = nil,
                                     fromId: Int? = nil,
-                                    limit: Int? = nil) async -> ([BAUserTrade]?, String?) {
+                                    limit: Int? = nil) async -> ([BAFUserTrade]?, String?) {
         let path = "GET /fapi/v1/userTrades (HMAC SHA256)"
         var params = ["symbol": instId] as [String: Any]
         if let startTime = startTime,
@@ -149,9 +149,9 @@ open class BAFOrderManager {
             params["limit"] = limit
         }
         
-        let response = await BARestAPI.sendRequestWith(path: path, params: params, dataClass: BAUserTrade.self)
+        let response = await BARestAPI.sendRequestWith(path: path, params: params, dataClass: BAFUserTrade.self)
         if response.responseSucceed {
-            if let data = response.res.model as? [BAUserTrade] {
+            if let data = response.res.model as? [BAFUserTrade] {
                 return (data, nil)
             }
         }
@@ -162,7 +162,7 @@ open class BAFOrderManager {
                                        orderId: String? = nil,
                                        startTime: String? = nil,
                                        endTime: String? = nil,
-                                       limit: Int? = nil) async -> ([BAOrder]?, String?) {
+                                       limit: Int? = nil) async -> ([BAFOrder]?, String?) {
         let path = "GET /fapi/v1/allOrders (HMAC SHA256)"
         var params = ["symbol": instId] as [String: Any]
         if let orderId = orderId {
@@ -179,9 +179,9 @@ open class BAFOrderManager {
         if let limit = limit {
             params["limit"] = limit
         }
-        let response = await BARestAPI.sendRequestWith(path: path, params: params, dataClass: BAOrder.self)
+        let response = await BARestAPI.sendRequestWith(path: path, params: params, dataClass: BAFOrder.self)
         if response.responseSucceed {
-            if let data = response.res.model as? [BAOrder] {
+            if let data = response.res.model as? [BAFOrder] {
                 return (data, nil)
             }
         }

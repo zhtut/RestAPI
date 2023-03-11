@@ -8,8 +8,8 @@
 import Foundation
 
 /// 资产
-open class BAAsset: Codable, Equatable {
-    public static func == (lhs: BAAsset, rhs: BAAsset) -> Bool {
+open class BAFAsset: Codable, Equatable {
+    public static func == (lhs: BAFAsset, rhs: BAFAsset) -> Bool {
         return lhs.asset == rhs.asset
     }
     

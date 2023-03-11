@@ -60,7 +60,7 @@ open class BAFAppSetup {
                 throw CommonError(errMsg: "BAInstrument返回格式有问题")
             }
             for dic in arr {
-                let ins = BAInstrument.modelWith(dic: dic)
+                let ins = BAFInstrument.modelWith(dic: dic)
                 if ins.symbol == self.instId {
                     var instrument = Instrument()
                     instrument.instId = ins.symbol ?? "" /// : String?

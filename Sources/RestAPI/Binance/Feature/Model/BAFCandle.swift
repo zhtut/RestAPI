@@ -7,7 +7,7 @@
 
 import Foundation
 
-open class BACandle: Codable {
+open class BAFCandle: Codable {
     open var t: Int = 0 /// ": 123400000, // 这根K线的起始时间
     open var o: String = "" ///": "0.0010",  // 这根K线期间第一笔成交价
     open var h: String = "" ///": "0.0025",  // 这根K线期间最高成交价

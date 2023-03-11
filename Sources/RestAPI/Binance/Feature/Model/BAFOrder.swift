@@ -21,7 +21,7 @@ public let EXPIRED = "EXPIRED"
 public let NEW_INSURANCE = "NEW_INSURANCE" //  风险保障基金(强平)
 public let NEW_ADL = "NEW_ADL" // 自动减仓序列(强平)
 
-open class BAOrder: Codable {
+open class BAFOrder: Codable {
     
     open var avgPrice: String? // : "0.00000",              // 平均成交价
     open var clientOrderId: String? // ": "abc",             // 用户自定义的订单号
@@ -76,7 +76,7 @@ open class BAOrder: Codable {
     }
     
     
-    open class func cancel(orders: [BAOrder], maxCount: Int = 10) async -> (succ: Bool, errMsg: String?) {
+    open class func cancel(orders: [BAFOrder], maxCount: Int = 10) async -> (succ: Bool, errMsg: String?) {
         if orders.count == 0 {
             return (true, nil)
         }

@@ -47,7 +47,7 @@ open class BAFCandleWebSocket: BAWebSocket {
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
         if let tick = message["k"] as? [String: Any] {
-            let candle = tick.transformToModel(BACandle.self)
+            let candle = tick.transformToModel(BAFCandle.self)
             NotificationCenter.default.post(name: BAFCandleWebSocket.candleDidChangeNotification, object: candle)
         }
     }

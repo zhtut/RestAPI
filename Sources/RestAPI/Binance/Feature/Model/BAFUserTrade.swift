@@ -7,7 +7,7 @@
 
 import Foundation
 
-open class BAUserTrade: Codable {
+open class BAFUserTrade: Codable {
     open var buyer = false // ": false, // 是否是买方
     open var commission = "" //  ": "-0.07819010", // 手续费
     open var commissionAsset = "" // ": "USDT", // 手续费计价单位

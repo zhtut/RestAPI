@@ -8,9 +8,9 @@
 import Foundation
 
 /// 永续持仓
-open class BAPosition: Codable, Equatable {
+open class BAFPosition: Codable, Equatable {
     
-    public static func == (lhs: BAPosition, rhs: BAPosition) -> Bool {
+    public static func == (lhs: BAFPosition, rhs: BAFPosition) -> Bool {
         return lhs.symbol == rhs.symbol
     }
     

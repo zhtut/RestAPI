@@ -7,7 +7,7 @@
 
 import Foundation
 
-open class BAInstrument {
+open class BAFInstrument {
     open var symbol: String? ///": "ETHBTC",
     open var status: String? ///": "TRADING",
     open var baseAsset: String? ///": "ETH",
@@ -38,8 +38,8 @@ open class BAInstrument {
 //    ]
 //    }
     
-    open class func modelWith(dic: [String: Any]) -> BAInstrument {
-        let model = BAInstrument()
+    open class func modelWith(dic: [String: Any]) -> BAFInstrument {
+        let model = BAFInstrument()
         model.symbol = dic.stringFor("symbol")
         model.status = dic.stringFor("status")
         model.baseAsset = dic.stringFor("baseAsset")

@@ -20,9 +20,9 @@ open class BAFAccountWebSocket: BAWebSocket {
     
     var expiredOrders = [Int]()
     
-    open var orders: [BAOrder]?
-    open var positions: [BAPosition]?
-    open var assets: [BAAsset]?
+    open var orders: [BAFOrder]?
+    open var positions: [BAFPosition]?
+    open var assets: [BAFAsset]?
     
     open var busdBal: Decimal? {
         if let assets = assets {
@@ -151,7 +151,7 @@ open class BAFAccountWebSocket: BAWebSocket {
     
     func processOrder(message: [String: Any]) {
         if let data = message["o"] as? [String: Any] {
-            let order = BAOrder()
+            let order = BAFOrder()
             order.symbol = data.stringFor("s") ?? ""
             order.clientOrderId = data.stringFor("c") ?? ""
             order.side = data.stringFor("S") ?? ""
@@ -176,7 +176,7 @@ open class BAFAccountWebSocket: BAWebSocket {
                 $0.orderId != order.orderId
             })
             if orders == nil {
-                orders = [BAOrder]()
+                orders = [BAFOrder]()
             }
             if order.status == NEW ||
                 order.status == PARTIALLY_FILLED {
@@ -236,10 +236,10 @@ open class BAFAccountWebSocket: BAWebSocket {
         }
     }
     
-    func fetchPendingOrders() async -> ([BAOrder]?, String?) {
+    func fetchPendingOrders() async -> ([BAFOrder]?, String?) {
         let path = "GET /fapi/v1/openOrders (HMAC SHA256)"
-        let response = await BARestAPI.sendRequestWith(path: path, dataClass: BAOrder.self)
-        if let data = response.data as? [BAOrder] {
+        let response = await BARestAPI.sendRequestWith(path: path, dataClass: BAFOrder.self)
+        if let data = response.data as? [BAFOrder] {
             return (data, nil)
         } else {
             return (nil, response.errMsg)
@@ -251,7 +251,7 @@ open class BAFAccountWebSocket: BAWebSocket {
             if let B = a["B"] as? [[String: Any]] {
                 for b in B {
                     let sym = b.stringFor("a")
-                    for asset in assets ?? [BAAsset]() {
+                    for asset in assets ?? [BAFAsset]() {
                         if sym == asset.asset {
                             asset.walletBalance = b.stringFor("wb") ?? ""
                             asset.crossWalletBalance = b.stringFor("cw") ?? ""
@@ -270,8 +270,8 @@ open class BAFAccountWebSocket: BAWebSocket {
                     let s = p.stringFor("s") ?? ""
                     let ps = p.stringFor("ps") ?? "" // 持仓方向
                     let pa = p.stringFor("pa") ?? "" // 仓位
-                    var find: BAPosition?
-                    for position in positions ?? [BAPosition]() {
+                    var find: BAFPosition?
+                    for position in positions ?? [BAFPosition]() {
                         if position.symbol == s {
                             find = position
                             break
@@ -287,7 +287,7 @@ open class BAFAccountWebSocket: BAWebSocket {
                             find.positionSide = ps
                         }
                     } else {
-                        let newPosition = BAPosition()
+                        let newPosition = BAFPosition()
                         newPosition.symbol = s
                         newPosition.positionAmt = pa
                         newPosition.entryPrice = p.stringFor("ep") ?? "" // 入仓价格
@@ -306,19 +306,19 @@ open class BAFAccountWebSocket: BAWebSocket {
         let response = await BARestAPI.sendRequestWith(path: path)
         if let data = response.data as? [String: Any] {
             if let positions = data["positions"] as? [[String: Any]],
-               let models = positions.transformToModelArray(BAPosition.self) {
+               let models = positions.transformToModelArray(BAFPosition.self) {
                 let avail = models.filter { position in
                     position.positionAmt.doubleValue! != 0.0
                 }
                 self.positions = avail
             } else {
-                self.positions = [BAPosition]()
+                self.positions = [BAFPosition]()
             }
             if let assets = data["assets"] as? [[String: Any]],
-               let models = assets.transformToModelArray(BAAsset.self) {
+               let models = assets.transformToModelArray(BAFAsset.self) {
                 self.assets = models
             } else {
-                self.assets = [BAAsset]()
+                self.assets = [BAFAsset]()
             }
             self.websocketDidReady()
         } else {
