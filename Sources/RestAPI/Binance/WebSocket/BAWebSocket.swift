@@ -29,11 +29,14 @@ open class BAWebSocket: NSObject, SSWebSocketDelegate {
     
     open func open() {
         if websocket?.state == .connected {
+            log("websocket已是连接状态，不需要再连接了")
             return
         }
         guard let url = URL(string: urlStr) else {
+            log("生成URL失败：\(urlStr)")
             return
         }
+        log("准备开始连接：\(urlStr)")
         let req = URLRequest(url: url)
         websocket = SSWebSocket(request: req)
         websocket?.delegate = self
@@ -54,7 +57,7 @@ open class BAWebSocket: NSObject, SSWebSocketDelegate {
 //    }
     
     open func webSocketDidReceive(message: [String: Any]) {
-        
+//        log("webSocketDidReceive：\(String(describing: message.jsonStr))")
     }
     
     // MARK: 代理
@@ -63,6 +66,7 @@ open class BAWebSocket: NSObject, SSWebSocketDelegate {
         log("\(urlStr) webSocketDidOpen")
         didOpenHandler?()
         didOpenHandler = nil
+        log("webSocketDidOpen")
     }
     
     open func webSocketDidReceivePing() {
@@ -82,7 +86,10 @@ open class BAWebSocket: NSObject, SSWebSocketDelegate {
     }
     
     public func webSocket(didReceiveMessageWith data: Data) {
-        
+        if let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments),
+           let dic = json as? [String: Any] {
+            self.webSocketDidReceive(message: dic)
+        }
     }
     
     open func webSocket(didCloseWithCode code: Int, reason: String?) {

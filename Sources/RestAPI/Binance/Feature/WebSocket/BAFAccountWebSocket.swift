@@ -92,8 +92,8 @@ open class BAFAccountWebSocket: BAWebSocket {
             if let data = response.data as? [String: Any],
                let listenKey = data.stringFor("listenKey") {
                 self.listenKey = listenKey
+                log("请求listenKey成功：\(listenKey)")
                 return (true, nil)
-                
             }
         }
         return (false, response.errMsg)
@@ -120,11 +120,12 @@ open class BAFAccountWebSocket: BAWebSocket {
     open override func webSocketDidOpen() {
         super.webSocketDidOpen()
         self.websocketDidReady()
+        log("webSocketDidOpen")
     }
     
     open override func webSocketDidReceive(message: [String: Any]) {
         super.webSocketDidReceive(message: message)
-//        log("BA.didReceiveMessageWith:\(message)")
+        log("BA.didReceiveMessageWith:\(message.jsonStr ?? "")")
         var data: [String: Any]
         if let _ = message.stringFor("stream"),
            let temp = message["data"] as? [String: Any] {
