@@ -39,7 +39,7 @@ open class BAFPosManager {
         if initalBusd == 0 {
             initalBusd = busd
         }
-        configLever()
+        refreshLever()
     }
     
     open func positionChanged(noti: Notification) {
@@ -48,10 +48,10 @@ open class BAFPosManager {
         if let position = BAFAccountWebSocket.shared.positions?.first {
             log("position数量变化:\(position.positionAmt)，持仓价格：\(position.entryPrice)，canOpen:\(canOpenSz), total: \(total)")
         }
-        configLever()
+        refreshLever()
     }
     
-    open func configLever() {
+    open func refreshLever() {
         if let positions = BAFAccountWebSocket.shared.positions,
            let first = positions.first,
            let lever = first.leverage.intValue {
@@ -59,6 +59,8 @@ open class BAFPosManager {
         }
     }
     
+    
+    /// 总张数，包括
     open var total: Decimal {
         if let busd = BAFAccountWebSocket.shared.busdBal,
            let currPx = BAFBookTickerManger.shared.centerPrice {

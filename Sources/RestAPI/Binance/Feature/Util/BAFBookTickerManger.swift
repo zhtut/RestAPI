@@ -19,7 +19,7 @@ open class BAFBookTickerManger {
     
     public static let bookTickerChangedNotification = Notification.Name("BAFBookTickerChangedNotification")
     
-    open func subcribeDepth() {
+    open func subscribeDepth() {
         guard let instId = instId else {
             return
         }

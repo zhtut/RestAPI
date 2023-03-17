@@ -127,6 +127,34 @@ open class BAFOrderManager {
         return (false, "没有持仓，不需要清仓")
     }
     
+    
+    /// 取消所有订单
+    /// - Returns: 取消的结果
+    @discardableResult
+    open class func cancelAllOrders() async -> (succ: Bool, errMsg: String?) {
+        let path = "DELETE /fapi/v1/allOpenOrders (HMAC SHA256)"
+        let params = ["symbol": BAFAppSetup.shared.instId]
+        let response =  await BARestAPI.sendRequestWith(path: path, params: params)
+        return (response.responseSucceed, response.errMsg)
+    }
+    
+    /// 取消批量的订单，可以大于10个
+    func cancelOrders(_ orders: [BAFOrder]) async {
+        if orders.count > 0 {
+            var remainOrders = orders
+            while remainOrders.count > 0 {
+                let tenOrders = Array(remainOrders.prefix(10))
+                let (succ, errMsg) = await BAFOrder.cancel(orders: tenOrders)
+                if succ {
+                    log("取消\(tenOrders.count)个订单成功")
+                } else {
+                    log("取消\(tenOrders.count)个订单失败：\(errMsg ?? "")")
+                }
+                remainOrders = remainOrders.suffix(remainOrders.count - tenOrders.count)
+            }
+        }
+    }
+    
     open class func fetchUserTrades(instId: String,
                                     startTime: String? = nil,
                                     endTime: String? = nil,

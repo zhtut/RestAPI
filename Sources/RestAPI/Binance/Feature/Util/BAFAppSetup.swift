@@ -31,7 +31,7 @@ open class BAFAppSetup {
         
         let bookTickerManger = BAFBookTickerManger.shared
         bookTickerManger.instId = instId
-        bookTickerManger.subcribeDepth()
+        bookTickerManger.subscribeDepth()
         
         log("开始请求产品信息")
         do {
@@ -43,7 +43,6 @@ open class BAFAppSetup {
             let websocket = BAFAccountWebSocket.shared
             return await withCheckedContinuation { continuation in
                 websocket.didReadyBlock = {
-                    BAFPosManager.shared.configLever()
                     continuation.resume()
                 }
             }
