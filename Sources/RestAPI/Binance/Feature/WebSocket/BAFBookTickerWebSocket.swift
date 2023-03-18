@@ -36,4 +36,9 @@ open class BAFBookTickerWebSocket: BAWebSocket {
             NotificationCenter.default.post(name: BAFBookTickerWebSocket.bookTickerDidChangeNotification, object: bookTicker)
         }
     }
+    
+    open override func webSocketDidOpen() {
+        super.webSocketDidOpen()
+        log("BAFBookTickerWebSocket webSocketDidOpen")
+    }
 }

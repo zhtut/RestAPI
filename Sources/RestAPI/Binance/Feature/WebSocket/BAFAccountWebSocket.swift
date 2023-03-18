@@ -71,6 +71,7 @@ open class BAFAccountWebSocket: BAWebSocket {
         log("开始请求ListenKey")
         let result = await createListenKey()
         if result.succ {
+            log("ListenKey请求成功，开始连接")
             self.open()
             
             log("开始刷新ListenKey的有效期")
@@ -120,7 +121,7 @@ open class BAFAccountWebSocket: BAWebSocket {
     open override func webSocketDidOpen() {
         super.webSocketDidOpen()
         self.websocketDidReady()
-        log("webSocketDidOpen")
+        log("accountwebSocketDidOpen")
     }
     
     open override func webSocketDidReceive(message: [String: Any]) {

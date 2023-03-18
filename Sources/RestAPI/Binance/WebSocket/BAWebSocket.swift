@@ -13,7 +13,7 @@ import SSLog
 import FoundationNetworking
 #endif
 
-open class BAWebSocket: NSObject, SSWebSocketDelegate {
+open class BAWebSocket: NSObject, WebSocketDelegate {
     
     var urlStr: String {
         ""
@@ -25,7 +25,7 @@ open class BAWebSocket: NSObject, SSWebSocketDelegate {
     
     open var didOpenHandler: (() -> Void)?
     
-    var websocket: SSWebSocket?
+    var websocket: NIOWebSocket?
     
     open func open() {
         if websocket?.state == .connected {
@@ -38,7 +38,7 @@ open class BAWebSocket: NSObject, SSWebSocketDelegate {
         }
         log("准备开始连接：\(urlStr)")
         let req = URLRequest(url: url)
-        websocket = SSWebSocket(request: req)
+        websocket = NIOWebSocket(request: req)
         websocket?.delegate = self
         websocket?.open()
     }
