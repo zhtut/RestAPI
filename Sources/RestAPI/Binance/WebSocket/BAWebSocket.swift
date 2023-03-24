@@ -23,6 +23,8 @@ open class BAWebSocket: NSObject, WebSocketDelegate {
         true
     }
     
+    open var autoReConnect: Bool = true
+    
     open var didOpenHandler: (() -> Void)?
     
     var websocket: NIOWebSocket?
@@ -66,7 +68,6 @@ open class BAWebSocket: NSObject, WebSocketDelegate {
         log("\(urlStr) webSocketDidOpen")
         didOpenHandler?()
         didOpenHandler = nil
-        log("webSocketDidOpen")
     }
     
     open func webSocketDidReceivePing() {
@@ -93,11 +94,16 @@ open class BAWebSocket: NSObject, WebSocketDelegate {
     }
     
     open func webSocket(didCloseWithCode code: Int, reason: String?) {
-        sendPushNotication("websocket断开连接\(urlStr)，code: \(code)，原因：\(reason ?? "")", atSelf: true)
-        open()
+        logErr("websocket断开连接\(urlStr)，code: \(code)，原因：\(reason ?? "")")
+        if autoReConnect {
+            open()
+        }
     }
     
     open func webSocket(didFailWithError error: Error) {
-        sendPushNotication("websocket收到错误：\(error)", atSelf: true)
+        logErr("websocket收到错误：\(error)")
+        if autoReConnect {
+            open()
+        }
     }
 }

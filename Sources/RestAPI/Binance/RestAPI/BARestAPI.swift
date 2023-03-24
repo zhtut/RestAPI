@@ -8,6 +8,7 @@
 import Foundation
 import SSEncrypt
 import SSNetwork
+import SSLog
 
 open class BARestAPI {
     @discardableResult
@@ -69,7 +70,10 @@ open class BARestAPI {
         let response = await SSNetwork.sendRequest(urlStr: urlStr, header: headerFields, method: newMethod, printLog: print, dataKey: dataKey, modelType: dataClass)
         let baRes = await BAResponse(res: response)
         if !baRes.responseSucceed {
-            await baRes.res.log()
+            Task {
+                let desc = await baRes.res.description
+                logErr(desc)
+            }
         }
         return baRes
     }

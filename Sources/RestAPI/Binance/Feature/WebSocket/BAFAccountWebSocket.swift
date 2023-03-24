@@ -75,9 +75,9 @@ open class BAFAccountWebSocket: BAWebSocket {
             self.open()
             
             log("开始刷新ListenKey的有效期")
-            self.startPutListenKey()
+            self.scheduledPutListenKey()
         } else {
-            log("ListenKey请求失败：\(result.errMsg ?? "")，一秒后重试")
+            logErr("ListenKey请求失败：\(result.errMsg ?? "")，一秒后重试")
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 Task {
                    await self.refreshListenKey()
@@ -100,7 +100,7 @@ open class BAFAccountWebSocket: BAWebSocket {
         return (false, response.errMsg)
     }
     
-    func startPutListenKey() {
+    func scheduledPutListenKey() {
         putTimer?.invalidate()
         putTimer = Timer.scheduledTimer(withTimeInterval: 30 * 60, repeats: true, block: { timer in
             Task {
@@ -114,6 +114,7 @@ open class BAFAccountWebSocket: BAWebSocket {
     }
     
     func putListenKey() async {
+        log("到了时间，准备要刷新listenKey了")
         let path = "PUT /fapi/v1/listenKey (HMAC SHA256)"
         await BARestAPI.sendRequestWith(path: path)
     }
@@ -199,7 +200,7 @@ open class BAFAccountWebSocket: BAWebSocket {
                 self.expiredOrders.remove(ord)
             }
         } else {
-            fatalError("order没有op字段")
+            logErr("order没有op字段")
         }
     }
     
@@ -229,8 +230,9 @@ open class BAFAccountWebSocket: BAWebSocket {
             self.orders = orders
             self.websocketDidReady()
         } else {
-            log("刷新订单失败")
+            logErr("刷新订单失败")
         }
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             Task {
                await self.refreshOrders()
@@ -324,7 +326,13 @@ open class BAFAccountWebSocket: BAWebSocket {
             }
             self.websocketDidReady()
         } else {
-            log("刷新Account失败：\(response.errMsg ?? "")")
+            logErr("刷新Account失败：\(response.errMsg ?? "")")
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            Task {
+                await self.refreshAccount()
+            }
         }
     }
     
