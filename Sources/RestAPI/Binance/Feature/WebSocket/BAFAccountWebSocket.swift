@@ -65,9 +65,6 @@ open class BAFAccountWebSocket: BAWebSocket {
             log("开始刷新账户信息")
             await refreshAccount()
         }
-        
-        log("开始起定时器去刷新ListenKey的有效期")
-        self.scheduledPutListenKey()
     }
     
     open func refreshListenKey() async {
@@ -75,7 +72,9 @@ open class BAFAccountWebSocket: BAWebSocket {
         let result = await createListenKey()
         if result.succ {
             log("ListenKey请求成功，开始连接")
-            self.open()
+            self.open(force: true)
+            log("开启起定时器去刷新ListenKey的有效期")
+            self.scheduledPutListenKey()
         } else {
             logErr("ListenKey请求失败：\(result.errMsg ?? "")，一秒后重试")
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -147,9 +146,10 @@ open class BAFAccountWebSocket: BAWebSocket {
                 processOrder(message: message)
             } else if e == "ACCOUNT_UPDATE" {
                 processAccount(data: data)
+            } else {
+                log("other User websocket message:\(message.jsonStr ?? "")")
             }
         }
-        log("other User websocket message:\(message.jsonStr ?? "")")
     }
     
     func processOrder(message: [String: Any]) {

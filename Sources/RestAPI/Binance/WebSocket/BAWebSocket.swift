@@ -29,11 +29,16 @@ open class BAWebSocket: NSObject, WebSocketDelegate {
     
     var websocket: NIOWebSocket?
     
-    open func open() {
+    open func open(force: Bool = false) {
         if websocket?.state == .connected {
-            log("websocket已是连接状态，断开当前连接，重新起一个实例去连")
-            Task {
-                try await websocket?.close()
+            if force {
+                log("websocket已是连接状态，断开当前连接，重新起一个实例去连")
+                Task {
+                    try await websocket?.close()
+                }
+            } else {
+                log("websocket已是连接状态，不需要连接")
+                return
             }
         }
         guard let url = URL(string: urlStr) else {
@@ -73,19 +78,16 @@ open class BAWebSocket: NSObject, WebSocketDelegate {
     }
     
     open func webSocketDidReceivePing() {
-        log("收到ping，立马回pong")
-        Task {
-           try await websocket?.sendPong()
+        log("收到ping，8分钟后回pong")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8 * 60) {
+            Task {
+                try await self.websocket?.sendPong()
+            }
         }
     }
     
     open func webSocketDidReceivePong() {
-        log("收到pong，8分钟后再Ping")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 8 * 60) {
-            Task {
-                try await self.websocket?.sendPing()
-             }
-        }
+        log("收到pong")
     }
     
     open func webSocket(didReceiveMessageWith string: String) {
@@ -106,7 +108,7 @@ open class BAWebSocket: NSObject, WebSocketDelegate {
     open func webSocket(didCloseWithCode code: Int, reason: String?) {
         logErr("websocket断开连接\(urlStr)，code: \(code)，原因：\(reason ?? "")")
         if autoReConnect {
-            open()
+            open(force: true)
         }
     }
     
