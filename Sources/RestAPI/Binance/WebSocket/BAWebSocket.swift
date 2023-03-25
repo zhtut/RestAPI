@@ -15,7 +15,7 @@ import FoundationNetworking
 
 open class BAWebSocket: NSObject, WebSocketDelegate {
     
-    var urlStr: String {
+    open var urlStr: String {
         ""
     }
     
@@ -23,7 +23,9 @@ open class BAWebSocket: NSObject, WebSocketDelegate {
         true
     }
     
-    open var autoReConnect: Bool = true
+    open var autoReConnect: Bool {
+        true
+    }
     
     open var didOpenHandler: (() -> Void)?
     
@@ -78,12 +80,7 @@ open class BAWebSocket: NSObject, WebSocketDelegate {
     }
     
     open func webSocketDidReceivePing() {
-        log("收到ping，8分钟后回pong")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 8 * 60) {
-            Task {
-                try await self.websocket?.sendPong()
-            }
-        }
+        log("收到ping")
     }
     
     open func webSocketDidReceivePong() {
