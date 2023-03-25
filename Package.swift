@@ -22,7 +22,7 @@ let package = Package(
         .package(url: "https://github.com/zhtut/SSNetwork.git", branch: "main"),
         //        .package(name: "SSNetwork", path: "\(toolsPath)/SSNetwork"),
         .package(url: "https://github.com/zhtut/SSWebsocket.git", branch: "main"),
-        //        .package(name: "SSWebsocket", path: "\(toolsPath)/SSWebsocket"),
+//                .package(name: "SSWebsocket", path: "\(toolsPath)/SSWebsocket"),
         .package(url: "https://github.com/zhtut/SSCommon.git", branch: "main"),
         //        .package(name: "SSCommon", path: "\(toolsPath)/SSCommon"),
         .package(url: "https://github.com/zhtut/SSLog.git", branch: "main"),

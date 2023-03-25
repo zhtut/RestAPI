@@ -65,6 +65,9 @@ open class BAFAccountWebSocket: BAWebSocket {
             log("开始刷新账户信息")
             await refreshAccount()
         }
+        
+        log("开始起定时器去刷新ListenKey的有效期")
+        self.scheduledPutListenKey()
     }
     
     open func refreshListenKey() async {
@@ -73,9 +76,6 @@ open class BAFAccountWebSocket: BAWebSocket {
         if result.succ {
             log("ListenKey请求成功，开始连接")
             self.open()
-            
-            log("开始刷新ListenKey的有效期")
-            self.scheduledPutListenKey()
         } else {
             logErr("ListenKey请求失败：\(result.errMsg ?? "")，一秒后重试")
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -101,12 +101,14 @@ open class BAFAccountWebSocket: BAWebSocket {
     }
     
     func scheduledPutListenKey() {
-        putTimer?.invalidate()
-        putTimer = Timer.scheduledTimer(withTimeInterval: 30 * 60, repeats: true, block: { timer in
-            Task {
-                await self.putListenKey()
-            }
-        })
+        DispatchQueue.main.async {
+            self.putTimer?.invalidate()
+            self.putTimer = Timer.scheduledTimer(withTimeInterval: 50 * 60, repeats: true, block: { [weak self] timer in
+                Task {
+                    await self?.putListenKey()
+                }
+            })
+        }
     }
     
     func stopPutListenKey() {
@@ -114,7 +116,7 @@ open class BAFAccountWebSocket: BAWebSocket {
     }
     
     func putListenKey() async {
-        log("到了时间，准备要刷新listenKey了")
+        log("到了50分钟，准备要刷新listenKey了")
         let path = "PUT /fapi/v1/listenKey (HMAC SHA256)"
         await BARestAPI.sendRequestWith(path: path)
     }
@@ -140,13 +142,11 @@ open class BAFAccountWebSocket: BAWebSocket {
                 Task {
                     await refreshListenKey()
                 }
-                return
+                log("收到listenKeyExpired失效事件，重新开始请求并连接")
             } else if e == "ORDER_TRADE_UPDATE" {
                 processOrder(message: message)
-                return
             } else if e == "ACCOUNT_UPDATE" {
                 processAccount(data: data)
-                return
             }
         }
         log("other User websocket message:\(message.jsonStr ?? "")")

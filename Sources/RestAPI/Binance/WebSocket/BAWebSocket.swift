@@ -31,14 +31,16 @@ open class BAWebSocket: NSObject, WebSocketDelegate {
     
     open func open() {
         if websocket?.state == .connected {
-            log("websocket已是连接状态，不需要再连接了")
-            return
+            log("websocket已是连接状态，断开当前连接，重新起一个实例去连")
+            Task {
+                try await websocket?.close()
+            }
         }
         guard let url = URL(string: urlStr) else {
             log("生成URL失败：\(urlStr)")
             return
         }
-        log("准备开始连接：\(urlStr)")
+        log("准备开始连接Wss：\(urlStr)")
         let req = URLRequest(url: url)
         websocket = NIOWebSocket(request: req)
         websocket?.delegate = self
@@ -71,11 +73,19 @@ open class BAWebSocket: NSObject, WebSocketDelegate {
     }
     
     open func webSocketDidReceivePing() {
-        log("收到ping")
+        log("收到ping，立马回pong")
+        Task {
+           try await websocket?.sendPong()
+        }
     }
     
     open func webSocketDidReceivePong() {
-        log("收到pong")
+        log("收到pong，8分钟后再Ping")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8 * 60) {
+            Task {
+                try await self.websocket?.sendPing()
+             }
+        }
     }
     
     open func webSocket(didReceiveMessageWith string: String) {

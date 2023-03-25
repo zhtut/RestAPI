@@ -20,11 +20,6 @@ open class BAFAppSetup {
     open func setup(instId: String) async throws {
         log("setup App方法，开始app")
         
-        sendPushNotication("开始记录日志")
-        let _ = Timer.scheduledTimer(withTimeInterval: 5 * 60, repeats: true) { timer in
-            sendPushNotication("状态消息，当前状态正常")
-        }
-        
         let _ = BAFPosManager.shared
         
         self.instId = instId
