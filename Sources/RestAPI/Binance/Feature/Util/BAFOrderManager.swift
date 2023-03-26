@@ -46,15 +46,6 @@ open class BAFOrderManager {
         return params
     }
     
-    @available(*, renamed: "batchOrder(batchParams:maxCount:)")
-    open class func batchOrder(batchParams: [[String: Any]], maxCount: Int = 5, completion: @escaping ([(Bool, String?)]) -> Void) {
-        Task {
-            let result = await batchOrder(batchParams: batchParams, maxCount: maxCount)
-            completion(result)
-        }
-    }
-    
-    
     open class func batchOrder(batchParams: [[String: Any]], maxCount: Int = 5) async -> [(Bool, String?)] {
         if batchParams.count == 0 {
             return [(Bool, String?)]()

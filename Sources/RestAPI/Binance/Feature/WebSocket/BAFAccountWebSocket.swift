@@ -186,10 +186,10 @@ open class BAFAccountWebSocket: BAWebSocket {
                 orders?.append(order)
             }
             self.orders = orders
-            let price = order.price?.intValue ?? 0
+            let price = order.price?.doubleValue ?? 0
             let action = order.side == BUY ? "买入": "卖出"
             let qty = order.origQty ?? ""
-            log("订单变化: \(price > 0 ? "\(price)" : "市价")\(action)\(qty), 状态: \(order.status ?? "")")
+            log("订单发生变化: \(price > 0 ? "\(price)" : "市价")\(action)\(qty), 状态: \(order.status ?? "")")
             log("当前订单数量：\(self.orders?.count ?? 0)")
             NotificationCenter.default.post(name: BAFAccountWebSocket.orderChangedNotification, object: order)
             // 失效的订单加入一个数组中，五秒后移除
