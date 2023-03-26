@@ -7,6 +7,7 @@
 
 import Foundation
 import SSCommon
+import SSLog
 
 public let BUY = "BUY"
 public let SELL = "SELL"
@@ -21,7 +22,15 @@ public let EXPIRED = "EXPIRED"
 public let NEW_INSURANCE = "NEW_INSURANCE" //  风险保障基金(强平)
 public let NEW_ADL = "NEW_ADL" // 自动减仓序列(强平)
 
-open class BAFOrder: Codable {
+open class BAFOrder: Codable, CustomStringConvertible {
+    
+    public var description: String {
+        let order = self
+        let price = order.price?.doubleValue ?? 0
+        let action = order.side == BUY ? "买入": "卖出"
+        let qty = order.origQty ?? ""
+        return "\(price > 0 ? "\(price)" : "市价")\(action)\(qty), 状态: \(order.status ?? "")"
+    }
     
     open var avgPrice: String? // : "0.00000",              // 平均成交价
     open var clientOrderId: String? // ": "abc",             // 用户自定义的订单号
